@@ -1,0 +1,560 @@
+/*Universal Styling */
+
+.App {
+  text-align: center;
+  padding: 20px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  /* background-color: #e6efdb; */
+  background-color: darkgreen;
+}
+
+.big-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #d9d9d9;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 20px;
+}
+
+.input-container {
+  margin-bottom: 10px;
+}
+
+/* Style the "Go" button */
+.small-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #d9d9d9;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 10px;
+}
+
+.small-button:hover {
+  background-color: grey;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+label {
+  font-size: 18px;
+  display: block;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+
+/*TopLinks Styling */
+
+/* Center the header content horizontally */
+.App-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.homepage-button {
+  height: 40px;
+}
+
+/* Style the links at the top right */
+.top-right-links {
+  margin-left: auto;
+  margin-bottom: 10px;
+}
+
+/* Add this CSS to your stylesheet or component style file */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Add this CSS to your stylesheet or component style file */
+.dropdown-link {
+  display: block;
+  padding: 10px;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Add this CSS rule to align "My Account" and "Logout" on the same line */
+.username {
+  display: flex;
+  align-items: center;
+}
+
+/* Add this CSS rule to style the arrow image */
+.username img {
+  margin-left: 5px;
+}
+
+/* Style the spacer between links */
+.spacer {
+  margin: 0 10px;
+}
+
+/* Style the links */
+.link {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  margin: 5px;
+}
+
+.search-content {
+  display: flex;
+}
+
+/* Style the search input */
+.search-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/*Login Styling */
+
+.login-container {
+  text-align: center;
+  margin: 0 auto;
+  width: 300px;
+  padding: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/*HomePage styling */
+
+/* Style the main content */
+.main-content {
+  text-align: center;
+}
+
+/* Style the square container */
+.square-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Style the squares */
+.square {
+  flex: 1;
+  margin: 20px;
+  background-color: #d9d9d9;
+  border: 1px solid #ccc;
+  text-align: center;
+  margin-left: 2%;
+  margin-right: 3%;
+}
+
+/* Style the text inside the squares */
+.square p {
+  font-weight: bold;
+}
+
+
+/*Register styling */
+
+.register-container {
+  text-align: center;
+  margin: 0 auto;
+  width: 300px;
+  padding: 20px;
+}
+
+
+/*AddGame styling */
+
+/*Game Info, Game Status, and Game Log styling */
+.section-selector {
+  display: flex;
+  justify-content: center;
+  margin: '20px 0';
+}
+
+.section-option {
+  cursor: pointer;
+  padding: 10px;
+  margin: 0 20px;
+}
+
+.section-option.active {
+  border-bottom: 2px solid #007bff;
+}
+
+/*Main game information window */
+.game-information {
+  display: flex;
+  justify-content: center;
+}
+
+/*Left section of game information window */
+.left-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: left;
+}
+
+.textbox-input input {
+  width: 250px;
+}
+
+/*Titles for game information */
+.game-information-titles {
+  font-weight: bold;
+}
+
+.display-image {
+  width: 250px;
+  height: 250px;
+  background-color: #d9d9d9;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.display-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*Add game button */
+.add-game-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #d9d9d9;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 20px;
+}
+
+.right-section {
+  text-align: left;
+  padding-left: 50px;
+}
+
+.right-section textarea {
+  width: 100%;
+  padding: 10px;
+  font: 16px;
+  margin-top: 5px;
+}
+
+.dropdown-box {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+.ownership-radio-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.ownership-radio-buttons input[type="radio"] {
+  margin-left: -105px;
+  align-self: flex-start;
+}
+
+.ownership-radio-buttons label {
+  margin-left: -90px;
+}
+
+.condition-fieldset {
+  width: 250px;
+}
+
+.condition-grade-radio-buttons {
+  display: flex;
+}
+
+.condition-grade-radio-button {
+  display: flex;
+  align-items: center;
+}
+
+.condition-grade-radio-button label {
+  margin-left: 5px;
+}
+
+.condition-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  width: 90%;
+  margin-top: 0px;
+  ;
+}
+
+.condition-checkbox-group-item {
+  width: 50%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.condition-checkbox-group-item label {
+  margin-left: 5px;
+  width: 80px;
+}
+
+.game-status-section {
+  width: 300px;
+}
+
+.game-status-section textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+.game-status-section img {
+  max-width: 100px;
+  max-height: 100px;
+}
+
+/* Add this CSS to style the spoiler warning container */
+.spoiler-container {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Add this CSS to style the spoiler warning text */
+.spoiler-container label span {
+  margin-left: 5px;
+}
+
+/* Add this CSS to style the spoiler warning checkbox */
+.spoiler-checkbox {
+  margin-right: 5px;
+}
+
+
+
+/* Search page styling */
+.search-content {
+  display: flex;
+  justify-content: center;
+}
+
+.search-main-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.sort-filter-section {
+  margin-top: 60px;
+  border: 2px solid black;
+  border-radius: 8px;
+  padding: 10px;
+  max-width: 200px;
+  margin-left: 10px;
+  align-self: flex-start;
+}
+
+.game-section {
+  margin-left: 20px;
+  text-align: center;
+}
+
+.game-item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  border: 2px solid black;
+  border-radius: 8px;
+  padding: 10px;
+  max-width: 700px;
+  justify-content: space-between;
+}
+
+.game-item-header-photo {
+  width: 150px;
+  height: 55px;
+  margin-right: 80px;
+}
+
+.game-item-header-name-console {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+}
+
+.game-item-header-name {
+  margin-right: 100px;
+}
+
+.game-item-header-actions {
+  text-align: right;
+  margin-right: 40px;
+  margin-left: 180px;
+}
+
+.game-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  border: 2px solid black;
+  border-radius: 8px;
+  padding: 10px;
+  max-width: 700px;
+  margin: 0 auto;
+  justify-content: space-between;
+}
+
+.game-item img {
+  width: 150px;
+  height: 150px;
+  margin-right: 90px;
+}
+
+.game-item-name-console {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+}
+
+.game-item-name {
+  margin-right: 110px;
+}
+
+.game-item-actions {
+  text-align: right;
+  margin-left: 80px;
+}
+
+.bottom-add-game-link {
+  margin-top: 20px;
+}
+
+.bottom-add-game-link2 {
+  color: blue;
+  cursor: pointer;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+  color: blue;
+}
+
+/* ReportsMenu page styling */
+
+.report-header {
+  background-color: #f0f0f0;
+  /* Grey background color */
+  padding: 20px;
+  text-align: center;
+  margin: 20px auto;
+  /* Center the container */
+  width: 80%;
+  /* Adjust the width as needed */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Add a subtle box shadow */
+}
+
+.user-reports-container {
+  background-color: #f0f0f0;
+  /* Grey background color */
+  padding: 20px;
+  text-align: center;
+  margin: 20px auto;
+  /* Center the container */
+  width: 80%;
+  /* Adjust the width as needed */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Add a subtle box shadow */
+  display: flex;
+  justify-content: space-between;
+}
+
+.column {
+  flex: 1;
+  padding: 10px;
+}
+
+.centered-rectangle {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+  background-color: #f0f0f0;
+  /* Grey background color */
+  padding: 20px;
+  /* Add padding for spacing */
+  border-radius: 8px;
+  /* Add border radius for rounded corners */
+}
+
+.column {
+  width: 120px;
+  /* Adjust the width of each column */
+  margin: 0 10px;
+  /* Adjust the margin for spacing between columns */
+  text-align: center;
+}
