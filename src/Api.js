@@ -128,6 +128,10 @@ export const removeFromWishlist = async (userId, gameId, token) => {
 
 
 
+
+
+
+
 // Function to check if a user has game details
 export const checkGameDetails = async (userId, gameId, token) => {
   try {
@@ -157,6 +161,79 @@ export const getGameDetails = async (gameId, token) => {
   } catch (error) {
     console.error('Error retrieving game details:', error);
     throw error;
+  }
+};
+
+
+
+
+
+
+
+
+export const fetchGameDetails = async (game, token) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/game-info/${game}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status === 200) {
+      const { gameDetails } = response.data;
+      return {
+        success: true,
+        gameDetails: {
+          title: gameDetails.name,
+          coverart: gameDetails.coverart,
+          platform: gameDetails.console,
+        },
+      };
+    } else {
+      return { success: false, message: 'Failed to fetch game details.' };
+    }
+  } catch (error) {
+    console.error('Error fetching game details:', error);
+    return { success: false, message: 'Error fetching game details.' };
+  }
+};
+
+export const addGameDetails = async (userId, game, formData, token) => {
+  const { ownership } = formData['Game Info'];
+  const { checkboxes, notes, pricePaid } = formData['Game Status'];
+  const { gameCompletion, rating, review, spoilerWarning } = formData['Game Log'];
+
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/add-game-details/${userId}/${game}`, {
+      userId,
+      gameId: game,
+      gameDetails: {
+        ownership,
+        included: formData['Game Info'].included,
+        checkboxes: checkboxes.join(', '),
+        notes,
+        completion: gameCompletion,
+        review,
+        spoiler: spoilerWarning,
+        price: parseFloat(pricePaid) || null,
+        rating: parseInt(rating) || null,
+      },
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status === 200) {
+      return { success: true, message: 'Game details added successfully!' };
+    } else {
+      return { success: false, message: 'Failed to add game details.' };
+    }
+  } catch (error) {
+    console.error('Error adding game details:', error);
+    return { success: false, message: 'Error adding game details.' };
   }
 };
 

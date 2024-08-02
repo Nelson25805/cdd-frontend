@@ -4,6 +4,7 @@ import '../App.css';
 import { useUser } from '../Context/UserContext';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { fetchGameDetails, addGameDetails } from '../Api';
 
 // Functional component for GameDetails
 /*This component is used to  create a collection game record with
@@ -20,7 +21,7 @@ const GameDetails = () => {
     // State variables for game details and form data
     const [gameDetails, setGameDetails] = useState({
         title: "...",
-        coverArt: null,
+        coverart: null,
         platform: "",
     });
 
@@ -40,29 +41,22 @@ const GameDetails = () => {
     useEffect(() => {
         if (game) {
             // Fetch game details based on the gameId
-            fetchGameDetails(game);
-            if (gameDetails.coverArt) {
-                setDisplayedCoverImage(`data:image/png;base64,${gameDetails.coverArt}`);
-            }
+            getGameDetails(game);
         }
-    }, [gameDetails.coverArt, game]);
+    }, [game]);
 
-    // Function to fetch game details from the server
-    const fetchGameDetails = async (game) => {
-        try {
-            const response = await fetch(`https://capstonebackend-mdnh.onrender.com/api/game-info/${game}`);
-            if (response.ok) {
-                const { gameDetails } = await response.json();
-                setGameDetails({
-                    title: gameDetails.Name,
-                    coverArt: gameDetails.CoverArt,
-                    platform: gameDetails.Console,
-                });
-            } else {
-                alert('Failed to fetch game details.');
+
+    const getGameDetails = async (game) => {
+        const token = localStorage.getItem('token');
+        const result = await fetchGameDetails(game, token);
+        if (result.success) {
+            const { gameDetails } = result;
+            setGameDetails(gameDetails);
+            if (gameDetails.coverart) {
+                setDisplayedCoverImage(`data:image/png;base64,${gameDetails.coverart}`);
             }
-        } catch (error) {
-            console.error('Error fetching game details:', error);
+        } else {
+            alert(result.message);
         }
     };
 
@@ -143,47 +137,13 @@ const GameDetails = () => {
 
     // Event handler for adding game details to the collection
     const handleAddGameDetails = async () => {
-        // Extracting relevant data from form data
-        const { ownership } = formData['Game Info'];
-        const { checkboxes, notes, pricePaid } = formData['Game Status'];
-        const { gameCompletion, rating, review, spoilerWarning } = formData['Game Log'];
-
-        try {
-
-            // Send data to the server to add the game with details
-            const response = await fetch(`https://capstonebackend-mdnh.onrender.com/api/add-game-details/${userId}/${game}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,
-                    gameId: game,
-                    gameDetails: {
-                        ownership,
-                        included: formData['Game Info'].included,
-                        checkboxes: checkboxes.join(', '),
-                        notes,
-                        completion: gameCompletion,
-                        review,
-                        spoiler: spoilerWarning,
-                        price: parseFloat(pricePaid) || null,
-                        rating: parseInt(rating) || null,
-                    },
-                }),
-            });
-
-            if (response.ok) {
-                // Handle successful response
-                alert('Game details added successfully!');
-                // Navigate to the "mycollection" page
-                navigate('/mycollection');
-            } else {
-                // Handle error response
-                console.error('Failed to add game details:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error adding game details:', error);
+        const token = localStorage.getItem('token');
+        const result = await addGameDetails(userId, game, formData, token);
+        if (result.success) {
+            alert(result.message);
+            navigate('/mycollection');
+        } else {[]
+            alert(result.message);
         }
     };
 
