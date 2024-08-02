@@ -15,7 +15,7 @@ const GameDetails = () => {
     const game = new URLSearchParams(location.search).get('q');
 
     const { user } = useUser();
-    const { userId } = user || {};
+    const userId = user?.userid;
     const navigate = useNavigate();
 
     // State variables for game details and form data
@@ -138,6 +138,7 @@ const GameDetails = () => {
     // Event handler for adding game details to the collection
     const handleAddGameDetails = async () => {
         const token = localStorage.getItem('token');
+        console.log('This is the frontend UserId: ', userId);
         const result = await addGameDetails(userId, game, formData, token);
         if (result.success) {
             alert(result.message);
