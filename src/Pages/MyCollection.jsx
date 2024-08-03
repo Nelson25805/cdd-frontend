@@ -1,19 +1,15 @@
-// Importing React hooks and components from 'react'
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-// Importing context and components
 import TopLinks from '../Context/TopLinks';
 import { useUser } from '../Context/UserContext';
 
-// Importing styles
+// Import API functions
+import { fetchCollectionItems, removeGameFromCollection } from '../Api';
+
 import '../App.css';
 
-// Functional component for the My Collection page
-/*This component is used to show all the games currently in a users collection.
-You're able to remove, or edit the game's contents to the users liking. */
 function MyCollection() {
-  // State for managing loading status, sort direction, filter console, current page, and collection items
   const [itemsLoaded, setItemsLoaded] = useState(false);
   const [loadingDots, setLoadingDots] = useState('');
   const [sortDirection, setSortDirection] = useState('Ascending');
@@ -22,37 +18,26 @@ function MyCollection() {
   const itemsPerPage = 5;
   const [collectionItems, setCollectionItems] = useState([]);
 
-  // State for loading and error handling during API requests
   const [, setLoading] = useState(false);
 
-  // Accessing the navigate function from React Router
   const navigate = useNavigate();
-
-  // Accessing user data from the user context
   const { user } = useUser();
-  const { userId } = user || {};
+  const userId = user?.userid; // Ensure userId is safely accessed
 
-  // Event handlers for navigating to the next and previous pages
   const handleNextPage = () => setCurrentPage((prevPage) => prevPage + 1);
   const handlePrevPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
 
-  // Callback function for fetching collection items
-  const fetchCollectionItems = useCallback(async () => {
+  const fetchItems = useCallback(async () => {
     try {
+      console.log('Current userId: ', userId);
       if (!userId) {
-        // If userId is not available, do not proceed with the request
         return;
       }
-
+      console.log('Trying to see collection items');
       setLoading(true);
-      const response = await fetch(`https://capstonebackend-mdnh.onrender.com/api/mycollection/${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setCollectionItems(data.results);
-        setItemsLoaded(true);
-      } else {
-        console.error('Failed to fetch collection items:', response.statusText);
-      }
+      const items = await fetchCollectionItems(userId);
+      setCollectionItems(items);
+      setItemsLoaded(true);
     } catch (error) {
       console.error('Error fetching collection items:', error.message);
     } finally {
@@ -60,7 +45,6 @@ function MyCollection() {
     }
   }, [userId]);
 
-  // Function for applying sort and filter to the collection items
   const applySortAndFilter = () => {
     const filteredResults = collectionItems.filter((game) =>
       filterConsole === 'All' ? true : game.Console === filterConsole
@@ -81,12 +65,10 @@ function MyCollection() {
     return paginatedResults;
   };
 
-  // Effect to fetch collection items on component mount and when dependencies change
   useEffect(() => {
-    fetchCollectionItems();
-  }, [userId, sortDirection, filterConsole, currentPage, fetchCollectionItems]);
+    fetchItems();
+  }, [userId, sortDirection, filterConsole, currentPage, fetchItems]);
 
-  // Effect to update loading dots every second
   useEffect(() => {
     const intervalId = setInterval(() => {
       setLoadingDots((prevDots) => (prevDots.length < 3 ? prevDots + '.' : '.'));
@@ -95,48 +77,30 @@ function MyCollection() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Function to remove a game from the collection
-  const removeGameFromCollection = async (gameId) => {
+  const handleRemoveGame = async (gameId) => {
     try {
-      const response = await fetch(`https://capstonebackend-mdnh.onrender.com/api/removecollection/${userId}/${gameId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        alert('Game was removed successfully from collection.')
-        // Fetch updated collection items
-        fetchCollectionItems();
-      } else {
-        console.error('Failed to remove game:', response.statusText);
+      const success = await removeGameFromCollection(userId, gameId);
+      if (success) {
+        alert('Game was removed successfully from collection.');
+        fetchItems();
       }
     } catch (error) {
       console.error('Error removing game:', error.message);
     }
   };
 
-  // Function to navigate to the EditGameDetails page for a specific game
-  const handleEditGameDetails = async (game) => {
-
-    // User does not have a record with details, navigate to the page
+  const handleEditGameDetails = (game) => {
     navigate(`/editgamedetails?q=${encodeURIComponent(game.GameId)}`);
   };
 
-  // Render UI component
   return (
     <div className="App">
-      {/* TopLinks component for rendering top navigation links */}
       <TopLinks />
       <h2>My Collection</h2>
       <div className="search-content">
-        {/* Main content section for sorting, filtering, and displaying collection items */}
         <main className="search-main-content">
-          {/* Section for sorting and filtering options */}
           <div className="sort-filter-section">
             <p>Sort & Filter</p>
-            {/* Dropdown for sorting by ascending or descending order */}
             <div>
               <p>Sort By:</p>
               <select value={sortDirection} onChange={(e) => setSortDirection(e.target.value)}>
@@ -144,7 +108,6 @@ function MyCollection() {
                 <option value="Descending">Descending</option>
               </select>
             </div>
-            {/* Dropdown for filtering by console */}
             <div>
               <p>Filter By Console:</p>
               <select value={filterConsole} onChange={(e) => setFilterConsole(e.target.value)}>
@@ -167,13 +130,10 @@ function MyCollection() {
             </div>
           </div>
 
-          {/* Section for displaying collection items */}
           <div className="game-section">
-            {/* Loading message while fetching results */}
             {(!itemsLoaded && loadingDots) && (
               <p>Loading results please wait ..{loadingDots}</p>
             )}
-            {/* Header for the collection items */}
             <div className="game-item-header">
               <div className='game-item-header-photo'>
                 <p>Photo</p>
@@ -186,8 +146,7 @@ function MyCollection() {
                 <p>Actions</p>
               </div>
             </div>
-            {/* Mapping through sorted and filtered collection items to render each game */}
-            {applySortAndFilter().map((game, index) => (
+            {applySortAndFilter().map((game) => (
               <div key={game.GameId} className="game-item">
                 <img src={`data:image/png;base64,${game.CoverArt}`} alt={game.Name} />
                 <div className='game-item-name-console'>
@@ -196,23 +155,18 @@ function MyCollection() {
                 </div>
                 <div className='game-item-actions'>
                   <p>
-                    {/* Button to edit game details */}
-                    <button className="link-button"
-                      onClick={() => handleEditGameDetails(game)}
-                    >
+                    <button className="link-button" onClick={() => handleEditGameDetails(game)}>
                       Edit
                     </button>
                   </p>
                   <p>
-                    {/* Link to remove game from collection */}
-                    <Link to="#" onClick={() => removeGameFromCollection(game.GameId)}>
+                    <Link to="#" onClick={() => handleRemoveGame(game.GameId)}>
                       Remove
                     </Link>
                   </p>
                 </div>
               </div>
             ))}
-            {/* Pagination buttons */}
             <div>
               <button onClick={handlePrevPage} disabled={currentPage === 1}>
                 Previous

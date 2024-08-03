@@ -167,6 +167,31 @@ export const getGameDetails = async (gameId, token) => {
 
 
 
+// Fetch collection items for a user
+export const fetchCollectionItems = async (userId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/api/mycollection/${userId}`);
+    return response.data.results;
+  } catch (error) {
+    console.error('Error fetching collection items:', error);
+    throw error;
+  }
+};
+
+// Remove a game from the collection
+export const removeGameFromCollection = async (userId, gameId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/removecollection/${userId}/${gameId}`);
+    console.log('This is the response: ', response);
+    return response;
+  } catch (error) {
+    console.error('Error removing game:', error);
+    throw error;
+  }
+};
+
+
+
 
 
 
