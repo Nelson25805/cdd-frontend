@@ -46,7 +46,6 @@ const EditGameDetails = () => {
         const fetchData = async () => {
             try {
                 if (game && user) {
-                    // Ensure you have the token available
                     const token = user.token; // Adjust this line to get the token from your user context or state
 
                     // Use the first fetchGameInfo function with token
@@ -67,9 +66,12 @@ const EditGameDetails = () => {
                         // Access gamedetails from the detailedInfo object
                         const { gamedetails } = detailedInfoResponse;
 
-                        const spoilerValue = gamedetails.spoiler ? true : false;
+                        // Convert spoiler to a number and check
+                        const spoilerNumber = Number(gamedetails.spoiler);
+                        const spoilerValue = spoilerNumber === 1;
 
-                        console.log('This is the detailedInfo: ', detailedInfoResponse);
+                        console.log('Fetched spoiler value:', gamedetails.spoiler);
+                        console.log('Converted spoiler value to boolean:', spoilerValue);
 
                         setFormData((prevData) => ({
                             'Game Info': {
@@ -111,12 +113,11 @@ const EditGameDetails = () => {
 
         fetchData();
     }, [game, user, userId]);
+
+
     // Effect to update form data when gameDetails state changes
     useEffect(() => {
         if (gameDetails) {
-            // Ensure pricePaid is handled as a string and formatted correctly
-            const formattedPricePaid = gameDetails.Price || "";
-    
             setFormData((prevData) => ({
                 'Game Info': {
                     ...prevData['Game Info'],
@@ -125,9 +126,9 @@ const EditGameDetails = () => {
                 },
                 'Game Status': {
                     ...prevData['Game Status'],
-                    checkboxes: gameDetails.Condition || [],
+                    checkboxes: gameDetails.Condition ? gameDetails.Condition.split(', ') : [], // Convert string to array
                     notes: gameDetails.Notes || "",
-                    pricePaid: formattedPricePaid,
+                    pricePaid: gameDetails.Price || "",
                 },
                 'Cover Image': {
                     ...prevData['Cover Image'],
@@ -144,6 +145,8 @@ const EditGameDetails = () => {
             console.warn('No detailed game information found.');
         }
     }, [gameDetails]);
+
+
 
     // Function to handle section click
     const handleSectionClick = (section) => {
@@ -174,16 +177,32 @@ const EditGameDetails = () => {
     // Function to handle checkbox change
     const handleCheckBoxChange = (e) => {
         const { name, checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            'Game Status': {
-                ...prevData['Game Status'],
-                checkboxes: checked
-                    ? [...(prevData['Game Status']?.checkboxes || []), name]
-                    : (prevData['Game Status']?.checkboxes || []).filter((item) => item !== name),
-            },
-        }));
+        console.log("Checkbox name:", name);
+        console.log("Checkbox checked:", checked);
+
+        setFormData((prevData) => {
+            const currentCheckboxes = prevData['Game Status']?.checkboxes || [];
+            console.log("Previous checkboxes:", currentCheckboxes);
+
+            const updatedCheckboxes = checked
+                ? [...currentCheckboxes, name]
+                : currentCheckboxes.filter((item) => item !== name);
+
+            console.log("Updated checkboxes:", updatedCheckboxes);
+
+            return {
+                ...prevData,
+                'Game Status': {
+                    ...prevData['Game Status'],
+                    checkboxes: updatedCheckboxes,
+                },
+            };
+        });
     };
+
+
+
+
 
     // Function to handle notes change
     const handleNotesChange = (e) => {
@@ -224,10 +243,10 @@ const EditGameDetails = () => {
         const { ownership, included } = formData['Game Info'];
         const { checkboxes, notes, pricePaid } = formData['Game Status'];
         const { gameCompletion, rating, review, spoilerWarning } = formData['Game Log'];
-    
+
         // Ensure pricePaid is handled correctly as a number or empty string
         const parsedPricePaid = pricePaid ? parseFloat(pricePaid.replace(/[^0-9.-]+/g, '')) : '';
-    
+
         const details = {
             ownership,
             included,
@@ -239,10 +258,10 @@ const EditGameDetails = () => {
             review,
             spoilerWarning,
         };
-    
+
         try {
             const response = await editGameDetails(userId, game, details);
-    
+
             if (response && response.message === 'Game details updated successfully') {
                 alert('Game details edited successfully!');
             } else {
@@ -401,6 +420,8 @@ const EditGameDetails = () => {
                                         </label>
                                     </div>
                                 ))}
+
+
                             </div>
                         </fieldset>
                         <div className='game-status-section'>
