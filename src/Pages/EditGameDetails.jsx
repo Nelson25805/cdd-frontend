@@ -4,6 +4,7 @@ import '../App.css';
 import { useUser } from '../Context/UserContext';
 import TopLinks from '../Context/TopLinks';
 import { useLocation } from 'react-router-dom';
+import { fetchGameInfo, fetchGameDetails, editGameDetails } from '../Api';
 
 // Main functional component for editing game details
 /*This component is used to edit the game record that a user
@@ -15,7 +16,7 @@ const EditGameDetails = () => {
     const [, setIsLoading] = useState(true);
 
     const { user } = useUser();
-    const { userId } = user || {};
+    const userId = user?.userid;
 
     // State for storing game details and form data
     const [gameDetails, setGameDetails] = useState({
@@ -45,12 +46,60 @@ const EditGameDetails = () => {
         const fetchData = async () => {
             try {
                 if (game && user) {
-                    // Fetch game details based on the gameId
-                    await fetchGameInfo(game);
-                    await fetchGameDetails(userId, game);
+                    // Ensure you have the token available
+                    const token = user.token; // Adjust this line to get the token from your user context or state
 
-                    if (gameDetails.coverArt) {
-                        setDisplayedCoverImage(`data:image/png;base64,${gameDetails.coverArt}`);
+                    // Use the first fetchGameInfo function with token
+                    const basicInfoResponse = await fetchGameInfo(game, token);
+
+                    if (basicInfoResponse.success) {
+                        const basicInfo = basicInfoResponse.gameDetails;
+
+                        setGameDetails({
+                            title: basicInfo.title, // Adjusted field names
+                            coverArt: basicInfo.coverart, // Adjusted field names
+                            platform: basicInfo.platform, // Adjusted field names
+                        });
+
+                        // Fetch detailed game information
+                        const detailedInfoResponse = await fetchGameDetails(userId, game);
+
+                        // Access gamedetails from the detailedInfo object
+                        const { gamedetails } = detailedInfoResponse;
+
+                        const spoilerValue = gamedetails.spoiler ? true : false;
+
+                        console.log('This is the detailedInfo: ', detailedInfoResponse);
+
+                        setFormData((prevData) => ({
+                            'Game Info': {
+                                ...prevData['Game Info'],
+                                ownership: gamedetails.ownership,
+                                included: gamedetails.included,
+                            },
+                            'Game Status': {
+                                ...prevData['Game Status'],
+                                checkboxes: gamedetails.condition,
+                                notes: gamedetails.notes,
+                                pricePaid: gamedetails.price,
+                            },
+                            'Cover Image': {
+                                ...prevData['Cover Image'],
+                            },
+                            'Game Log': {
+                                ...prevData['Game Log'],
+                                gameCompletion: gamedetails.completion,
+                                rating: gamedetails.rating,
+                                review: gamedetails.review,
+                                spoilerWarning: spoilerValue,
+                            },
+                        }));
+
+                        if (basicInfo.coverart) {
+                            setDisplayedCoverImage(`data:image/png;base64,${basicInfo.coverart}`);
+                        }
+                    } else {
+                        console.error('Failed to fetch game details:', basicInfoResponse.message);
                     }
                 }
             } catch (error) {
@@ -61,78 +110,13 @@ const EditGameDetails = () => {
         };
 
         fetchData();
-    }, [game, user, userId, gameDetails.coverArt]);
-
-    // Function to fetch basic game information
-    const fetchGameInfo = async (game) => {
-        try {
-            const response = await fetch(`https://capstonebackend-mdnh.onrender.com/api/game-info/${game}`);
-            if (response.ok) {
-                const { gameDetails } = await response.json();
-                setGameDetails({
-                    title: gameDetails.Name,
-                    coverArt: gameDetails.CoverArt,
-                    platform: gameDetails.Console,
-                });
-            } else {
-                alert('Failed to fetch game details.');
-            }
-        } catch (error) {
-            console.error('Error fetching game details:', error);
-        }
-    };
-
-    // Function to fetch detailed game information
-    const fetchGameDetails = async (userId, game) => {
-        try {
-            // Local API endpoint for fetching detailed game info
-            const response = await fetch(`https://capstonebackend-mdnh.onrender.com/api/get-game-details/${userId}/${game}`);
-
-            if (response.ok) {
-                const { gameDetails: detailedInfo } = await response.json();
-
-                // Determine the spoilerWarning value
-                const spoilerValue = detailedInfo.Spoiler ? true : false;
-
-                // Update your state with the detailed information
-                setFormData((prevData) => ({
-                    'Game Info': {
-                        ...prevData['Game Info'],
-                        ownership: detailedInfo.Ownership,
-                        included: detailedInfo.Included,
-                    },
-                    'Game Status': {
-                        ...prevData['Game Status'],
-                        checkboxes: detailedInfo.Condition,
-                        notes: detailedInfo.Notes,
-                        pricePaid: detailedInfo.Price,
-                    },
-                    'Cover Image': {
-                        ...prevData['Cover Image'],
-                    },
-                    'Game Log': {
-                        ...prevData['Game Log'],
-                        gameCompletion: detailedInfo.Completion,
-                        rating: detailedInfo.Rating,
-                        review: detailedInfo.Review,
-                        spoilerWarning: spoilerValue,
-                    },
-                }));
-            } else {
-                alert('Failed to fetch detailed game information.');
-            }
-        } catch (error) {
-            console.error('Error fetching detailed game info:', error);
-        }
-        finally {
-            setIsLoading(false);
-        }
-    };
-
+    }, [game, user, userId]);
     // Effect to update form data when gameDetails state changes
     useEffect(() => {
         if (gameDetails) {
-            // Update your state with the detailed information
+            // Ensure pricePaid is handled as a string and formatted correctly
+            const formattedPricePaid = gameDetails.Price || "";
+    
             setFormData((prevData) => ({
                 'Game Info': {
                     ...prevData['Game Info'],
@@ -143,7 +127,7 @@ const EditGameDetails = () => {
                     ...prevData['Game Status'],
                     checkboxes: gameDetails.Condition || [],
                     notes: gameDetails.Notes || "",
-                    pricePaid: gameDetails.Price || "",
+                    pricePaid: formattedPricePaid,
                 },
                 'Cover Image': {
                     ...prevData['Cover Image'],
@@ -236,43 +220,40 @@ const EditGameDetails = () => {
         }));
     };
 
-    // Function to handle edit game details
     const handleEditGameDetails = async () => {
         const { ownership, included } = formData['Game Info'];
         const { checkboxes, notes, pricePaid } = formData['Game Status'];
         const { gameCompletion, rating, review, spoilerWarning } = formData['Game Log'];
-
+    
+        // Ensure pricePaid is handled correctly as a number or empty string
+        const parsedPricePaid = pricePaid ? parseFloat(pricePaid.replace(/[^0-9.-]+/g, '')) : '';
+    
+        const details = {
+            ownership,
+            included,
+            checkboxes,
+            notes,
+            pricePaid: parsedPricePaid,
+            gameCompletion,
+            rating: parseInt(rating) || '',
+            review,
+            spoilerWarning,
+        };
+    
         try {
-            // Send data to the server to edit the game details
-            const response = await fetch(`https://capstonebackend-mdnh.onrender.com/api/edit-game-details/${userId}/${game}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ownership,
-                    included,
-                    checkboxes,
-                    notes,
-                    pricePaid: parseFloat(pricePaid) || null,
-                    gameCompletion,
-                    rating: parseInt(rating) || null,
-                    review,
-                    spoilerWarning,
-                }),
-            });
-
-            if (response.ok) {
-                // Handle successful response
+            const response = await editGameDetails(userId, game, details);
+    
+            if (response && response.message === 'Game details updated successfully') {
                 alert('Game details edited successfully!');
             } else {
-                // Handle error response
-                console.error('Failed to edit game details:', response.statusText);
+                console.error('Failed to edit game details:', response.message || 'Unknown error');
             }
         } catch (error) {
-            console.error('Error editing game details:', error);
+            console.error('Error editing game details:', error.message || 'An unexpected error occurred');
+            alert('Failed to edit game details. Please try again.');
         }
     };
+
 
     // Render UI components
     return (
@@ -397,7 +378,7 @@ const EditGameDetails = () => {
                                 type="text"
                                 name="pricePaid"
                                 placeholder="Enter the price"
-                                value={formData['Game Status'].pricePaid}
+                                value={formData['Game Status'].pricePaid || ''}
                                 onChange={(e) => handleInputChange(e, 'Game Status')}
                             />
                         </div>

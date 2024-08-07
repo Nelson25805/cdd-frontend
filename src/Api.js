@@ -196,7 +196,7 @@ export const removeGameFromCollection = async (userId, gameId) => {
 
 
 
-export const fetchGameDetails = async (game, token) => {
+export const fetchGameInfo = async (game, token) => {
   try {
     const response = await axios.get(`${API_BASE_URL}/api/game-info/${game}`, {
       headers: {
@@ -241,8 +241,8 @@ export const addGameDetails = async (userId, game, formData, token) => {
         completion: gameCompletion,
         review,
         spoiler: spoilerWarning,
-        price: parseFloat(pricePaid) || null,
-        rating: parseInt(rating) || null,
+        price: parseFloat(pricePaid) || '',
+        rating: parseInt(rating) || '',
       },
     }, {
       headers: {
@@ -264,3 +264,34 @@ export const addGameDetails = async (userId, game, formData, token) => {
 
 
 
+// Fetch detailed game information
+export const fetchGameDetails = async (userId, game) => {
+  try {
+      const response = await axios.get(`${API_BASE_URL}/api/get-game-details/${userId}/${game}`);
+      return response.data.gameDetails;
+  } catch (error) {
+      console.error('Error fetching detailed game info:', error);
+      throw error;
+  }
+};
+
+// Edit game details
+export const editGameDetails = async (userId, game, details) => {
+  try {
+      // Send PUT request to update game details
+      const response = await axios.put(`${API_BASE_URL}/api/edit-game-details/${userId}/${game}`, details, {
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+
+      // Return only the response data
+      return response.data;
+  } catch (error) {
+      // Log detailed error information
+      console.error('Error editing game details:', error.response ? error.response.data : error.message);
+
+      // Re-throw error to be handled by the calling function
+      throw error;
+  }
+};

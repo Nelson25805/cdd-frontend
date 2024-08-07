@@ -4,7 +4,7 @@ import '../App.css';
 import { useUser } from '../Context/UserContext';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchGameDetails, addGameDetails } from '../Api';
+import { fetchGameInfo, addGameDetails } from '../Api';
 
 // Functional component for GameDetails
 /*This component is used to  create a collection game record with
@@ -48,7 +48,7 @@ const GameDetails = () => {
 
     const getGameDetails = async (game) => {
         const token = localStorage.getItem('token');
-        const result = await fetchGameDetails(game, token);
+        const result = await fetchGameInfo(game, token);
         if (result.success) {
             const { gameDetails } = result;
             setGameDetails(gameDetails);
