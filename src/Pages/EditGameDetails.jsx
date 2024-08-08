@@ -70,8 +70,7 @@ const EditGameDetails = () => {
                         const spoilerNumber = Number(gamedetails.spoiler);
                         const spoilerValue = spoilerNumber === 1;
 
-                        console.log('Fetched spoiler value:', gamedetails.spoiler);
-                        console.log('Converted spoiler value to boolean:', spoilerValue);
+                        console.log('This is the gamedetails: ', gamedetails);
 
                         setFormData((prevData) => ({
                             'Game Info': {
@@ -113,40 +112,6 @@ const EditGameDetails = () => {
 
         fetchData();
     }, [game, user, userId]);
-
-
-    // Effect to update form data when gameDetails state changes
-    useEffect(() => {
-        if (gameDetails) {
-            setFormData((prevData) => ({
-                'Game Info': {
-                    ...prevData['Game Info'],
-                    ownership: gameDetails.Ownership || "",
-                    included: gameDetails.Included || "",
-                },
-                'Game Status': {
-                    ...prevData['Game Status'],
-                    checkboxes: gameDetails.Condition ? gameDetails.Condition.split(', ') : [], // Convert string to array
-                    notes: gameDetails.Notes || "",
-                    pricePaid: gameDetails.Price || "",
-                },
-                'Cover Image': {
-                    ...prevData['Cover Image'],
-                },
-                'Game Log': {
-                    ...prevData['Game Log'],
-                    gameCompletion: gameDetails.Completion || "",
-                    rating: gameDetails.Rating || 0,
-                    review: gameDetails.Review || "",
-                    spoilerWarning: gameDetails.SpoilerWarning || false,
-                },
-            }));
-        } else {
-            console.warn('No detailed game information found.');
-        }
-    }, [gameDetails]);
-
-
 
     // Function to handle section click
     const handleSectionClick = (section) => {
@@ -420,10 +385,9 @@ const EditGameDetails = () => {
                                         </label>
                                     </div>
                                 ))}
-
-
                             </div>
                         </fieldset>
+
                         <div className='game-status-section'>
                             <p className="game-information-titles">Notes</p>
                             <textarea
