@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import '../App.css';
 import { useUser } from '../Context/UserContext';
+import StarRating from '../Context/StarRating';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchGameInfo, addGameDetails } from '../Api';
@@ -376,34 +377,6 @@ const GameDetails = () => {
                     </div>
                 )}
             </div>
-        </div>
-    );
-};
-
-// StarRating component for displaying and selecting ratings
-const StarRating = ({ rating, onChange, starSize = 24 }) => {
-    const stars = [1, 2, 3, 4, 5];
-
-    return (
-        <div>
-            {stars.map((star) => {
-                const isHalfStar = rating >= star - 0.5 && rating < star;
-                const isFullStar = rating >= star;
-
-                return (
-                    <span
-                        key={star}
-                        style={{
-                            cursor: 'pointer',
-                            color: isFullStar ? 'gold' : 'gray',
-                            fontSize: `${starSize}px`,
-                        }}
-                        onClick={() => onChange(isHalfStar ? star - 0.5 : star)}
-                    >
-                        {isHalfStar ? '☆' : '★'}
-                    </span>
-                );
-            })}
         </div>
     );
 };
