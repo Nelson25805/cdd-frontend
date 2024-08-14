@@ -295,3 +295,19 @@ export const editGameDetails = async (userId, game, details) => {
       throw error;
   }
 };
+
+
+
+export const fetchReportData = async (reportType) => {
+  try {
+      const response = await axios.get(`${API_BASE_URL}/api/reports/${reportType}`);
+      if (response.headers['content-type'].includes('application/json')) {
+          return response.data;
+      } else {
+          throw new Error('Unexpected response format');
+      }
+  } catch (error) {
+      console.error('Error fetching report data:', error);
+      return null;
+  }
+};

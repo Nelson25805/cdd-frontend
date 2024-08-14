@@ -22,7 +22,7 @@ const EditGameDetails = () => {
     // State for storing game details and form data
     const [gameDetails, setGameDetails] = useState({
         title: "...",
-        coverArt: null,
+        coverart: null,
         platform: "",
     });
 
@@ -70,6 +70,10 @@ const EditGameDetails = () => {
                         // Convert spoiler to a number and check
                         const spoilerNumber = Number(gamedetails.spoiler);
                         const spoilerValue = spoilerNumber === 1;
+
+                        const { gameinfo } = detailedInfoResponse;
+
+                        console.log('This is the gameinfo: ', gameinfo);
 
                         console.log('This is the gamedetails: ', gamedetails);
 
