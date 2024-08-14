@@ -241,8 +241,8 @@ export const addGameDetails = async (userId, game, formData, token) => {
         completion: gameCompletion,
         review,
         spoiler: spoilerWarning,
-        price: parseFloat(pricePaid) || '',
-        rating: parseInt(rating) || '',
+        price: parseFloat(pricePaid) || null,
+        rating: parseInt(rating) || null,
       },
     }, {
       headers: {
