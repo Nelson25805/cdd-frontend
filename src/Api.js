@@ -298,6 +298,64 @@ export const editGameDetails = async (userId, game, details) => {
 
 
 
+
+
+
+
+
+
+// Function to check if the username exists
+export const checkUsername = async (username) => {
+  const response = await axios.get(`${API_BASE_URL}/api/check-username/${username}`);
+  return response.data;
+};
+
+export const updateUsername = async (userId, newUsername) => {
+  console.log('Updating username for userId:', userId); // Check userId
+  const response = await axios.put(`${API_BASE_URL}/api/update-username/${userId}`, {
+      newUsername
+  });
+  return response.data;
+};
+
+
+// Function to update the password
+export const updatePassword = async (userId, newPassword) => {
+  const response = await axios.put(`${API_BASE_URL}/api/update-password/${userId}`, {
+      newPassword
+  });
+  return response.data;
+};
+
+// Function to check if the email exists
+export const checkEmail = async (email) => {
+  const response = await axios.get(`${API_BASE_URL}/api/check-email/${email}`);
+  return response.data;
+};
+
+// Function to update the email
+export const updateEmail = async (userId, newEmail) => {
+  const response = await axios.put(`${API_BASE_URL}/api/update-email/${userId}`, {
+      newEmail
+  });
+  return response.data;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const fetchReportData = async (reportType) => {
   try {
       const response = await axios.get(`${API_BASE_URL}/api/reports/${reportType}`);
