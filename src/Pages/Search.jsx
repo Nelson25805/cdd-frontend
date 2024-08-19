@@ -4,7 +4,7 @@ import TopLinks from '../Context/TopLinks';
 import { useUser } from '../Context/UserContext';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
-import { searchGames, addToWishlist, checkGameDetails } from '../Api'; // Import your API functions 
+import { searchGames, addToWishlist, checkGameDetails } from '../Api';
 
 const Search = () => {
   const location = useLocation();
@@ -19,11 +19,26 @@ const Search = () => {
   const itemsPerPage = 5;
   const { user } = useUser();
   const { userId } = user || {};
+  const token = localStorage.getItem('token'); // Retrieve token directly
+
+  // Redirect if the user is not authenticated
+  useEffect(() => {
+    console.log(token);
+    if (!token) {
+      navigate('/login'); // Redirect to login page if no token is found
+    }
+  }, [navigate]);
 
   const handleNextPage = () => setCurrentPage((prevPage) => prevPage + 1);
   const handlePrevPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
 
   const applySortAndFilter = () => {
+    // Ensure searchResults is an array
+    if (!Array.isArray(searchResults)) {
+      console.error('Expected searchResults to be an array, but received:', searchResults);
+      return []; // Return an empty array if not an array
+    }
+
     const filteredResults = searchResults.filter((game) =>
       filterConsole === 'All' ? true : game.Console === filterConsole
     );
@@ -57,12 +72,25 @@ const Search = () => {
   const fetchSearchResults = async (query) => {
     try {
       const data = await searchGames(query, user.token);
-      setSearchResults(data);
+      console.log('Data fetched:', data); // Log the fetched data
+
+      // Check if data.results is an array
+      if (Array.isArray(data.results)) {
+        setSearchResults(data.results);
+      } else {
+        console.error('Expected data.results to be an array, but received:', data.results);
+        setSearchResults([]);
+      }
+
       setItemsLoaded(true);
     } catch (error) {
       console.error('Error fetching search results:', error.message);
+      setSearchResults([]);
+      setItemsLoaded(true); // Ensure itemsLoaded is true even in case of error
     }
   };
+
+
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -92,7 +120,7 @@ const Search = () => {
       alert('Error adding game to wishlist: ' + error.message);
     }
   };
-  
+
 
   const handleGameDetails = async (game, userId) => {
     console.log('UserId: ', userId);
@@ -109,115 +137,114 @@ const Search = () => {
     }
   };
 
-// Render UI component
 
-
-return (
-  <div>
+  // Render UI component
+  return (
+    <div>
       <TopLinks />
       <div className="search-content">
-          <main className="search-main-content">
-              <div className="sort-filter-section">
-                  <p>Sort & Filter</p>
-                  <div>
-                      <p>Sort By:</p>
-                      <select value={sortDirection} onChange={(e) => setSortDirection(e.target.value)}>
-                          <option value="Ascending">Ascending</option>
-                          <option value="Descending">Descending</option>
-                      </select>
-                  </div>
-                  <div>
-                      <p>Filter By Console:</p>
-                      {/* Dropdown for Filter By Console options */}
-                      <select value={filterConsole} onChange={(e) => setFilterConsole(e.target.value)}>
-                          <option value="All"> All</option>
-                          <option value="Xbox"> Xbox</option>
-                          <option value="Xbox 360">Xbox 360</option>
-                          <option value="Xbox One">Xbox One</option>
-                          <option value="NES">NES</option>
-                          <option value="SNES">SNES</option>
-                          <option value="Nintendo 64">Nintendo 64</option>
-                          <option value="Gamecube">Gamecube</option>
-                          <option value="Wii">Wii</option>
-                          <option value="Wii U">Wii U</option>
-                          <option value="Nintendo Switch">Nintendo Switch</option>
-                          <option value="Playstation 1">Playstation 1</option>
-                          <option value="Playstation 2">Playstation 2</option>
-                          <option value="Playstation 3">Playstation 3</option>
-                          <option value="Playstation 4">Playstation 4</option>
-                      </select>
-                  </div>
-              </div>
+        <main className="search-main-content">
+          <div className="sort-filter-section">
+            <p>Sort & Filter</p>
+            <div>
+              <p>Sort By:</p>
+              <select value={sortDirection} onChange={(e) => setSortDirection(e.target.value)}>
+                <option value="Ascending">Ascending</option>
+                <option value="Descending">Descending</option>
+              </select>
+            </div>
+            <div>
+              <p>Filter By Console:</p>
+              {/* Dropdown for Filter By Console options */}
+              <select value={filterConsole} onChange={(e) => setFilterConsole(e.target.value)}>
+                <option value="All"> All</option>
+                <option value="Xbox"> Xbox</option>
+                <option value="Xbox 360">Xbox 360</option>
+                <option value="Xbox One">Xbox One</option>
+                <option value="NES">NES</option>
+                <option value="SNES">SNES</option>
+                <option value="Nintendo 64">Nintendo 64</option>
+                <option value="Gamecube">Gamecube</option>
+                <option value="Wii">Wii</option>
+                <option value="Wii U">Wii U</option>
+                <option value="Nintendo Switch">Nintendo Switch</option>
+                <option value="Playstation 1">Playstation 1</option>
+                <option value="Playstation 2">Playstation 2</option>
+                <option value="Playstation 3">Playstation 3</option>
+                <option value="Playstation 4">Playstation 4</option>
+              </select>
+            </div>
+          </div>
 
-              <div className="game-section">
-                  <h1>Results for: {searchQuery}</h1>
-                  {(!itemsLoaded && loadingDots) && (
-                      <p>Loading results please wait ..{loadingDots}</p>
-                  )}
-                  <div
-                      className="game-item-header">
-                      <div className='game-item-header-photo'>
-                          <p>Photo</p>
-                      </div>
-                      <div className='game-item-header-name-console'>
-                          <p className='game-item-header-name'>Name</p>
-                          <p>Console</p>
-                      </div>
-                      <div className='game-item-header-actions'>
-                          <p>Actions</p>
-                      </div>
-                  </div>
-                  {/* Mapping over paginated results and rendering game items */}
-                  {applySortAndFilter().map((game, index) => (
-                    
-                      <div key={game.GameId} className="game-item">
-                          <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
-                          <div className='game-item-name-console'>
-                              <p className='game-item-name'>{game.Name}</p>
-                              <p>{game.Console}</p>
-                          </div>
-                          <div className='game-item-actions'>
-                              {/* Button to handle adding to collection with details */}
-                              <p>
-                                  <button className="link-button"
-                                      onClick={() => handleGameDetails(game, user.userid)}
-                                  >
-                                      + Collection (With Details)
-                                  </button>
-                              </p>
-                              {/* Link to handle adding to wishlist */}
-                              <p>
-                                  <Link to="#" onClick={() => handleAddToWishlist(game, user.userid)}>
-                                      + Wishlist
-                                  </Link>
-                              </p>
-                          </div>
-                      </div>
-                  ))}
-                  {/* Pagination controls */}
-                  <div>
-                      <button onClick={handlePrevPage} disabled={currentPage === 1}>
-                          Previous
-                      </button>
-                      <span> Page {currentPage} of {Math.ceil(searchResults.length / itemsPerPage)} </span>
-                      <button onClick={handleNextPage} disabled={currentPage === Math.ceil(searchResults.length / itemsPerPage)}>
-                          Next
-                      </button>
-                  </div>
-                  {/* Message for adding a game manually to the database */}
-                  {itemsLoaded && (
-                      <p className='bottom-add-game-link'>
-                          Not the results you're looking for?{' '}
-                          <span className='bottom-add-game-link2'>
-                              <Link to="/AddGameToDatabase">Click here to add a game manually to our database!</Link>
-                          </span>
-                      </p>
-                  )}
+          <div className="game-section">
+            <h1>Results for: {searchQuery}</h1>
+            {(!itemsLoaded && loadingDots) && (
+              <p>Loading results please wait ..{loadingDots}</p>
+            )}
+            <div
+              className="game-item-header">
+              <div className='game-item-header-photo'>
+                <p>Photo</p>
               </div>
-          </main>
+              <div className='game-item-header-name-console'>
+                <p className='game-item-header-name'>Name</p>
+                <p>Console</p>
+              </div>
+              <div className='game-item-header-actions'>
+                <p>Actions</p>
+              </div>
+            </div>
+            {/* Mapping over paginated results and rendering game items */}
+            {applySortAndFilter().map((game, index) => (
+
+              <div key={game.GameId} className="game-item">
+                <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
+                <div className='game-item-name-console'>
+                  <p className='game-item-name'>{game.Name}</p>
+                  <p>{game.Console}</p>
+                </div>
+                <div className='game-item-actions'>
+                  {/* Button to handle adding to collection with details */}
+                  <p>
+                    <button className="link-button"
+                      onClick={() => handleGameDetails(game, user.userid)}
+                    >
+                      + Collection (With Details)
+                    </button>
+                  </p>
+                  {/* Link to handle adding to wishlist */}
+                  <p>
+                    <Link to="#" onClick={() => handleAddToWishlist(game, user.userid)}>
+                      + Wishlist
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            ))}
+            {/* Pagination controls */}
+            <div>
+              <button onClick={handlePrevPage} disabled={currentPage === 1}>
+                Previous
+              </button>
+              <span> Page {currentPage} of {Math.ceil(searchResults.length / itemsPerPage)} </span>
+              <button onClick={handleNextPage} disabled={currentPage === Math.ceil(searchResults.length / itemsPerPage)}>
+                Next
+              </button>
+            </div>
+            {/* Message for adding a game manually to the database */}
+            {itemsLoaded && (
+              <p className='bottom-add-game-link'>
+                Not the results you're looking for?{' '}
+                <span className='bottom-add-game-link2'>
+                  <Link to="/AddGameToDatabase">Click here to add a game manually to our database!</Link>
+                </span>
+              </p>
+            )}
+          </div>
+        </main>
       </div>
-  </div>
-);
+    </div>
+  );
 };
 
 export default Search;
