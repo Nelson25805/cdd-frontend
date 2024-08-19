@@ -1,72 +1,110 @@
 import axios from 'axios';
+import TokenManager from './Context/TokenManager'; // Import the TokenManager
 
 const API_BASE_URL = 'http://localhost:5000'; // Replace with your backend URL
 
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+});
 
+// Request interceptor to add Authorization header
+apiClient.interceptors.request.use(
+  config => {
+    const token = TokenManager.getToken(); // Get token via TokenManager
+    console.log('Attaching Token:', token); // Log the token being attached
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+);
+
+// Response interceptor to handle token refresh
+apiClient.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config;
+
+    // Check if error is due to token expiration
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = TokenManager.getRefreshToken(); // Get refreshToken via TokenManager
+        const { data } = await axios.post(`${API_BASE_URL}/token/refresh`, { refreshToken });
+
+        TokenManager.setToken(data.accessToken); // Update token via TokenManager
+
+        apiClient.defaults.headers.Authorization = `Bearer ${data.accessToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        console.error('Refresh token error:', refreshError);
+        // Handle refresh token errors (e.g., redirect to login)
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
+
+// Define your API functions
 export const loginUser = async (username, password) => {
-  console.log('loginUser called with:', { username, password });
   try {
-    const response = await axios.post(`${API_BASE_URL}/login`, { username, password });
-    const {token, user} = response.data;
-    console.log('Token:', token, 'User: ', user);
+    const response = await apiClient.post('/login', { username, password });
+    const { token, user } = response.data;
+    TokenManager.setToken(token); // Store token via TokenManager
     return response.data;
   } catch (error) {
-    if (error.response) {
-      console.error('Error response:', error.response.data);
-      throw new Error('Login failed: ' + error.response.data.message);
-    } else {
-      console.error('Error during loginUser:', error.message);
-      throw new Error('Login failed: ' + error.message);
-    }
+    console.error('Error during loginUser:', error.message);
+    throw new Error('Login failed: ' + (error.response?.data?.message || error.message));
   }
 };
 
 export const registerUser = async (username, email, password, admin) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/register`, { username, email, password, admin });
-    console.log('Response status:', response.status);
+    const response = await apiClient.post('/register', { username, email, password, admin });
 
-    if (response.status === 201) {
-      console.log('Registration successful');
-      return response.data; // Assuming response.data contains user data and token
-    } else {
-      const errorText = response.data.error || 'Unknown error occurred';
-      console.error('Error response:', errorText);
-      throw new Error('Registration failed: ' + errorText);
+    // Assuming the registration response contains a token and user data
+    const { token, user } = response.data;
+
+    // Store the token if provided
+    if (token) {
+      TokenManager.setToken(token);
     }
-  } catch (error) {
-    console.error('Error during registerUser:', error.message);
-    throw new Error('Registration failed: ' + error.message);
-  }
-};
-
-export const addGameToDatabase = async (formData, token) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/add-game-to-database`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    });
 
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    console.error('Error during registerUser:', error.message);
+    throw new Error('Registration failed: ' + (error.response?.data?.error || error.message));
+  }
+};
+
+
+export const addGameToDatabase = async (formData) => {
+  try {
+    const response = await apiClient.post('/add-game-to-database', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding game to database:', error.message);
+    throw new Error('Failed to add game to database');
   }
 };
 
 
 
 // New function to search games based on a query
-export const searchGames = async (query, token) => {
+export const searchGames = async (query) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/search`, {
+    const response = await apiClient.get('/api/search', {
       params: { q: query },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     });
-    return response.data.results;
+    return response.data;
   } catch (error) {
     console.error('Error searching games:', error);
     throw error;
@@ -74,17 +112,14 @@ export const searchGames = async (query, token) => {
 };
 
 
+
+
 // Function to add a game to the user's wishlist
-export const addToWishlist = async (userId, gameId, token) => {
-  console.log('Api stuff: ');
-  console.log('UserId: ', userId);
-  console.log('GameId: ', gameId);
-  console.log('Token: ', token);
+export const addToWishlist = async (userId, gameId) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/add-to-wishlist/${userId}/${gameId}`, {}, {
+    const response = await apiClient.post(`/api/add-to-wishlist/${userId}/${gameId}`, {}, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -94,13 +129,13 @@ export const addToWishlist = async (userId, gameId, token) => {
   }
 };
 
+
 // Function to retrieve a user's wishlist
-export const getWishlist = async (userId, token) => {
+export const getWishlist = async (userId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/mywishlist/${userId}`, {
+    const response = await apiClient.get(`/api/mywishlist/${userId}`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -110,13 +145,13 @@ export const getWishlist = async (userId, token) => {
   }
 };
 
+
 // Function to remove a game from the user's wishlist
-export const removeFromWishlist = async (userId, gameId, token) => {
+export const removeFromWishlist = async (userId, gameId) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/api/removewishlist/${userId}/${gameId}`, {
+    const response = await apiClient.delete(`/api/removewishlist/${userId}/${gameId}`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -127,18 +162,12 @@ export const removeFromWishlist = async (userId, gameId, token) => {
 };
 
 
-
-
-
-
-
 // Function to check if a user has game details
-export const checkGameDetails = async (userId, gameId, token) => {
+export const checkGameDetails = async (userId, gameId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/check-gamedetails/${userId}/${gameId}`, {
+    const response = await apiClient.get(`/api/check-gamedetails/${userId}/${gameId}`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -148,13 +177,13 @@ export const checkGameDetails = async (userId, gameId, token) => {
   }
 };
 
+
 // Function to view game details
-export const getGameDetails = async (gameId, token) => {
+export const getGameDetails = async (gameId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/game-details/${gameId}`, {
+    const response = await apiClient.get(`/api/game-details/${gameId}`, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -167,10 +196,11 @@ export const getGameDetails = async (gameId, token) => {
 
 
 
+
 // Fetch collection items for a user
 export const fetchCollectionItems = async (userId) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/mycollection/${userId}`);
+    const response = await apiClient.get(`/api/mycollection/${userId}`);
     return response.data.results;
   } catch (error) {
     console.error('Error fetching collection items:', error);
@@ -178,10 +208,11 @@ export const fetchCollectionItems = async (userId) => {
   }
 };
 
+
 // Remove a game from the collection
 export const removeGameFromCollection = async (userId, gameId) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/api/removecollection/${userId}/${gameId}`);
+    const response = await apiClient.delete(`/api/removecollection/${userId}/${gameId}`);
     console.log('This is the response: ', response);
     return response;
   } catch (error) {
@@ -196,11 +227,11 @@ export const removeGameFromCollection = async (userId, gameId) => {
 
 
 
-export const fetchGameInfo = async (game, token) => {
+
+export const fetchGameInfo = async (game) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/api/game-info/${game}`, {
+    const response = await apiClient.get(`/api/game-info/${game}`, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
@@ -224,13 +255,14 @@ export const fetchGameInfo = async (game, token) => {
   }
 };
 
-export const addGameDetails = async (userId, game, formData, token) => {
+
+export const addGameDetails = async (userId, game, formData) => {
   const { ownership } = formData['Game Info'];
   const { checkboxes, notes, pricePaid } = formData['Game Status'];
   const { gameCompletion, rating, review, spoilerWarning } = formData['Game Log'];
 
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/add-game-details/${userId}/${game}`, {
+    const response = await apiClient.post(`/api/add-game-details/${userId}/${game}`, {
       userId,
       gameId: game,
       gameDetails: {
@@ -246,7 +278,6 @@ export const addGameDetails = async (userId, game, formData, token) => {
       },
     }, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
@@ -264,35 +295,31 @@ export const addGameDetails = async (userId, game, formData, token) => {
 
 
 
+
 // Fetch detailed game information
 export const fetchGameDetails = async (userId, game) => {
   try {
-      const response = await axios.get(`${API_BASE_URL}/api/get-game-details/${userId}/${game}`);
-      return response.data.gameDetails;
+    const response = await apiClient.get(`/api/get-game-details/${userId}/${game}`);
+    return response.data.gameDetails;
   } catch (error) {
-      console.error('Error fetching detailed game info:', error);
-      throw error;
+    console.error('Error fetching detailed game info:', error);
+    throw error;
   }
 };
+
 
 // Edit game details
 export const editGameDetails = async (userId, game, details) => {
   try {
-      // Send PUT request to update game details
-      const response = await axios.put(`${API_BASE_URL}/api/edit-game-details/${userId}/${game}`, details, {
-          headers: {
-              'Content-Type': 'application/json',
-          },
-      });
-
-      // Return only the response data
-      return response.data;
+    const response = await apiClient.put(`/api/edit-game-details/${userId}/${game}`, details, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
   } catch (error) {
-      // Log detailed error information
-      console.error('Error editing game details:', error.response ? error.response.data : error.message);
-
-      // Re-throw error to be handled by the calling function
-      throw error;
+    console.error('Error editing game details:', error.response ? error.response.data : error.message);
+    throw error;
   }
 };
 
@@ -304,42 +331,63 @@ export const editGameDetails = async (userId, game, details) => {
 
 
 
-// Function to check if the username exists
+
 export const checkUsername = async (username) => {
-  const response = await axios.get(`${API_BASE_URL}/api/check-username/${username}`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/api/check-username/${username}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error checking username:', error);
+    throw error;
+  }
 };
 
 export const updateUsername = async (userId, newUsername) => {
-  console.log('Updating username for userId:', userId); // Check userId
-  const response = await axios.put(`${API_BASE_URL}/api/update-username/${userId}`, {
+  try {
+    const response = await apiClient.put(`/api/update-username/${userId}`, {
       newUsername
-  });
-  return response.data;
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating username:', error);
+    throw error;
+  }
 };
 
-
-// Function to update the password
 export const updatePassword = async (userId, newPassword) => {
-  const response = await axios.put(`${API_BASE_URL}/api/update-password/${userId}`, {
+  try {
+    const response = await apiClient.put(`/api/update-password/${userId}`, {
       newPassword
-  });
-  return response.data;
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating password:', error);
+    throw error;
+  }
 };
 
-// Function to check if the email exists
 export const checkEmail = async (email) => {
-  const response = await axios.get(`${API_BASE_URL}/api/check-email/${email}`);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/api/check-email/${email}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error checking email:', error);
+    throw error;
+  }
 };
 
-// Function to update the email
 export const updateEmail = async (userId, newEmail) => {
-  const response = await axios.put(`${API_BASE_URL}/api/update-email/${userId}`, {
+  try {
+    const response = await apiClient.put(`/api/update-email/${userId}`, {
       newEmail
-  });
-  return response.data;
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating email:', error);
+    throw error;
+  }
 };
+
 
 
 
@@ -358,14 +406,14 @@ export const updateEmail = async (userId, newEmail) => {
 
 export const fetchReportData = async (reportType) => {
   try {
-      const response = await axios.get(`${API_BASE_URL}/api/reports/${reportType}`);
-      if (response.headers['content-type'].includes('application/json')) {
-          return response.data;
-      } else {
-          throw new Error('Unexpected response format');
-      }
+    const response = await apiClient.get(`${API_BASE_URL}/api/reports/${reportType}`);
+    if (response.headers['content-type'].includes('application/json')) {
+      return response.data;
+    } else {
+      throw new Error('Unexpected response format');
+    }
   } catch (error) {
-      console.error('Error fetching report data:', error);
-      return null;
+    console.error('Error fetching report data:', error);
+    return null;
   }
 };
