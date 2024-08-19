@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../Api';
 import { useUser } from '../Context/UserContext';
+import TokenManager from '../Context/TokenManager';
 import '../App.css';
 
 function Login() {
   const navigate = useNavigate();
-  const { setUser, setToken } = useUser(); // Using setUser from UserContext
+  const { setUser, setToken } = useUser(); 
 
   const [formData, setFormData] = useState({
     username: '',
@@ -31,12 +32,26 @@ function Login() {
 
       setUser(userData.user); // Update UserContext with user data
       setToken(userData.token); // Update UserContext with token
+
+      // If a refresh token is returned, store it as well
+      if (userData.refreshToken) {
+        TokenManager.setRefreshToken(userData.refreshToken);
+      }
+
+      // Clear the form data
+      setFormData({
+        username: '',
+        password: '',
+      });
+
       navigate('/'); // Redirect to home page or any protected route
     } catch (error) {
       console.error('Login failed:', error);
       // Handle login failure (e.g., show an error message)
     }
   };
+
+
 
   return (
     <div className="login-container">
