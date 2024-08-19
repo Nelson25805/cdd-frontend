@@ -1,28 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import TokenManager from './TokenManager'; // Import the TokenManager
 
-// Create a context to hold the user data and related functions
 const UserContext = createContext();
 
-// UserProvider component that wraps your app and provides user-related data
 export function UserProvider({ children }) {
-  // State to store user data
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(TokenManager.getToken()); // Initialize from TokenManager
 
-  // Load user and token from local storage on component mount
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-    }
   }, []);
 
-  // Save user and token to local storage when they change
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -33,18 +24,17 @@ export function UserProvider({ children }) {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('token', token);
+      TokenManager.setToken(token); // Save token via TokenManager
     } else {
-      localStorage.removeItem('token');
+      TokenManager.setToken(null);
     }
   }, [token]);
 
-  // Function to log out the user
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    TokenManager.setToken(null);
   };
 
   return (
@@ -54,8 +44,6 @@ export function UserProvider({ children }) {
   );
 }
 
-
-// Custom hook to access the user context
 export function useUser() {
   return useContext(UserContext);
 }
