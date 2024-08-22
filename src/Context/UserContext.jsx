@@ -26,15 +26,18 @@ export function UserProvider({ children }) {
     if (token) {
       TokenManager.setToken(token); // Save token via TokenManager
     } else {
-      TokenManager.setToken(null);
+      //Do nothing (Enabling this allows for users not logged into access other pages)
+      //TokenManager.setToken(null);
     }
   }, [token]);
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    setRefreshToken(null);
     localStorage.removeItem('user');
     TokenManager.setToken(null);
+    TokenManager.setRefreshToken(null);
   };
 
   return (
