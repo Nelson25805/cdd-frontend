@@ -39,6 +39,7 @@ const TopLinks = () => {
 
     // Clear the token from local storage
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
 
     // Redirect to the home page
     navigate('/');
