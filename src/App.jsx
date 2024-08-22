@@ -14,6 +14,7 @@ import AccountSettings from './Pages/AccountSettings';
 import EditGameDetails from './Pages/EditGameDetails';
 import ReportsMenu from './Pages/ReportsMenu';
 import PrivateRoute from './Context/PrivateRoute';
+import AdminRoute from './Context/AdminRoute.jsx'; // Import AdminRoute
 
 const App = () => {
   return (
@@ -23,7 +24,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/Register" element={<Register />} />
-          
+
           {/* Protected routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/GameDetails" element={<GameDetails />} />
@@ -33,6 +34,10 @@ const App = () => {
             <Route path="/Search" element={<Search />} />
             <Route path="/AccountSettings" element={<AccountSettings />} />
             <Route path="/EditGameDetails" element={<EditGameDetails />} />
+          </Route>
+
+          {/* Admin-only route */}
+          <Route element={<AdminRoute />}>
             <Route path="/ReportsMenu" element={<ReportsMenu />} />
           </Route>
         </Routes>
