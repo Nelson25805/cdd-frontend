@@ -34,11 +34,11 @@ const App = () => {
             <Route path="/Search" element={<Search />} />
             <Route path="/AccountSettings" element={<AccountSettings />} />
             <Route path="/EditGameDetails" element={<EditGameDetails />} />
-          </Route>
 
-          {/* Admin-only route */}
-          <Route element={<AdminRoute />}>
-            <Route path="/ReportsMenu" element={<ReportsMenu />} />
+            {/* Admin-only route nested within PrivateRoute */}
+            <Route element={<AdminRoute />}>
+              <Route path="/ReportsMenu" element={<ReportsMenu />} />
+            </Route>
           </Route>
         </Routes>
       </Router>
