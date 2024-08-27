@@ -1,7 +1,11 @@
 import axios from 'axios';
 import TokenManager from './Context/TokenManager'; // Import the TokenManager
 
-const API_BASE_URL = 'http://localhost:5000'; // Replace with your backend URL
+//local api
+// const API_BASE_URL = 'http://localhost:5000';
+
+//hosted api
+const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
