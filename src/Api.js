@@ -2,10 +2,10 @@ import axios from 'axios';
 import TokenManager from './Context/TokenManager'; // Import the TokenManager
 
 //local api
-// const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'http://localhost:5000';
 
 //hosted api
-const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
+//const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
