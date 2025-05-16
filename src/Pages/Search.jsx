@@ -140,7 +140,7 @@ const Search = () => {
 
   // Render UI component
   return (
-    <div>
+    <div className="App">
       <TopLinks />
       <div className="search-content">
         <main className="search-main-content">
