@@ -1,8 +1,14 @@
 import axios from 'axios';
 import TokenManager from './Context/TokenManager'; // manages in-memory access token
 
-// Use Vite env var (falls back to localhost in dev)
-const API_BASE_URL = 'https://cdd-frontend.vercel.app' || 'http://localhost:5000';
+// base URL
+//const API_BASE_URL = 'http://localhost:5000';
+//const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
+
+const API_BASE_URL = [
+  'http://localhost:5173',                // dev
+  'https://cdd-backend-liqx.onrender.com'       // prod
+];
 
 // create axios instance with credentials
 const apiClient = axios.create({
