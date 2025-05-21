@@ -1,44 +1,57 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import TokenManager from './TokenManager'; // Import the TokenManager
+import TokenManager from './TokenManager';
+import apiClient from '../Api';
 
 const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(TokenManager.getToken()); // Initialize from TokenManager
+  const [token, setToken] = useState(null);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const path = window.location.pathname.toLowerCase();
+    // Skip refresh only on login/register pages
+    if (path === '/login' || path === '/register') {
+      setInitializing(false);
+      return;
     }
+
+    (async () => {
+      try {
+        const newToken = await TokenManager.refreshAccessToken();
+        setToken(newToken);
+        const profileRes = await apiClient.get('/api/me');
+        setUser(profileRes.data.user);
+      } catch {
+        setUser(null);
+        setToken(null);
+      } finally {
+        setInitializing(false);
+      }
+    })();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
-    }
-  }, [user]);
-
+  // update in-memory token whenever it changes
   useEffect(() => {
     if (token) {
-      TokenManager.setToken(token); // Save token via TokenManager
-    } else {
-      //Do nothing (Enabling this allows for users not logged into access other pages)
-      //TokenManager.setToken(null);
+      TokenManager.setAccessToken(token);
     }
   }, [token]);
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await apiClient.post('/api/logout');
+    } catch {}
     setUser(null);
     setToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem('user');
-    TokenManager.setToken(null);
-    TokenManager.setRefreshToken(null);
+    TokenManager.setAccessToken(null);
+    window.location.href = '/';
   };
+
+  if (initializing) {
+    return <div className="App">Loading…</div>;
+  }
 
   return (
     <UserContext.Provider value={{ user, token, setUser, setToken, logout }}>

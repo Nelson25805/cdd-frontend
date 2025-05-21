@@ -1,22 +1,21 @@
 import axios from 'axios';
-import TokenManager from './Context/TokenManager'; // Import the TokenManager
+import TokenManager from './Context/TokenManager'; // manages in-memory access token
 
-//local api
-//const API_BASE_URL = 'http://localhost:5000';
+// base URL
+const API_BASE_URL = 'http://localhost:5000';
+// const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 
-//hosted api
-const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
-
+// create axios instance with credentials
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true,               // send/receive HttpOnly cookies
 });
 
-// Request interceptor to add Authorization header
+// attach access token to headers
 apiClient.interceptors.request.use(
   config => {
-    const token = TokenManager.getToken(); // Get token via TokenManager
-    console.log('Attaching Token:', token); // Log the token being attached
+    const token = TokenManager.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,27 +24,41 @@ apiClient.interceptors.request.use(
   error => Promise.reject(error)
 );
 
-// Response interceptor to handle token refresh
+// response interceptor for auto-refresh
 apiClient.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
 
-    // Check if error is due to token expiration
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+    // if we're already trying to refresh, just fail
+    if (originalRequest.url?.endsWith('/api/token/refresh')) {
+      return Promise.reject(error);
+    }
+
+    // on 401, try one retry with a fresh token
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       try {
-        const refreshToken = TokenManager.getRefreshToken(); // Get refreshToken via TokenManager
-        const { data } = await axios.post(`${API_BASE_URL}/token/refresh`, { refreshToken });
+        // call refresh endpoint; cookie is sent automatically
+        const refreshRes = await apiClient.post('/api/token/refresh');
+        const { accessToken } = refreshRes.data;
 
-        TokenManager.setToken(data.accessToken); // Update token via TokenManager
+        // update in-memory token
+        TokenManager.setAccessToken(accessToken);
+        // update default header for future requests
+        apiClient.defaults.headers.Authorization = `Bearer ${accessToken}`;
 
-        apiClient.defaults.headers.Authorization = `Bearer ${data.accessToken}`;
+        // retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        console.error('Refresh token error:', refreshError);
-        // Handle refresh token errors (e.g., redirect to login)
+        console.error('Refresh token failed:', refreshError);
+
+        // clear client state & send user back to login
+        TokenManager.setAccessToken(null);
+        window.location.href = '/login';
+
+        return Promise.reject(refreshError);
       }
     }
 
@@ -55,15 +68,17 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 
-// Define your API functions
+// API functions below
+
 export const loginUser = async (username, password) => {
   try {
     const response = await apiClient.post('/login', { username, password });
-    const { token, user } = response.data;
-    TokenManager.setToken(token); // Store token via TokenManager
-    return response.data;
+    const { accessToken, user } = response.data;
+
+    TokenManager.setAccessToken(accessToken);
+    return { accessToken, user };
   } catch (error) {
-    console.error('Error during loginUser:', error.message);
+    console.error('Error during loginUser:', error);
     throw new Error('Login failed: ' + (error.response?.data?.message || error.message));
   }
 };
@@ -71,22 +86,17 @@ export const loginUser = async (username, password) => {
 export const registerUser = async (username, email, password, admin) => {
   try {
     const response = await apiClient.post('/register', { username, email, password, admin });
+    const { accessToken, user } = response.data;
 
-    // Assuming the registration response contains a token and user data
-    const { token, user } = response.data;
-
-    // Store the token if provided
-    if (token) {
-      TokenManager.setToken(token);
+    if (accessToken) {
+      TokenManager.setAccessToken(accessToken);
     }
-
-    return response.data;
+    return { accessToken, user };
   } catch (error) {
-    console.error('Error during registerUser:', error.message);
+    console.error('Error during registerUser:', error);
     throw new Error('Registration failed: ' + (error.response?.data?.error || error.message));
   }
 };
-
 
 export const addGameToDatabase = async (formData) => {
   try {
@@ -101,7 +111,6 @@ export const addGameToDatabase = async (formData) => {
 };
 
 
-
 // New function to search games based on a query
 export const searchGames = async (query) => {
   try {
@@ -114,8 +123,6 @@ export const searchGames = async (query) => {
     throw error;
   }
 };
-
-
 
 
 // Function to add a game to the user's wishlist
@@ -198,9 +205,6 @@ export const getGameDetails = async (gameId) => {
 };
 
 
-
-
-
 // Fetch collection items for a user
 export const fetchCollectionItems = async (userId) => {
   try {
@@ -224,13 +228,6 @@ export const removeGameFromCollection = async (userId, gameId) => {
     throw error;
   }
 };
-
-
-
-
-
-
-
 
 export const fetchGameInfo = async (game) => {
   try {
@@ -260,6 +257,20 @@ export const fetchGameInfo = async (game) => {
 };
 
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Adds detailed information about a game to a user's collection.
+ *
+ * @param {string} userId - The ID of the user adding the game details.
+ * @param {string} game - The ID of the game for which details are being added.
+ * @param {Object} formData - An object containing the form data with game details.
+ * @param {Object} formData['Game Info'] - Contains ownership and included information.
+ * @param {Object} formData['Game Status'] - Includes checkboxes, notes, and pricePaid.
+ * @param {Object} formData['Game Log'] - Contains gameCompletion, rating, review, and spoilerWarning.
+ * @returns {Promise<Object>} - A promise that resolves to an object indicating success or failure with a message.
+ */
+
+/*******  526b8350-c1eb-45be-8291-85201de384c2  *******/
 export const addGameDetails = async (userId, game, formData) => {
   const { ownership } = formData['Game Info'];
   const { checkboxes, notes, pricePaid } = formData['Game Status'];
@@ -298,8 +309,6 @@ export const addGameDetails = async (userId, game, formData) => {
 };
 
 
-
-
 // Fetch detailed game information
 export const fetchGameDetails = async (userId, game) => {
   try {
@@ -326,14 +335,6 @@ export const editGameDetails = async (userId, game, details) => {
     throw error;
   }
 };
-
-
-
-
-
-
-
-
 
 
 export const checkUsername = async (username) => {
@@ -391,21 +392,6 @@ export const updateEmail = async (userId, newEmail) => {
     throw error;
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 export const fetchReportData = async (reportType) => {

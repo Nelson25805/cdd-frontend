@@ -1,39 +1,51 @@
 // TokenManager.jsx
-class TokenManager {
-    static getToken() {
-      return localStorage.getItem('token');
-    }
-  
-    static setToken(token) {
-      localStorage.setItem('token', token);
-    }
-  
-    static getRefreshToken() {
-      return localStorage.getItem('refreshToken');
-    }
-  
-    static setRefreshToken(refreshToken) {
-      localStorage.setItem('refreshToken', refreshToken);
-    }
+import apiClient from '../Api';
 
-    static async refreshAuthToken() {
-      try {
-        const refreshToken = this.getRefreshToken();
-        if (!refreshToken) throw new Error('No refresh token available');
-  
-        const response = await axios.post(`${API_BASE_URL}/api/refresh-token`, {}, {
-          headers: { Authorization: `Bearer ${refreshToken}` },
-        });
-  
-        const newToken = response.data.token;
-        this.setToken(newToken);
-        return newToken;
-      } catch (error) {
-        console.error('Error refreshing token:', error);
-        throw error;
-      }
+class TokenManager {
+  // in-memory storage for access token
+  static accessToken = null;
+
+  /**
+   * Alias for getAccessToken (for older components using getToken)
+   */
+  static getToken() {
+    return this.getAccessToken();
+  }
+
+  static setToken(token) {
+    this.setAccessToken(token);
+  }
+
+  /**
+   * Get the current access token
+   */
+  static getAccessToken() {
+    return this.accessToken;
+  }
+
+  /**
+   * Store a new access token in-memory
+   */
+  static setAccessToken(token) {
+    this.accessToken = token;
+  }
+
+  /**
+   * Refreshes the access token by calling the backend refresh endpoint.
+   * The HttpOnly refresh cookie is sent automatically via apiClient.
+   * Returns the new access token.
+   */
+  static async refreshAccessToken() {
+    try {
+      const response = await apiClient.post('/api/token/refresh');
+      const { accessToken } = response.data;
+      this.setAccessToken(accessToken);
+      return accessToken;
+    } catch (error) {
+      console.error('Error refreshing access token:', error);
+      throw error;
     }
   }
-  
-  export default TokenManager;
-  
+}
+
+export default TokenManager;
