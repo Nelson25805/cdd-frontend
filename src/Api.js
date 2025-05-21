@@ -3,12 +3,7 @@ import TokenManager from './Context/TokenManager'; // manages in-memory access t
 
 // base URL
 //const API_BASE_URL = 'http://localhost:5000';
-//const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
-
-const API_BASE_URL = [
-  'http://localhost:5173',                // dev
-  'https://cdd-backend-liqx.onrender.com'       // prod
-];
+const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 
 // create axios instance with credentials
 const apiClient = axios.create({
