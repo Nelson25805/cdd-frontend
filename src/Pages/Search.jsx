@@ -17,17 +17,16 @@ const Search = () => {
   const [filterConsole, setFilterConsole] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const { user } = useUser();
-  const { userId } = user || {};
-  const token = localStorage.getItem('token'); // Retrieve token directly
+  const { user, token } = useUser();
+  const { userid: userId } = user || {};
+
 
   // Redirect if the user is not authenticated
   useEffect(() => {
-    console.log(token);
     if (!token) {
-      navigate('/login'); // Redirect to login page if no token is found
+      navigate('/login');
     }
-  }, [navigate]);
+  }, [token, navigate]);
 
   const handleNextPage = () => setCurrentPage((prevPage) => prevPage + 1);
   const handlePrevPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
@@ -101,38 +100,52 @@ const Search = () => {
   }, []);
 
 
-  const handleAddToWishlist = async (game, userId) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No token found');
-      }
+    const handleAddToWishlist = async (game) => {
+  if (!token) {
+    // not logged in, bounce to login
+    return navigate('/login');
+  }
 
-      console.log('UserId: ', userId);
-      console.log('GameId: ', game.GameId);
-      console.log('Token: ', token);
-
-      const response = await addToWishlist(userId, game.GameId, token);
-      console.log('Added to wishlist:', response);
-      alert('Game added to wishlist successfully!');
-    } catch (error) {
-      console.error('Error adding to wishlist:', error.message);
-      alert('Error adding game to wishlist: ' + error.message);
+  try {
+    console.log('UserId:', userId, 'GameId:', game.GameId);
+    const response = await addToWishlist(userId, game.GameId);
+    console.log('Added to wishlist:', response);
+    alert('Game added to wishlist successfully!');
+  } catch (error) {
+    // If the server sends a 409 Conflict for “already in wishlist”
+    if (error.response?.status === 409) {
+      return alert('This game is already in your wishlist.');
     }
-  };
+
+    // Otherwise fallback to the generic error
+    console.error('Error adding to wishlist:', error);
+    const msg =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Unknown error';
+    alert('Error adding game to wishlist: ' + msg);
+  }
+};
 
 
-  const handleGameDetails = async (game, userId) => {
-    console.log('UserId: ', userId);
-    const token = localStorage.getItem('token');
+
+
+  const handleGameDetails = async (game) => {
+    if (!token) {
+      return navigate('/login');
+    }
+
     try {
-      const data = await checkGameDetails(userId, game.GameId, token);
+      console.log('Checking details for user', userId, 'game', game.GameId);
+      const data = await checkGameDetails(userId, game.GameId);
       if (data.hasDetails) {
         alert('You already have details for this game in your collection.');
       } else {
         navigate(`/gamedetails?q=${encodeURIComponent(game.GameId)}`);
       }
     } catch (error) {
+      console.error('Error checking GameDetails:', error);
       alert('Error checking GameDetails.');
     }
   };

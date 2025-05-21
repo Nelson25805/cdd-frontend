@@ -27,16 +27,11 @@ function Login() {
     e.preventDefault();
 
     try {
-      const userData = await loginUser(formData.username, formData.password);
-      console.log('Login successful:', userData);
+      const { accessToken, user } = await loginUser(formData.username, formData.password);
+      console.log('Login successful:', user);
 
-      setUser(userData.user); // Update UserContext with user data
-      setToken(userData.token); // Update UserContext with token
-
-      // If a refresh token is returned, store it as well
-      if (userData.refreshToken) {
-        TokenManager.setRefreshToken(userData.refreshToken);
-      }
+      setUser(user);                  // Update UserContext
+      setToken(accessToken);          // store the 15m access token in memory via your TokenManager
 
       // Clear the form data
       setFormData({
