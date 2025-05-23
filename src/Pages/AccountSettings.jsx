@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '../Context/UserContext';
 import TopLinks from '../Context/TopLinks';
 import { checkUsername, updateUsername, updatePassword, checkEmail, updateEmail } from '../Api';

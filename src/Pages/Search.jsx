@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
 import { useUser } from '../Context/UserContext';
@@ -247,7 +247,7 @@ const Search = () => {
             {/* Message for adding a game manually to the database */}
             {itemsLoaded && (
               <p className='bottom-add-game-link'>
-                Not the results you're looking for?{' '}
+                Not the results you`re looking for?{' '}
                 <span className='bottom-add-game-link2'>
                   <Link to="/AddGameToDatabase">Click here to add a game manually to our database!</Link>
                 </span>

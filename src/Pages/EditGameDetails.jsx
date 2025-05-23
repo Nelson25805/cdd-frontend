@@ -1,5 +1,5 @@
 // Import necessary modules and components
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import '../App.css';
 import { useUser } from '../Context/UserContext';
 import StarRating from '../Context/StarRating';
@@ -338,14 +338,14 @@ const EditGameDetails = () => {
                             <label htmlFor="digital">Digital</label>
                         </div>
 
-                        <p className="game-information-titles">What's Included</p>
+                        <p className="game-information-titles">What`s Included</p>
                         <select
                             value={formData['Game Info'].included}
                             onChange={(e) => handleInputChange(e, 'Game Info')}
                             name="included"
                             className='dropdown-box'
                         >
-                            <option value="">Select What's Included...</option>
+                            <option value="">Select What`s Included...</option>
                             <option value="Game Only">Game Only</option>
                             <option value="Box Only">Box Only</option>
                             <option value="Manual Only">Manual Only</option>

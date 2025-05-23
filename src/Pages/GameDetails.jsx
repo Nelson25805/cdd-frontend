@@ -1,5 +1,5 @@
 // Importing necessary dependencies from React and other modules
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import '../App.css';
 import { useUser } from '../Context/UserContext';
 import StarRating from '../Context/StarRating';
@@ -251,7 +251,7 @@ const GameDetails = () => {
                             <label htmlFor="digital">Digital</label>
                         </div>
 
-                        <p className="game-information-titles">What's Included</p>
+                        <p className="game-information-titles">What`s Included</p>
                         {/* Dropdown for selecting what's included */}
                         <select
                             value={formData['Game Info'].included}
@@ -259,7 +259,7 @@ const GameDetails = () => {
                             name="included"
                             className='dropdown-box'
                         >
-                            <option value="">Select What's Included...</option>
+                            <option value="">Select What`s Included...</option>
                             {/* Options for what's included */}
                             <option value="Game Only">Game Only</option>
                             <option value="Box Only">Box Only</option>

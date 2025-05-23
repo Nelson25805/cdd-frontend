@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import TokenManager from './TokenManager';
 import apiClient from '../Api';
+import PropTypes from 'prop-types';
 
 const UserContext = createContext();
 
@@ -42,7 +43,9 @@ export function UserProvider({ children }) {
   const logout = async () => {
     try {
       await apiClient.post('/api/logout');
-    } catch {}
+    } catch {
+      // user is already logged out
+    }
     setUser(null);
     setToken(null);
     TokenManager.setAccessToken(null);
@@ -59,6 +62,10 @@ export function UserProvider({ children }) {
     </UserContext.Provider>
   );
 }
+
+UserProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export function useUser() {
   return useContext(UserContext);

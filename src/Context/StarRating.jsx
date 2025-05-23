@@ -1,5 +1,3 @@
-import React from 'react';
-
 // StarRating component for displaying and selecting ratings
 const StarRating = ({ rating, onChange, starSize = 24 }) => {
     const stars = [1, 2, 3, 4, 5];

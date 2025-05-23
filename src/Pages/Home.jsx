@@ -1,5 +1,5 @@
 // Importing necessary dependencies from React and other modules
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 // Importing styles and images
@@ -68,7 +68,7 @@ function HomePage() {
           <div className="square">
             <img src={discuss} alt="Discuss" />
             <h2>Discuss video games</h2>
-            <p>Talk with others. Keep in touch with what they've played and what they've completed.</p>
+            <p>Talk with others. Keep in touch with what they`ve played and what they`ve completed.</p>
           </div>
         </div>
       </main>
