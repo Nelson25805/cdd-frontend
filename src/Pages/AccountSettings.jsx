@@ -1,227 +1,263 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '../Context/UserContext';
 import TopLinks from '../Context/TopLinks';
-import { checkUsername, updateUsername, updatePassword, checkEmail, updateEmail } from '../Api';
+import {
+  checkUsername, updateUsername, updatePassword,
+   checkEmail, updateEmail } from '../Api';
 import '../App.css';
 
 function AccountSettings() {
-    const { setUser, user, token } = useUser();
-    const [formData, setFormData] = useState({
-        displayUsername: '',
-        displayEmail: '',
+  const { setUser, user, token } = useUser();
+
+  const [formData, setFormData] = useState({
+    displayUsername: '',
+    displayEmail: '',
+    newUsername: '',
+    confirmUsername: '',
+    newPassword: '',
+    confirmPassword: '',
+    newEmail: '',
+    confirmEmail: '',
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  // ─── Separate error states ───────────────────────────────────
+  const [usernameError, setUsernameError] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
+  const [emailError, setEmailError]     = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        displayUsername: user.username || '',
+        displayEmail:    user.email    || '',
         newUsername: '',
         confirmUsername: '',
         newPassword: '',
         confirmPassword: '',
         newEmail: '',
         confirmEmail: '',
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+      });
+    }
+  }, [user]);
 
-    useEffect(() => {
-        if (user) {
-            console.log('User:', user);
-            setFormData({
-                displayUsername: user.username || '',
-                displayEmail: user.email || '',
-                newUsername: '',
-                confirmUsername: '',
-                newPassword: '',
-                confirmPassword: '',
-                newEmail: '',
-                confirmEmail: '',
-            });
-        }
-    }, [user]);
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(fd => ({
+      ...fd,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
 
-    const handleChange = (e) => {
-        const { name, value, type } = e.target;
-        setFormData({
-            ...formData,
-            [name]: type === 'checkbox' ? e.target.checked : value,
-        });
-    };
+  // ─── Update Username ────────────────────────────────────────
+  const handleUpdateUsername = async () => {
+    // clear only this section’s error
+    setUsernameError(null);
+    setLoading(true);
+    try {
+      const { newUsername, confirmUsername } = formData;
+      if (newUsername !== confirmUsername) {
+        throw new Error('Usernames must match.');
+      }
+      if (newUsername === user.username) {
+        throw new Error('New username is the same as current.');
+      }
+      const { exists } = await checkUsername(newUsername, token);
+      if (exists) {
+        throw new Error('That username is already taken.');
+      }
+      await updateUsername(user.userid, newUsername, token);
+      setUser(u => ({ ...u, username: newUsername }));
+      setFormData(fd => ({
+        ...fd,
+        displayUsername: newUsername,
+        newUsername: '',
+        confirmUsername: ''
+      }));
+      alert('Username updated successfully!');
+    } catch (err) {
+      console.error(err);
+      setUsernameError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleUpdateUsername = async () => {
-        console.log('User ID:', user.userid); // Add this line
-        if (formData.newUsername !== formData.confirmUsername) {
-            alert('Username mismatch, please keep them the same.');
-            return;
-        }
-        if (formData.newUsername !== user.username) {
-            try {
-                const data = await checkUsername(formData.newUsername);
-                if (data.exists) {
-                    alert('Username already exists, please use another.');
-                    return;
-                }
-                await updateUsername(user.userid, formData.newUsername);
-                setUser((prevUser) => ({
-                    ...prevUser,
-                    username: formData.newUsername,
-                }));
-                setFormData({
-                    ...formData,
-                    displayUsername: formData.newUsername,
-                    newUsername: '',
-                    confirmUsername: '',
-                });
-                alert('Username updated successfully!');
-            } catch (error) {
-                console.error('Error updating username:', error);
-                alert('Failed to update username. Please try again.');
-            }
-        }
-    };
+  // ─── Update Password ────────────────────────────────────────
+  const handleUpdatePassword = async () => {
+    setPasswordError(null);
+    setLoading(true);
+    try {
+      const { newPassword, confirmPassword } = formData;
+      if (newPassword !== confirmPassword) {
+        throw new Error('Passwords must match.');
+      }
+      await updatePassword(user.userid, newPassword, token);
+      setFormData(fd => ({
+        ...fd,
+        newPassword: '',
+        confirmPassword: ''
+      }));
+      alert('Password updated successfully!');
+    } catch (err) {
+      console.error(err);
+      setPasswordError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // ─── Update Email ───────────────────────────────────────────
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-    const handleUpdatePassword = async () => {
-        if (formData.newPassword !== formData.confirmPassword) {
-            alert('Password mismatch, please keep them the same.');
-            return;
-        }
-        try {
-            await updatePassword(user.userid, formData.newPassword);
-            setFormData({
-                ...formData,
-                newPassword: '',
-                confirmPassword: '',
-            });
-            alert('Password updated successfully!');
-        } catch (error) {
-            console.error('Error updating password:', error);
-            alert('Failed to update password. Please try again.');
-        }
-    };
+  const handleUpdateEmail = async () => {
+    setEmailError(null);
+    setLoading(true);
+    try {
+      const { newEmail, confirmEmail } = formData;
+      if (newEmail !== confirmEmail) {
+        throw new Error('Emails must match.');
+      }
+      if (!isValidEmail(newEmail)) {
+        throw new Error('Invalid email format.');
+      }
+      if (newEmail === user.email) {
+        throw new Error('New email is the same as current.');
+      }
+      const { exists } = await checkEmail(newEmail, token);
+      if (exists) {
+        throw new Error('That email is already in use.');
+      }
+      await updateEmail(user.userid, newEmail, token);
+      setUser(u => ({ ...u, email: newEmail }));
+      setFormData(fd => ({
+        ...fd,
+        displayEmail: newEmail,
+        newEmail: '',
+        confirmEmail: ''
+      }));
+      alert('Email updated successfully!');
+    } catch (err) {
+      console.error(err);
+      setEmailError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleUpdateEmail = async () => {
-        if (formData.newEmail !== formData.confirmEmail) {
-            alert('Email mismatch, please keep them the same.');
-            return;
-        }
-        if (!isValidEmail(formData.newEmail) || !isValidEmail(formData.confirmEmail)) {
-            alert('Invalid email format. Please enter valid email addresses.');
-            return;
-        }
-        if (formData.newEmail !== user.email) {
-            try {
-                const data = await checkEmail(formData.newEmail);
-                if (data.exists) {
-                    alert('Email already exists, please use another.');
-                    return;
-                }
-                await updateEmail(user.userid, formData.newEmail);
-                setUser((prevUser) => ({
-                    ...prevUser,
-                    email: formData.newEmail,
-                }));
-                setFormData({
-                    ...formData,
-                    displayEmail: formData.newEmail,
-                    newEmail: '',
-                    confirmEmail: '',
-                });
-                alert('Email updated successfully!');
-            } catch (error) {
-                console.error('Error updating email:', error);
-                alert('Failed to update email. Please try again.');
-            }
-        }
-    };
+  return (
+    <div>
+      <TopLinks />
+      <div className="register-container">
+        <h1>Account Settings</h1>
 
-    const isValidEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
-
-    return (
-        <div>
-            <TopLinks />
-            <div className="register-container">
-                <h1>Account Settings</h1>
-                <div className="info-section">
-                    <div>
-                        <label>Current Username: {formData.displayUsername}</label>
-                    </div>
-                    <div>
-                        <label>Current Email: {formData.displayEmail}</label>
-                    </div>
-                </div>
-                <form>
-                    <div className="change-section">
-                        <div>
-                            <label>Change Username</label>
-                            <input
-                                type="text"
-                                id="newUsername"
-                                name="newUsername"
-                                placeholder="Enter new username"
-                                value={formData.newUsername}
-                                onChange={handleChange}
-                            />
-                            <input
-                                type="text"
-                                id="confirmUsername"
-                                name="confirmUsername"
-                                placeholder="Confirm new username"
-                                value={formData.confirmUsername}
-                                onChange={handleChange}
-                            />
-                            <button className="big-button" type="button" onClick={handleUpdateUsername} disabled={loading}>
-                                Change Username
-                            </button>
-                        </div>
-                        <div>
-                            <label>Change Password</label>
-                            <input
-                                type="password"
-                                id="newPassword"
-                                name="newPassword"
-                                placeholder="Enter new password"
-                                value={formData.newPassword}
-                                onChange={handleChange}
-                            />
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                placeholder="Confirm new password"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                            />
-                            <button className="big-button" type="button" onClick={handleUpdatePassword} disabled={loading}>
-                                Change Password
-                            </button>
-                        </div>
-                        <div>
-                            <label>Change Email</label>
-                            <input
-                                type="email"
-                                id="newEmail"
-                                name="newEmail"
-                                placeholder="Enter new email"
-                                value={formData.newEmail}
-                                onChange={handleChange}
-                            />
-                            <input
-                                type="email"
-                                id="confirmEmail"
-                                name="confirmEmail"
-                                placeholder="Confirm new email"
-                                value={formData.confirmEmail}
-                                onChange={handleChange}
-                            />
-                            <button className="big-button" type="button" onClick={handleUpdateEmail} disabled={loading}>
-                                Change Email
-                            </button>
-                        </div>
-                    </div>
-                </form>
-                {error && <div className="error-message">{error}</div>}
-            </div>
+        {/* Display current info */}
+        <div className="info-section">
+          <div>
+            <label>Current Username: {formData.displayUsername}</label>
+          </div>
+          <div>
+            <label>Current Email: {formData.displayEmail}</label>
+          </div>
         </div>
-    );
+
+        <form>
+          <div className="change-section">
+
+            {/* Username Section */}
+            <div>
+              <label>Change Username</label>
+              <input
+                name="newUsername"
+                placeholder="Enter new username"
+                value={formData.newUsername}
+                onChange={handleChange}
+              />
+              <input
+                name="confirmUsername"
+                placeholder="Confirm new username"
+                value={formData.confirmUsername}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                onClick={handleUpdateUsername}
+                disabled={loading}
+                className="big-button"
+              >
+                Change Username
+              </button>
+              {usernameError && (
+                <div className="error-message">{usernameError}</div>
+              )}
+            </div>
+
+            {/* Password Section */}
+            <div>
+              <label>Change Password</label>
+              <input
+                type="password"
+                name="newPassword"
+                placeholder="Enter new password"
+                value={formData.newPassword}
+                onChange={handleChange}
+              />
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm new password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                onClick={handleUpdatePassword}
+                disabled={loading}
+                className="big-button"
+              >
+                Change Password
+              </button>
+              {passwordError && (
+                <div className="error-message">{passwordError}</div>
+              )}
+            </div>
+
+            {/* Email Section */}
+            <div>
+              <label>Change Email</label>
+              <input
+                type="email"
+                name="newEmail"
+                placeholder="Enter new email"
+                value={formData.newEmail}
+                onChange={handleChange}
+              />
+              <input
+                type="email"
+                name="confirmEmail"
+                placeholder="Confirm new email"
+                value={formData.confirmEmail}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                onClick={handleUpdateEmail}
+                disabled={loading}
+                className="big-button"
+              >
+                Change Email
+              </button>
+              {emailError && (
+                <div className="error-message">{emailError}</div>
+              )}
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 export default AccountSettings;
