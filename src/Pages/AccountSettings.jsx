@@ -147,9 +147,9 @@ function AccountSettings() {
   };
 
   return (
-    <div>
+    <div className= "App">
       <TopLinks />
-      <div className="register-container">
+      <main className="main-content">
         <h1>Account Settings</h1>
 
         {/* Display current info */}
@@ -255,7 +255,7 @@ function AccountSettings() {
 
           </div>
         </form>
-      </div>
+      </main>
     </div>
   );
 }

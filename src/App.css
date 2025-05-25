@@ -85,20 +85,30 @@ input[type="email"] {
 
 /* Center the header content horizontally */
 .App-header {
+  position: relative;        /* allow absolute children */
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  
+  /* ── BEGIN VIEWPORT WIDENING HACK ── */
+  width: 100vw;              /* span the full viewport width */
+  left: 50%;                 /* shift its origin to the center of viewport */
+  margin-left: -50vw;        /* pull it back so it truly starts at the left edge */
+  box-sizing: border-box;    /* include the 20px padding inside that 100vw */
+  /* ── END VIEWPORT WIDENING HACK ── */
 }
+
 
 .homepage-button {
   height: 40px;
 }
 
-/* Style the links at the top right */
 .top-right-links {
-  margin-left: auto;
-  margin-bottom: 10px;
+  position: absolute;
+  top: 20px;
+  right: 50px;
+  margin-bottom: 0;
 }
 
 /* Add this CSS to your stylesheet or component style file */
@@ -153,8 +163,11 @@ input[type="email"] {
   margin: 5px;
 }
 
+/* Search page styling */
 .search-content {
   display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 /* Style the search input */
@@ -394,14 +407,6 @@ input[type="email"] {
 /* Add this CSS to style the spoiler warning checkbox */
 .spoiler-checkbox {
   margin-right: 5px;
-}
-
-
-
-/* Search page styling */
-.search-content {
-  display: flex;
-  justify-content: center;
 }
 
 .search-main-content {
