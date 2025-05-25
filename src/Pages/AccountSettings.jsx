@@ -63,6 +63,9 @@ function AccountSettings() {
       if (newUsername === user.username) {
         throw new Error('New username is the same as current.');
       }
+      if (!newUsername) {
+        throw new Error('Username cannot be empty.');
+      }
       const { exists } = await checkUsername(newUsername, token);
       if (exists) {
         throw new Error('That username is already taken.');
@@ -92,6 +95,9 @@ function AccountSettings() {
       const { newPassword, confirmPassword } = formData;
       if (newPassword !== confirmPassword) {
         throw new Error('Passwords must match.');
+      }
+      if (!newPassword) {
+        throw new Error('Password cannot be empty.');
       }
       await updatePassword(user.userid, newPassword, token);
       setFormData(fd => ({
