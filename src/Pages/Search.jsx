@@ -57,39 +57,35 @@ const Search = () => {
     return paginatedResults;
   };
 
+  // 1. Fetch only when the query or token changes:
   useEffect(() => {
+    let isActive = true;
+    async function fetchResults() {
+      try {
+        const { results } = await searchGames(searchQuery, token);
+        if (!isActive) return;
+        setSearchResults(Array.isArray(results) ? results : []);
+      } catch (err) {
+        console.error(err);
+        if (isActive) setSearchResults([]);
+      } finally {
+        if (isActive) setItemsLoaded(true);
+      }
+    }
+
     if (searchQuery) {
-      if (user && user.userId) {
-        console.log('User:', user);
-      }
-      fetchSearchResults(searchQuery);
+      setItemsLoaded(false);
+      fetchResults();
     } else {
-      setItemsLoaded(true);
-    }
-  }, [user, searchQuery, sortDirection, filterConsole, currentPage]);
-
-  const fetchSearchResults = async (query) => {
-    try {
-      const data = await searchGames(query, user.token);
-      console.log('Data fetched:', data); // Log the fetched data
-
-      // Check if data.results is an array
-      if (Array.isArray(data.results)) {
-        setSearchResults(data.results);
-      } else {
-        console.error('Expected data.results to be an array, but received:', data.results);
-        setSearchResults([]);
-      }
-
-      setItemsLoaded(true);
-    } catch (error) {
-      console.error('Error fetching search results:', error.message);
+      // no query → just flip the loaded flag
       setSearchResults([]);
-      setItemsLoaded(true); // Ensure itemsLoaded is true even in case of error
+      setItemsLoaded(true);
     }
-  };
 
-
+    return () => {
+      isActive = false;
+    };
+  }, [searchQuery, token]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -100,33 +96,33 @@ const Search = () => {
   }, []);
 
 
-    const handleAddToWishlist = async (game) => {
-  if (!token) {
-    // not logged in, bounce to login
-    return navigate('/login');
-  }
-
-  try {
-    console.log('UserId:', userId, 'GameId:', game.GameId);
-    const response = await addToWishlist(userId, game.GameId);
-    console.log('Added to wishlist:', response);
-    alert('Game added to wishlist successfully!');
-  } catch (error) {
-    // If the server sends a 409 Conflict for “already in wishlist”
-    if (error.response?.status === 409) {
-      return alert('This game is already in your wishlist.');
+  const handleAddToWishlist = async (game) => {
+    if (!token) {
+      // not logged in, bounce to login
+      return navigate('/login');
     }
 
-    // Otherwise fallback to the generic error
-    console.error('Error adding to wishlist:', error);
-    const msg =
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message ||
-      'Unknown error';
-    alert('Error adding game to wishlist: ' + msg);
-  }
-};
+    try {
+      console.log('UserId:', userId, 'GameId:', game.GameId);
+      const response = await addToWishlist(userId, game.GameId);
+      console.log('Added to wishlist:', response);
+      alert('Game added to wishlist successfully!');
+    } catch (error) {
+      // If the server sends a 409 Conflict for “already in wishlist”
+      if (error.response?.status === 409) {
+        return alert('This game is already in your wishlist.');
+      }
+
+      // Otherwise fallback to the generic error
+      console.error('Error adding to wishlist:', error);
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Unknown error';
+      alert('Error adding game to wishlist: ' + msg);
+    }
+  };
 
 
 
@@ -208,7 +204,7 @@ const Search = () => {
               </div>
             </div>
             {/* Mapping over paginated results and rendering game items */}
-            {applySortAndFilter().map((game, index) => (
+            {applySortAndFilter().map((game) => (
 
               <div key={game.GameId} className="game-item">
                 <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
