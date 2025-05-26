@@ -112,14 +112,17 @@ function MyWishlist() {
             <div>
               <p>Filter By Console:</p>
               <select value={filterConsole} onChange={(e) => setFilterConsole(e.target.value)}>
-                <option value="All">All</option>
+                <option value="">Select Platform...</option>
                 <option value="Xbox">Xbox</option>
                 <option value="Xbox 360">Xbox 360</option>
                 <option value="Xbox One">Xbox One</option>
-                <option value="NES">NES</option>
-                <option value="SNES">SNES</option>
+                <option value="Nes">NES</option>
+                <option value="Gameboy">Gameboy</option>
+                <option value="Gameboy Color">Gameboy Color</option>
+                <option value="Snes">SNES</option>
                 <option value="Nintendo 64">Nintendo 64</option>
                 <option value="Gamecube">Gamecube</option>
+                <option value="Gameboy Advance">Gameboy Advance</option>
                 <option value="Wii">Wii</option>
                 <option value="Wii U">Wii U</option>
                 <option value="Nintendo Switch">Nintendo Switch</option>
