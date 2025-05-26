@@ -22,7 +22,6 @@ function MyWishlist() {
 
   const fetchWishlistItems = useCallback(async () => {
     console.log('UserId: ', userId);
-    console.log('User: ', user);
     try {
       if (!userId) {
         console.log('User ID not available');

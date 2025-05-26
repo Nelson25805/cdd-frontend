@@ -19,7 +19,7 @@ of the website. Only allows to search website unless
 user is logged in. */
 function HomePage() {
   // Accessing user information using the useUser hook
-  const { user, token, setUser, setToken, logout } = useUser();
+  const { user, token } = useUser();
 
   // Effect to log user information when user data changes
   useEffect(() => {
@@ -27,7 +27,7 @@ function HomePage() {
       console.log('User: ', user);
       console.log('Token: ', token);
     }
-  }, [user]);
+  }, [user, token]);
 
   // Render UI component
   return (

@@ -1,5 +1,4 @@
 // App.jsx
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './Context/UserContext';
 import Home from './Pages/Home';
