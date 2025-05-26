@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 import { getWishlist, removeFromWishlist } from '../Api';
 import '../App.css';
 

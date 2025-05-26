@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import TopLinks from '../Context/TopLinks';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 
 // Import API functions
 import { fetchCollectionItems, removeGameFromCollection } from '../Api';

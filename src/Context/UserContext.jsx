@@ -1,9 +1,9 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import TokenManager from './TokenManager';
 import apiClient from '../Api';
 import PropTypes from 'prop-types';
 
-const UserContext = createContext();
+export const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -67,6 +67,3 @@ UserProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export function useUser() {
-  return useContext(UserContext);
-}

@@ -1,7 +1,7 @@
 // Importing necessary dependencies from React and other modules
 import { useState, useEffect } from 'react';
 import '../App.css';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 import StarRating from '../Context/StarRating';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';

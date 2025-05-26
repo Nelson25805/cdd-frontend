@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
 import { searchGames, addToWishlist, checkGameDetails } from '../Api';

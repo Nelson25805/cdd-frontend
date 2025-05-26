@@ -1,7 +1,7 @@
 // AdminRoute.jsx
 import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useUser } from './UserContext';
+import { useUser } from './useUser';
 
 const AdminRoute = () => {
   const { user } = useUser();

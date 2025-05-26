@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import {
   checkUsername, updateUsername, updatePassword,

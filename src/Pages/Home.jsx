@@ -10,7 +10,7 @@ import search from '../Images/search.png';
 
 // Importing custom components and hooks
 import TopLinks from '../Context/TopLinks';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 
 // Functional component for the HomePage
 /*This component is used for the main home page, allowing

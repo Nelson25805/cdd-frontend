@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../Api';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 import TokenManager from '../Context/TokenManager';
 import '../App.css';
 

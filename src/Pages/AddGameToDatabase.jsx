@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import '../App.css';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import { addGameToDatabase } from '../Api';
 import { useNavigate } from 'react-router-dom';

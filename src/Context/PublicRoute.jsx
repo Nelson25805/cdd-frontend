@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useUser } from './UserContext';
+import { useUser } from './useUser';
 
 const PublicRoute = () => {
   const { user } = useUser();

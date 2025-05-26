@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import arrow from '../Images/arrow.png';
 import logo from '../Images/logo.png';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../Context/useUser';
 import { Link, useNavigate } from 'react-router-dom';
 
 const TopLinks = () => {
