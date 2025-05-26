@@ -28,7 +28,7 @@ const AddGameToDatabase = () => {
     setSelectedSection(section);
   };
 
-  const handleInputChange = (e, section = selectedSection) => {
+  const handleInputChange = (e) => {
     const { name, value, type } = e.target;
     setFormData((prevData) => {
       const updatedSection = { ...prevData['Game Info'] };
