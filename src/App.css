@@ -10,9 +10,7 @@
 body {
   margin: 0;
   padding: 0;
-  /* background-color: #e6efdb; */
   background-color: #98A869;
-  /* background-color: darkgreen; */
 }
 
 .big-button {
@@ -91,12 +89,10 @@ input[type="email"] {
   align-items: center;
   padding: 20px;
   
-  /* ── BEGIN VIEWPORT WIDENING HACK ── */
   width: 100vw;              /* span the full viewport width */
   left: 50%;                 /* shift its origin to the center of viewport */
   margin-left: -50vw;        /* pull it back so it truly starts at the left edge */
   box-sizing: border-box;    /* include the 20px padding inside that 100vw */
-  /* ── END VIEWPORT WIDENING HACK ── */
 }
 
 
