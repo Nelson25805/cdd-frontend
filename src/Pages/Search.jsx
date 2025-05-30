@@ -176,10 +176,23 @@ const Search = () => {
             {applySortAndFilter().map((game) => (
               <div key={game.GameId} className="game-item">
                 <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
+
                 <div className="game-item-name-console">
-                  <p className="game-item-name">{game.Name}</p>
-                  <p>{game.Console}</p>
+                  {/* 1️⃣ Name cell */}
+                  <div className="name-cell">
+                    <p className="game-item-name">{game.Name}</p>
+                  </div>
+
+                  {/* 2️⃣ Console cell (scrollable) */}
+                  <div className="console-cell">
+                    <div className="console-list">
+                      {(Array.isArray(game.Consoles) ? game.Consoles : [game.Console])
+                        .map(c => <div key={c} className="console-item">{c}</div>)}
+                    </div>
+                  </div>
                 </div>
+
+
                 <div className="game-item-actions">
                   <button
                     className="link-button"

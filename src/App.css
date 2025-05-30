@@ -477,13 +477,6 @@ input[type="email"] {
   margin-right: 90px;
 }
 
-.game-item-name-console {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex: 1;
-}
-
 .game-item-name {
   margin-right: 110px;
 }
@@ -491,6 +484,20 @@ input[type="email"] {
 .game-item-actions {
   text-align: right;
   margin-left: 80px;
+}
+
+/* ensure the name/console block still lays out correctly */
+.game-item-name-console {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex: 1;               /* fill the gap between image and actions */
+  gap: 16px;             /* space between name & consoles */
+}
+
+.name-cell {
+  flex: 1;           /* “1 part” of the space */
+  min-width: 150px;  /* don’t let it collapse too small */
 }
 
 .bottom-add-game-link {
@@ -506,9 +513,24 @@ input[type="email"] {
   background: none;
   border: none;
   padding: 0;
-  text-decoration: underline;
   cursor: pointer;
   color: blue;
+}
+
+.console-cell {
+  flex: 3;           /* “3 parts” of the space */
+}
+
+.console-list {
+  max-height: 7em;     /* e.g. 3 lines at 1.5em each */
+  overflow-y: auto;
+  padding-right: 4px;    /* prevent scrollbar overlap */
+}
+
+/* optional: style each console line */
+.console-item {
+  line-height: 1.5em;
+  font-size: 0.9em;
 }
 
 /* ReportsMenu page styling */
