@@ -5,94 +5,85 @@ import { useUser } from '../Context/useUser';
 import { getWishlist, removeFromWishlist } from '../Api';
 import '../App.css';
 
+// 1️⃣ shared context + controls
+import { useSortFilter } from '../Context/useSortFilter';
+import SortFilterControls from '../Context/SortFilterControls';
+
 function MyWishlist() {
   const [itemsLoaded, setItemsLoaded] = useState(false);
   const [loadingDots, setLoadingDots] = useState('');
-  const [sortDirection, setSortDirection] = useState('Ascending');
-  const [filterConsole, setFilterConsole] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [wishlistItems, setWishlistItems] = useState([]);
   const [, setLoading] = useState(false);
-  const { user, loading: userLoading } = useUser(); // Destructure loading from useUser
-  const userId = user?.userid; // Ensure userId is safely accessed
 
-  const handleNextPage = () => setCurrentPage((prevPage) => prevPage + 1);
-  const handlePrevPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  const { user, loading: userLoading } = useUser();
+  const userId = user?.userid;
+
+  // 2️⃣ get context values
+  const { sortDirection, filterConsole } = useSortFilter();
+
+  const handleNextPage = () => setCurrentPage((p) => p + 1);
+  const handlePrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
 
   const fetchWishlistItems = useCallback(async () => {
-    console.log('UserId: ', userId);
+    if (!userId) return;
     try {
-      if (!userId) {
-        console.log('User ID not available');
-        return;
-      }
       setLoading(true);
-      const token = localStorage.getItem('token');  // Assuming token is stored in localStorage
-      console.log('Fetching wishlist items...');
-      const response = await getWishlist(userId, token);
-      console.log('Wishlist items fetched:', response);
-      if (response && response.results) {
-        setWishlistItems(response.results); // Access the results property correctly
-        setItemsLoaded(true);
-      } else {
-        console.log('Invalid response format', response);
-      }
-    } catch (error) {
-      console.error('Error fetching wishlist items:', error.message);
+      const token = localStorage.getItem('token');
+      const { results } = await getWishlist(userId, token);
+      setWishlistItems(results || []);
+      setItemsLoaded(true);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }, [userId]);
 
-  const applySortAndFilter = () => {
-    const filteredResults = wishlistItems.filter((game) =>
-      filterConsole === 'All' ? true : game.Console === filterConsole
-    );
-
-    const sortedResults = [...filteredResults];
-
-    sortedResults.sort((a, b) => {
-      const comparison = sortDirection === 'Ascending' ? 1 : -1;
-      return a.Name.localeCompare(b.Name) * comparison;
-    });
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-
-    return sortedResults.slice(startIndex, endIndex);
-  };
-
   useEffect(() => {
-    if (!userLoading) { // Wait until user data is loaded
-      fetchWishlistItems();
-    }
-  }, [userId, userLoading, sortDirection, filterConsole, currentPage, fetchWishlistItems]);
+    if (!userLoading) fetchWishlistItems();
+  }, [userLoading, fetchWishlistItems]);
 
+  // loading dots
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setLoadingDots((prevDots) => (prevDots.length < 3 ? prevDots + '.' : '.'));
+    const id = setInterval(() => {
+      setLoadingDots((d) => (d.length < 3 ? d + '.' : '.'));
     }, 1000);
-
-    return () => clearInterval(intervalId);
+    return () => clearInterval(id);
   }, []);
 
-  const handleRemoveGameFromWishlist = async (gameId) => {
+  const handleRemove = async (gameId) => {
     try {
-      const token = localStorage.getItem('token');  // Assuming token is stored in localStorage
+      const token = localStorage.getItem('token');
       await removeFromWishlist(userId, gameId, token);
-      setWishlistItems(prevWishlistItems =>
-        prevWishlistItems.filter(game => game.GameId !== gameId)
-      );
-      alert('Game removed successfully from wishlist.');
-    } catch (error) {
-      console.error('Error removing game:', error.message);
+      setWishlistItems(wishlistItems.filter(g => g.GameId !== gameId));
+      alert('Removed from wishlist');
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  if (userLoading) {
-    return <div>Loading user data...</div>;
-  }
+  if (userLoading) return <div>Loading user data…</div>;
+
+  // 3️⃣ filter, sort, paginate
+  const applySortAndFilter = () => {
+    const filtered = wishlistItems.filter(g =>
+      filterConsole === 'All' ? true : g.Console === filterConsole
+    );
+    filtered.sort((a, b) => {
+      const dir = sortDirection === 'Ascending' ? 1 : -1;
+      return a.Name.localeCompare(b.Name) * dir;
+    });
+    const start = (currentPage - 1) * itemsPerPage;
+    return filtered.slice(start, start + itemsPerPage);
+  };
+
+  const totalPages = Math.ceil(
+    wishlistItems.filter(g =>
+      filterConsole === 'All' ? true : g.Console === filterConsole
+    ).length / itemsPerPage
+  );
 
   return (
     <div className="App">
@@ -100,81 +91,47 @@ function MyWishlist() {
       <h2>My Wishlist</h2>
       <div className="search-content">
         <main className="search-main-content">
-          <div className="sort-filter-section">
-            <p>Sort & Filter</p>
-            <div>
-              <p>Sort By:</p>
-              <select value={sortDirection} onChange={(e) => setSortDirection(e.target.value)}>
-                <option value="Ascending">Ascending</option>
-                <option value="Descending">Descending</option>
-              </select>
-            </div>
-            <div>
-              <p>Filter By Console:</p>
-              <select value={filterConsole} onChange={(e) => setFilterConsole(e.target.value)}>
-                <option value="">Select Platform...</option>
-                <option value="Xbox">Xbox</option>
-                <option value="Xbox 360">Xbox 360</option>
-                <option value="Xbox One">Xbox One</option>
-                <option value="Nes">NES</option>
-                <option value="Gameboy">Gameboy</option>
-                <option value="Gameboy Color">Gameboy Color</option>
-                <option value="Snes">SNES</option>
-                <option value="Nintendo 64">Nintendo 64</option>
-                <option value="Gamecube">Gamecube</option>
-                <option value="Gameboy Advance">Gameboy Advance</option>
-                <option value="Wii">Wii</option>
-                <option value="Wii U">Wii U</option>
-                <option value="Nintendo Switch">Nintendo Switch</option>
-                <option value="Playstation 1">Playstation 1</option>
-                <option value="Playstation 2">Playstation 2</option>
-                <option value="Playstation 3">Playstation 3</option>
-                <option value="Playstation 4">Playstation 4</option>
-              </select>
-            </div>
-          </div>
+
+          {/* 4️⃣ shared controls */}
+          <SortFilterControls />
 
           <div className="game-section">
-            {(!itemsLoaded && loadingDots) && (
-              <p>Loading results please wait ..{loadingDots}</p>
-            )}
+            {(!itemsLoaded && loadingDots) && <p>Loading…{loadingDots}</p>}
+
             <div className="game-item-header">
-              <div className='game-item-header-photo'>
-                <p>Photo</p>
-              </div>
-              <div className='game-item-header-name-console'>
-                <p className='game-item-header-name'>Name</p>
+              <div className="game-item-header-photo"><p>Photo</p></div>
+              <div className="game-item-header-name-console">
+                <p className="game-item-header-name">Name</p>
                 <p>Console</p>
               </div>
-              <div className='game-item-header-actions'>
-                <p>Actions</p>
-              </div>
+              <div className="game-item-header-actions"><p>Actions</p></div>
             </div>
-            {applySortAndFilter().map((game) => (
+
+            {applySortAndFilter().map(game => (
               <div key={game.GameId} className="game-item">
                 <img src={`data:image/png;base64,${game.CoverArt}`} alt={game.Name} />
-                <div className='game-item-name-console'>
-                  <p className='game-item-name'>{game.Name}</p>
+                <div className="game-item-name-console">
+                  <p className="game-item-name">{game.Name}</p>
                   <p>{game.Console}</p>
                 </div>
-                <div className='game-item-actions'>
-                  <p>
-                    <Link to="#" onClick={() => handleRemoveGameFromWishlist(game.GameId)}>
-                      Remove
-                    </Link>
-                  </p>
+                <div className="game-item-actions">
+                  <Link to="#" onClick={() => handleRemove(game.GameId)}>
+                    Remove
+                  </Link>
                 </div>
               </div>
             ))}
-            <div>
+
+            <div className="pagination-controls">
               <button onClick={handlePrevPage} disabled={currentPage === 1}>
                 Previous
               </button>
-              <span> Page {currentPage} of {Math.ceil(wishlistItems.length / itemsPerPage)} </span>
-              <button onClick={handleNextPage} disabled={currentPage === Math.ceil(wishlistItems.length / itemsPerPage)}>
+              <span> Page {currentPage} of {totalPages} </span>
+              <button onClick={handleNextPage} disabled={currentPage === totalPages}>
                 Next
               </button>
             </div>
+
           </div>
         </main>
       </div>

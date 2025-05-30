@@ -15,6 +15,14 @@ import ReportsMenu from './Pages/ReportsMenu';
 import PublicRoute from './Context/PublicRoute';
 import PrivateRoute from './Context/PrivateRoute';
 import AdminRoute from './Context/AdminRoute.jsx';
+import { SortFilterProvider } from './Context/SortFilterContext.jsx';
+import { Outlet } from 'react-router-dom';
+
+const SortFilterLayout = () => (
+  <SortFilterProvider>
+    <Outlet />
+  </SortFilterProvider>
+);
 
 const App = () => {
   return (
@@ -34,9 +42,13 @@ const App = () => {
           <Route element={<PrivateRoute />}>
             <Route path="/GameDetails" element={<GameDetails />} />
             <Route path="/AddGameToDatabase" element={<AddGameToDatabase />} />
-            <Route path="/MyCollection" element={<MyCollection />} />
-            <Route path="/MyWishlist" element={<MyWishlist />} />
-            <Route path="/Search" element={<Search />} />
+
+            <Route element={<SortFilterLayout />}>
+              <Route path="/MyCollection" element={<MyCollection />} />
+              <Route path="/MyWishlist" element={<MyWishlist />} />
+              <Route path="/Search"      element={<Search />} />
++           </Route>
+
             <Route path="/AccountSettings" element={<AccountSettings />} />
             <Route path="/EditGameDetails" element={<EditGameDetails />} />
 

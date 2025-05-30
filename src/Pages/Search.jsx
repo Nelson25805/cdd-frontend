@@ -1,3 +1,4 @@
+// src/Pages/Search.jsx
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
@@ -6,96 +7,92 @@ import '../App.css';
 import { useNavigate } from 'react-router-dom';
 import { searchGames, addToWishlist, checkGameDetails } from '../Api';
 
+// 1️⃣ Import the context hook and controls component
+import { useSortFilter } from '../Context/useSortFilter';
+import SortFilterControls from '../Context/SortFilterControls';
+
+
 const Search = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchQuery = new URLSearchParams(location.search).get('q');
+
   const [searchResults, setSearchResults] = useState([]);
   const [itemsLoaded, setItemsLoaded] = useState(false);
   const [loadingDots, setLoadingDots] = useState('');
-  const [sortDirection, setSortDirection] = useState('Ascending');
-  const [filterConsole, setFilterConsole] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
   const { user, token } = useUser();
   const { userid: userId } = user || {};
 
+  // 2️⃣ Grab sort/filter values from context
+  const {
+    sortDirection,
+    filterConsole,
+    // (you could also update these here if you need)
+  } = useSortFilter();
 
-  // Redirect if the user is not authenticated
+  // Redirect if not logged in
   useEffect(() => {
-    if (!token) {
-      navigate('/login');
-    }
+    if (!token) navigate('/login');
   }, [token, navigate]);
 
-  const handleNextPage = () => setCurrentPage((prevPage) => prevPage + 1);
-  const handlePrevPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  const handleNextPage = () => setCurrentPage((p) => p + 1);
+  const handlePrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
 
+  // 3️⃣ Use context values in your filtering/sorting/pagination
   const applySortAndFilter = () => {
-    // Ensure searchResults is an array
-    if (!Array.isArray(searchResults)) {
-      console.error('Expected searchResults to be an array, but received:', searchResults);
-      return []; // Return an empty array if not an array
-    }
+    if (!Array.isArray(searchResults)) return [];
 
-    const filteredResults = searchResults.filter((game) =>
-      filterConsole === 'All' ? true : game.Console === filterConsole
+    // filter
+    const filtered = searchResults.filter((g) =>
+      filterConsole === 'All' ? true : g.Console === filterConsole
     );
-
-    const sortedResults = [...filteredResults];
-
-    sortedResults.sort((a, b) => {
-      const comparison = sortDirection === 'Ascending' ? 1 : -1;
-      return a.Name.localeCompare(b.Name) * comparison;
+    // sort
+    filtered.sort((a, b) => {
+      const dir = sortDirection === 'Ascending' ? 1 : -1;
+      return a.Name.localeCompare(b.Name) * dir;
     });
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-
-    const paginatedResults = sortedResults.slice(startIndex, endIndex);
-
-    return paginatedResults;
+    // paginate
+    const start = (currentPage - 1) * itemsPerPage;
+    return filtered.slice(start, start + itemsPerPage);
   };
 
-  // 1. Fetch only when the query or token changes:
+  // Fetch on query/token change
   useEffect(() => {
-    let isActive = true;
-    async function fetchResults() {
+    let active = true;
+    const fetchResults = async () => {
       try {
         const { results } = await searchGames(searchQuery, token);
-        if (!isActive) return;
+        if (!active) return;
         setSearchResults(Array.isArray(results) ? results : []);
-      } catch (err) {
-        console.error(err);
-        if (isActive) setSearchResults([]);
+      } catch {
+        if (active) setSearchResults([]);
       } finally {
-        if (isActive) setItemsLoaded(true);
+        if (active) setItemsLoaded(true);
       }
-    }
+    };
 
     if (searchQuery) {
       setItemsLoaded(false);
       fetchResults();
     } else {
-      // no query → just flip the loaded flag
       setSearchResults([]);
       setItemsLoaded(true);
     }
-
-    return () => {
-      isActive = false;
-    };
+    return () => { active = false; };
   }, [searchQuery, token]);
 
+  // Loading-dots animation
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setLoadingDots((prevDots) => (prevDots.length < 3 ? prevDots + '.' : '.'));
+    const id = setInterval(() => {
+      setLoadingDots((d) => (d.length < 3 ? d + '.' : '.'));
     }, 1000);
-
-    return () => clearInterval(intervalId);
+    return () => clearInterval(id);
   }, []);
 
-
+  // Wishlist / Details handlers unchanged…
   const handleAddToWishlist = async (game) => {
     if (!token) {
       // not logged in, bounce to login
@@ -124,9 +121,6 @@ const Search = () => {
     }
   };
 
-
-
-
   const handleGameDetails = async (game) => {
     if (!token) {
       return navigate('/login');
@@ -138,7 +132,9 @@ const Search = () => {
       if (data.hasDetails) {
         alert('You already have details for this game in your collection.');
       } else {
-        navigate(`/gamedetails?q=${encodeURIComponent(game.GameId)}`);
+        // ✅ Proper template string with backticks:
+        navigate(`/GameDetails?q=${encodeURIComponent(game.GameId)}`);
+
       }
     } catch (error) {
       console.error('Error checking GameDetails:', error);
@@ -146,110 +142,74 @@ const Search = () => {
     }
   };
 
+  // Calculate total pages for UI
+  const totalPages = Math.ceil(
+    (Array.isArray(searchResults)
+      ? searchResults.filter((g) =>
+        filterConsole === 'All' ? true : g.Console === filterConsole
+      ).length
+      : 0) / itemsPerPage
+  );
 
-  // Render UI component
   return (
     <div className="App">
       <TopLinks />
       <div className="search-content">
         <main className="search-main-content">
-          <div className="sort-filter-section">
-            <p>Sort & Filter</p>
-            <div>
-              <p>Sort By:</p>
-              <select value={sortDirection} onChange={(e) => setSortDirection(e.target.value)}>
-                <option value="Ascending">Ascending</option>
-                <option value="Descending">Descending</option>
-              </select>
-            </div>
-            <div>
-              <p>Filter By Console:</p>
-              {/* Dropdown for Filter By Console options */}
-              <select value={filterConsole} onChange={(e) => setFilterConsole(e.target.value)}>
-                <option value="">Select Platform...</option>
-                <option value="Xbox">Xbox</option>
-                <option value="Xbox 360">Xbox 360</option>
-                <option value="Xbox One">Xbox One</option>
-                <option value="Nes">NES</option>
-                <option value="Gameboy">Gameboy</option>
-                <option value="Gameboy Color">Gameboy Color</option>
-                <option value="Snes">SNES</option>
-                <option value="Nintendo 64">Nintendo 64</option>
-                <option value="Gamecube">Gamecube</option>
-                <option value="Gameboy Advance">Gameboy Advance</option>
-                <option value="Wii">Wii</option>
-                <option value="Wii U">Wii U</option>
-                <option value="Nintendo Switch">Nintendo Switch</option>
-                <option value="Playstation 1">Playstation 1</option>
-                <option value="Playstation 2">Playstation 2</option>
-                <option value="Playstation 3">Playstation 3</option>
-                <option value="Playstation 4">Playstation 4</option>
-              </select>
-            </div>
-          </div>
+
+          {/* 4️⃣ Render the shared sort/filter controls */}
+          <SortFilterControls />
 
           <div className="game-section">
             <h1>Results for: {searchQuery}</h1>
-            {(!itemsLoaded && loadingDots) && (
-              <p>Loading results please wait ..{loadingDots}</p>
-            )}
-            <div
-              className="game-item-header">
-              <div className='game-item-header-photo'>
-                <p>Photo</p>
-              </div>
-              <div className='game-item-header-name-console'>
-                <p className='game-item-header-name'>Name</p>
+            {!itemsLoaded && <p>Loading results please wait{loadingDots}</p>}
+
+            <div className="game-item-header">
+              <div className="game-item-header-photo"><p>Photo</p></div>
+              <div className="game-item-header-name-console">
+                <p className="game-item-header-name">Name</p>
                 <p>Console</p>
               </div>
-              <div className='game-item-header-actions'>
-                <p>Actions</p>
-              </div>
+              <div className="game-item-header-actions"><p>Actions</p></div>
             </div>
-            {/* Mapping over paginated results and rendering game items */}
-            {applySortAndFilter().map((game) => (
 
+            {applySortAndFilter().map((game) => (
               <div key={game.GameId} className="game-item">
                 <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
-                <div className='game-item-name-console'>
-                  <p className='game-item-name'>{game.Name}</p>
+                <div className="game-item-name-console">
+                  <p className="game-item-name">{game.Name}</p>
                   <p>{game.Console}</p>
                 </div>
-                <div className='game-item-actions'>
-                  {/* Button to handle adding to collection with details */}
-                  <p>
-                    <button className="link-button"
-                      onClick={() => handleGameDetails(game, user.userid)}
-                    >
-                      + Collection (With Details)
-                    </button>
-                  </p>
-                  {/* Link to handle adding to wishlist */}
-                  <p>
-                    <Link to="#" onClick={() => handleAddToWishlist(game, user.userid)}>
-                      + Wishlist
-                    </Link>
-                  </p>
+                <div className="game-item-actions">
+                  <button
+                    className="link-button"
+                    onClick={() => handleGameDetails(game)}
+                  >
+                    + Collection (With Details)
+                  </button>
+                  <Link to="#" onClick={() => handleAddToWishlist(game)}>
+                    + Wishlist
+                  </Link>
                 </div>
               </div>
             ))}
-            {/* Pagination controls */}
-            <div>
+
+            <div className="pagination-controls">
               <button onClick={handlePrevPage} disabled={currentPage === 1}>
                 Previous
               </button>
-              <span> Page {currentPage} of {Math.ceil(searchResults.length / itemsPerPage)} </span>
-              <button onClick={handleNextPage} disabled={currentPage === Math.ceil(searchResults.length / itemsPerPage)}>
+              <span> Page {currentPage} of {totalPages} </span>
+              <button onClick={handleNextPage} disabled={currentPage === totalPages}>
                 Next
               </button>
             </div>
-            {/* Message for adding a game manually to the database */}
+
             {itemsLoaded && (
-              <p className='bottom-add-game-link'>
-                Not the results you`re looking for?{' '}
-                <span className='bottom-add-game-link2'>
-                  <Link to="/AddGameToDatabase">Click here to add a game manually to our database!</Link>
-                </span>
+              <p className="bottom-add-game-link">
+                Not the results you’re looking for?{' '}
+                <Link to="/AddGameToDatabase">
+                  Click here to add a game manually to our database!
+                </Link>
               </p>
             )}
           </div>
