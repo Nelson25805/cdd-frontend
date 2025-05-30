@@ -126,6 +126,7 @@ function MyCollection() {
                   >
                     Edit
                   </button>
+                  <span> | </span>
                   <Link to="#" onClick={() => handleRemoveGame(game.GameId)}>
                     Remove
                   </Link>
