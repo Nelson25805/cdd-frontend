@@ -202,9 +202,11 @@ const Search = () => {
                   >
                     + Collection (With Details)
                   </button>
-                  <Link to="#" onClick={() => handleAddToWishlist(game)}>
+                  <button className="link-button"
+                    onClick={() => handleAddToWishlist(game)}
+                  >
                     + Wishlist
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}
