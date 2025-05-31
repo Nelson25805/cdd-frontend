@@ -178,9 +178,11 @@ const Search = () => {
                 <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
 
                 <div className="game-item-name-console">
-                  {/* 1️⃣ Name cell */}
+                  {/* 1️⃣ Name cell (scrollable) */}
                   <div className="name-cell">
-                    <p className="game-item-name">{game.Name}</p>
+                    <div className="name-list">
+                      <p className="game-item-name">{game.Name}</p>
+                    </div>
                   </div>
 
                   {/* 2️⃣ Console cell (scrollable) */}
