@@ -477,8 +477,17 @@ input[type="email"] {
   margin-right: 90px;
 }
 
+.name-list {
+  max-height: 7em;     
+  overflow-y: auto;    
+  padding-right: 4px;  
+}
+
 .game-item-name {
-  margin-right: 110px;
+  line-height: 1.5em;
+  margin: 0;
+  font-size: 1em;
+  word-break: break-word;
 }
 
 .game-item-actions {
@@ -532,6 +541,7 @@ input[type="email"] {
   line-height: 1.5em;
   font-size: 0.9em;
 }
+
 
 /* ReportsMenu page styling */
 
