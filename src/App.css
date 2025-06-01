@@ -439,7 +439,7 @@ input[type="email"] {
 .game-item-header-photo {
   width: 150px;
   height: 55px;
-  margin-right: 80px;
+  margin-right: 50px;
 }
 
 .game-item-header-name-console {
@@ -447,6 +447,7 @@ input[type="email"] {
   flex-direction: row;
   align-items: center;
   flex: 1;
+  margin-left: 15px;
 }
 
 .game-item-header-name {
@@ -455,8 +456,8 @@ input[type="email"] {
 
 .game-item-header-actions {
   text-align: right;
-  margin-right: 40px;
-  margin-left: 180px;
+  margin-right: 60px;
+  /* margin-left: 90px; */
 }
 
 .game-item {
@@ -474,13 +475,12 @@ input[type="email"] {
 .game-item img {
   width: 150px;
   height: 150px;
-  margin-right: 90px;
+  margin-right: 45px;
 }
 
 .name-list {
   max-height: 7em;     
   overflow-y: auto;    
-  padding-right: 4px;  
 }
 
 .game-item-name {
@@ -492,7 +492,6 @@ input[type="email"] {
 
 .game-item-actions {
   text-align: right;
-  margin-left: 80px;
 }
 
 /* ensure the name/console block still lays out correctly */
@@ -501,7 +500,7 @@ input[type="email"] {
   flex-direction: row;
   align-items: flex-start;
   flex: 1;               /* fill the gap between image and actions */
-  gap: 16px;             /* space between name & consoles */
+  gap: 20px;             /* space between name & consoles */
 }
 
 .name-cell {
@@ -528,6 +527,7 @@ input[type="email"] {
 
 .console-cell {
   flex: 3;           /* “3 parts” of the space */
+  min-width: 150px;  /* don’t let it collapse too small */
 }
 
 .console-list {
