@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
 import { useUser } from '../Context/useUser';
 import { getWishlist, removeFromWishlist } from '../Api';
@@ -127,9 +126,9 @@ function MyWishlist() {
                   </div>
                 </div>
                 <div className="game-item-actions">
-                  <Link to="#" onClick={() => handleRemove(game.GameId)}>
+                  <button className="link-button" onClick={() => handleRemove(game.GameId)}>
                     Remove
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}

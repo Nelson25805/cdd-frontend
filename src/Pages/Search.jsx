@@ -222,9 +222,9 @@ const Search = () => {
             </div>
 
             {itemsLoaded && (
-              <p className="bottom-add-game-link">
+              <p>
                 Not the results you’re looking for?{' '}
-                <Link to="/AddGameToDatabase">
+                <Link to="/AddGameToDatabase" className="link-button">
                   Click here to add a game manually to our database!
                 </Link>
               </p>

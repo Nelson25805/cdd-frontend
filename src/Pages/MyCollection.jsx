@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
 import { useUser } from '../Context/useUser';
 import { fetchCollectionItems, removeGameFromCollection } from '../Api';
@@ -132,16 +132,13 @@ function MyCollection() {
                   </div>
                 </div>
                 <div className="game-item-actions">
-                  <button
-                    className="link-button"
-                    onClick={() => handleEditGameDetails(game)}
-                  >
+                  <button className="link-button" onClick={() => handleEditGameDetails(game)}>
                     Edit
                   </button>
                   <span> | </span>
-                  <Link to="#" onClick={() => handleRemoveGame(game.GameId)}>
+                  <button className="link-button" onClick={() => handleRemoveGame(game.GameId)}>
                     Remove
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}
@@ -155,7 +152,6 @@ function MyCollection() {
                 Next
               </button>
             </div>
-
           </div>
         </main>
       </div>
