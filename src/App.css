@@ -509,21 +509,17 @@ input[type="email"] {
   min-width: 150px;  /* don’t let it collapse too small */
 }
 
-.bottom-add-game-link {
-  margin-top: 20px;
-}
-
-.bottom-add-game-link2 {
-  color: blue;
-  cursor: pointer;
-}
-
 .link-button {
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
   color: blue;
+  transition: background-color 0.2s ease;
+}
+
+.link-button:hover {
+  color: darkblue;
 }
 
 .console-cell {
