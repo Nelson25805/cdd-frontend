@@ -492,6 +492,7 @@ input[type="email"] {
 
 .game-item-actions {
   text-align: right;
+  min-width: 210px;
 }
 
 /* ensure the name/console block still lays out correctly */
