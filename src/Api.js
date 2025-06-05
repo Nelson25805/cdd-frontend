@@ -1,5 +1,5 @@
 import axios from 'axios';
-import TokenManager from './Context/TokenManager'; // manages in-memory access token
+import TokenManager from './Context/TokenManager';
 
 // base URL
 //const API_BASE_URL = 'http://localhost:5000';
@@ -9,7 +9,7 @@ const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  withCredentials: true,               // send/receive HttpOnly cookies
+  withCredentials: true,           
 });
 
 // attach access token to headers
@@ -61,7 +61,6 @@ apiClient.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );
@@ -256,21 +255,6 @@ export const fetchGameInfo = async (game) => {
   }
 };
 
-
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Adds detailed information about a game to a user's collection.
- *
- * @param {string} userId - The ID of the user adding the game details.
- * @param {string} game - The ID of the game for which details are being added.
- * @param {Object} formData - An object containing the form data with game details.
- * @param {Object} formData['Game Info'] - Contains ownership and included information.
- * @param {Object} formData['Game Status'] - Includes checkboxes, notes, and pricePaid.
- * @param {Object} formData['Game Log'] - Contains gameCompletion, rating, review, and spoilerWarning.
- * @returns {Promise<Object>} - A promise that resolves to an object indicating success or failure with a message.
- */
-
-/*******  526b8350-c1eb-45be-8291-85201de384c2  *******/
 export const addGameDetails = async (userId, game, formData) => {
   const { ownership } = formData['Game Info'];
   const { checkboxes, notes, pricePaid } = formData['Game Status'];

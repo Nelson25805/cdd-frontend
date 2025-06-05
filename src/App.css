@@ -34,7 +34,6 @@ body {
   margin-top: 0.5rem;
 }
 
-/* Style the "Go" button */
 .small-button {
   padding: 10px 20px;
   font-size: 16px;
@@ -81,18 +80,17 @@ input[type="email"] {
 
 /*TopLinks Styling */
 
-/* Center the header content horizontally */
 .App-header {
-  position: relative;        /* allow absolute children */
+  position: relative;       
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
   
-  width: 100vw;              /* span the full viewport width */
-  left: 50%;                 /* shift its origin to the center of viewport */
-  margin-left: -50vw;        /* pull it back so it truly starts at the left edge */
-  box-sizing: border-box;    /* include the 20px padding inside that 100vw */
+  width: 100vw;     
+  left: 50%;               
+  margin-left: -50vw;     
+  box-sizing: border-box;    
 }
 
 
@@ -107,7 +105,6 @@ input[type="email"] {
   margin-bottom: 0;
 }
 
-/* Add this CSS to your stylesheet or component style file */
 .dropdown {
   position: relative;
   display: inline-block;
@@ -126,7 +123,6 @@ input[type="email"] {
   display: block;
 }
 
-/* Add this CSS to your stylesheet or component style file */
 .dropdown-link {
   display: block;
   padding: 10px;
@@ -135,23 +131,19 @@ input[type="email"] {
   font-weight: bold;
 }
 
-/* Add this CSS rule to align "My Account" and "Logout" on the same line */
 .username {
   display: flex;
   align-items: center;
 }
 
-/* Add this CSS rule to style the arrow image */
 .username img {
   margin-left: 5px;
 }
 
-/* Style the spacer between links */
 .spacer {
   margin: 0 10px;
 }
 
-/* Style the links */
 .link {
   text-decoration: none;
   color: #333;
@@ -166,7 +158,6 @@ input[type="email"] {
   margin-top: 20px;
 }
 
-/* Style the search input */
 .search-input {
   padding: 10px;
   font-size: 16px;
@@ -196,14 +187,12 @@ input[type="email"] {
   text-align: center;
 }
 
-/* Style the square container */
 .square-container {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
 
-/* Style the squares */
 .square {
   flex: 1;
   margin: 20px;
@@ -214,7 +203,6 @@ input[type="email"] {
   margin-right: 3%;
 }
 
-/* Style the text inside the squares */
 .square p {
   font-weight: bold;
 }
@@ -249,13 +237,11 @@ input[type="email"] {
   border-bottom: 2px solid #007bff;
 }
 
-/*Main game information window */
 .game-information {
   display: flex;
   justify-content: center;
 }
 
-/*Left section of game information window */
 .left-section {
   display: flex;
   flex-direction: column;
@@ -267,7 +253,6 @@ input[type="email"] {
   width: 250px;
 }
 
-/*Titles for game information */
 .game-information-titles {
   font-weight: bold;
 }
@@ -289,7 +274,6 @@ input[type="email"] {
   object-fit: cover;
 }
 
-/*Add game button */
 .add-game-button {
   padding: 10px 20px;
   font-size: 16px;
@@ -388,19 +372,16 @@ input[type="email"] {
   max-height: 100px;
 }
 
-/* Add this CSS to style the spoiler warning container */
 .spoiler-container {
   display: flex;
   align-items: center;
   margin-top: 20px;
 }
 
-/* Add this CSS to style the spoiler warning text */
 .spoiler-container label span {
   margin-left: 5px;
 }
 
-/* Add this CSS to style the spoiler warning checkbox */
 .spoiler-checkbox {
   margin-right: 5px;
 }
@@ -457,7 +438,6 @@ input[type="email"] {
 .game-item-header-actions {
   text-align: right;
   margin-right: 60px;
-  /* margin-left: 90px; */
 }
 
 .game-item {
@@ -495,18 +475,17 @@ input[type="email"] {
   min-width: 210px;
 }
 
-/* ensure the name/console block still lays out correctly */
 .game-item-name-console {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  flex: 1;               /* fill the gap between image and actions */
-  gap: 20px;             /* space between name & consoles */
+  flex: 1;              
+  gap: 20px;           
 }
 
 .name-cell {
-  flex: 1;           /* “1 part” of the space */
-  min-width: 150px;  /* don’t let it collapse too small */
+  flex: 1;
+  min-width: 150px; 
 }
 
 .link-button {
@@ -523,17 +502,16 @@ input[type="email"] {
 }
 
 .console-cell {
-  flex: 3;           /* “3 parts” of the space */
-  min-width: 150px;  /* don’t let it collapse too small */
+  flex: 3;       
+  min-width: 150px;  
 }
 
 .console-list {
-  max-height: 7em;     /* e.g. 3 lines at 1.5em each */
+  max-height: 7em;  
   overflow-y: auto;
-  padding-right: 4px;    /* prevent scrollbar overlap */
+  padding-right: 4px;  
 }
 
-/* optional: style each console line */
 .console-item {
   line-height: 1.5em;
   font-size: 0.9em;
@@ -544,30 +522,22 @@ input[type="email"] {
 
 .report-header {
   background-color: #f0f0f0;
-  /* Grey background color */
   padding: 20px;
   text-align: center;
   margin: 20px auto;
-  /* Center the container */
   width: 80%;
-  /* Adjust the width as needed */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  /* Add a subtle box shadow */
 }
 
 .user-reports-container {
   background-color: #f0f0f0;
-  /* Grey background color */
   padding: 20px;
   text-align: center;
   margin: 20px auto;
-  /* Center the container */
   width: 80%;
-  /* Adjust the width as needed */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  /* Add a subtle box shadow */
   display: flex;
   justify-content: space-between;
 }
@@ -582,17 +552,12 @@ input[type="email"] {
   justify-content: center;
   margin: 20px auto;
   background-color: #f0f0f0;
-  /* Grey background color */
   padding: 20px;
-  /* Add padding for spacing */
   border-radius: 8px;
-  /* Add border radius for rounded corners */
 }
 
 .column {
   width: 120px;
-  /* Adjust the width of each column */
   margin: 0 10px;
-  /* Adjust the margin for spacing between columns */
   text-align: center;
 }
