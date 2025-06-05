@@ -12,6 +12,16 @@ const SortFilterControls = () => {
     setFilterConsole,
   } = useSortFilter();
 
+  // 1) RESET sortDirection → "Ascending" every time this component mounts
+  useEffect(() => {
+    setSortDirection('Ascending');
+  }, [setSortDirection]);
+
+  // 2) RESET filterConsole → "All" every time this component mounts
+  useEffect(() => {
+    setFilterConsole('All');
+  }, [setFilterConsole]);
+
   // Local state for the text input
   const [searchTerm, setSearchTerm] = useState(
     filterConsole === 'All' ? '' : filterConsole
@@ -22,12 +32,7 @@ const SortFilterControls = () => {
   // Ref on the wrapper to detect clicks outside
   const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    setFilterConsole('All');
-  }, [setFilterConsole]);
-
-  // 2) Whenever filterConsole changes (e.g. via the effect above, or by user selection),
-  //    sync local searchTerm. If filterConsole is "All", clear the input string.
+  // Sync local searchTerm whenever filterConsole changes
   useEffect(() => {
     if (filterConsole === 'All') {
       setSearchTerm('');
@@ -93,18 +98,30 @@ const SortFilterControls = () => {
 
   return (
     <div className="sort-filter-section">
-      <p>Sort &amp; Filter</p>
-
-      <div>
-        <p>Sort By:</p>
-        <select
-          value={sortDirection}
-          onChange={(e) => setSortDirection(e.target.value)}
-        >
-          <option value="Ascending">Ascending</option>
-          <option value="Descending">Descending</option>
-        </select>
+      <p>Sort By:</p>
+      <div className="sort-by-options">
+        <label className="sort-by-option">
+          <input
+            type="radio"
+            name="sortDirection"
+            value="Ascending"
+            checked={sortDirection === 'Ascending'}
+            onChange={(e) => setSortDirection(e.target.value)}
+          />
+          Ascending
+        </label>
+        <label className="sort-by-option">
+          <input
+            type="radio"
+            name="sortDirection"
+            value="Descending"
+            checked={sortDirection === 'Descending'}
+            onChange={(e) => setSortDirection(e.target.value)}
+          />
+          Descending
+        </label>
       </div>
+
 
       <div ref={wrapperRef} className="filter-console-wrapper">
         <p>Filter By Console:</p>

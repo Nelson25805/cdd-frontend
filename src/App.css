@@ -391,16 +391,6 @@ input[type="email"] {
   align-items: flex-start;
 }
 
-/* .sort-filter-section {
-  margin-top: 60px;
-  border: 2px solid black;
-  border-radius: 8px;
-  padding: 10px;
-  max-width: 200px;
-  margin-left: 10px;
-  align-self: flex-start;
-} */
-
 .sort-filter-section {
   display: flex;
   flex-direction: column;
@@ -409,6 +399,14 @@ input[type="email"] {
   border: 2px solid black;
   border-radius: 6px;
   max-width: 400px;
+}
+
+.sort-filter-section > .sort-by-options {
+  display: flex;           /* ensure it’s a flex container */
+  flex-direction: row;     /* put <p> and <label>s side-by-side */
+  align-items: center;     /* vertically center the radio + its text */
+  gap: 1rem;               /* space between “Ascending” and “Descending” */
+  margin-bottom: 8px;      /* (optional) spacing under this group */
 }
 
 .sort-filter-section > div {
@@ -471,6 +469,44 @@ input[type="email"] {
 
 
 
+
+
+.sort-by-options {
+  display: flex;         /* put children in a row */
+  flex-direction: row;   /* this is the default, but be explicit */
+  align-items: center;   /* vertically center the radios + text */
+  gap: 1rem;             /* space between “Ascending” and “Descending” */
+  margin-bottom: 8px;    /* optional spacing under the radio group */
+}
+
+.sort-by-options p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.sort-by-option {
+  display: flex;        /* put input + text side-by-side */
+  align-items: center;  /* vertically center the circle and its text */
+  gap: 4px;             /* small gap between circle and label text */
+  cursor: pointer;      /* nice hover cursor */
+}
+
+.sort-by-option input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+.sort-by-options > label {
+  display: flex;           /* each label is its own flex row */
+  align-items: center;     /* center the circle and text vertically */
+  gap: 4px;                /* small gap between the radio circle and text */
+  cursor: pointer;
+}
+
+.sort-by-option input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+}
 
 
 
