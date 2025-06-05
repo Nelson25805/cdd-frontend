@@ -391,7 +391,7 @@ input[type="email"] {
   align-items: flex-start;
 }
 
-.sort-filter-section {
+/* .sort-filter-section {
   margin-top: 60px;
   border: 2px solid black;
   border-radius: 8px;
@@ -399,7 +399,81 @@ input[type="email"] {
   max-width: 200px;
   margin-left: 10px;
   align-self: flex-start;
+} */
+
+.sort-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 2px solid black;
+  border-radius: 6px;
+  max-width: 400px;
 }
+
+.sort-filter-section > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sort-filter-section p {
+  margin: 0;
+  font-weight: 500;
+}
+
+
+.filter-console-wrapper {
+  position: relative;
+  width: 250px; /* match the old inline width */
+  margin-top: 8px; /* spacing if you like */
+}
+
+.console-search-input {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.console-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  z-index: 1000;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.console-suggestion-item {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+.console-suggestion-item:hover {
+  background-color: #f5f5f5;
+}
+
+.console-hint {
+  margin-top: 4px;
+  font-style: italic;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+
+
+
+
+
 
 .game-section {
   margin-left: 20px;
