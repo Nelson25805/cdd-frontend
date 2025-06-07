@@ -120,10 +120,26 @@ function MyWishlist() {
                   {/* 2️⃣ Console cell (scrollable) */}
                   <div className="console-cell">
                     <div className="console-list">
-                      {(Array.isArray(game.Consoles) ? game.Consoles : [game.Console])
-                        .map(c => <div key={c} className="console-item">{c}</div>)}
+                      {(
+                        Array.isArray(game.Consoles)
+                          ? game.Consoles
+                          : game.Console.split(',')
+                      )
+                        // 1) Trim whitespace off each entry
+                        .map((c) => c.trim())
+                        // 2) Sort alphabetically
+                        .sort((a, b) => a.localeCompare(b))
+                        // 3) Render each as its own item
+                        .map((c) => (
+                          <div key={c} className="console-item">
+                            {c}
+                          </div>
+                        ))}
                     </div>
                   </div>
+
+
+
                 </div>
                 <div className="game-item-actions">
                   <button className="link-button" onClick={() => handleRemove(game.GameId)}>

@@ -248,7 +248,7 @@ input[type="email"] {
   flex-wrap: wrap;        /* allow chips to flow into multiple rows */
   gap: 6px;
   max-width: 100%;        /* fill the 250px container */
-  max-height: 120px;      /* limit vertical size (adjust as you like) */
+  max-height: 350px;      /* limit vertical size (adjust as you like) */
   overflow-y: auto;       /* turn on vertical scrolling when overflow */
   padding-right: 4px;     /* give space for the scrollbar */
 }
@@ -655,10 +655,11 @@ input[type="email"] {
 .game-item-name-console {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;   /* ← center vertically instead of top */
   flex: 1;
   gap: 20px;
 }
+
 
 .name-cell {
   flex: 1;
@@ -692,6 +693,12 @@ input[type="email"] {
 .console-item {
   line-height: 1.5em;
   font-size: 0.9em;
+}
+
+/* After every console-item except the last, inject a comma */
+.console-item:not(:last-child)::after {
+  content: ",";
+  margin-right: 0.5rem;  /* small gap after the comma */
 }
 
 

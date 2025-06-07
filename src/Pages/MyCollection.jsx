@@ -10,9 +10,9 @@ import { useSortFilter } from '../Context/useSortFilter';
 import SortFilterControls from '../Context/SortFilterControls';
 
 function MyCollection() {
-  const [itemsLoaded, setItemsLoaded]   = useState(false);
-  const [loadingDots, setLoadingDots]   = useState('');
-  const [currentPage, setCurrentPage]   = useState(1);
+  const [itemsLoaded, setItemsLoaded] = useState(false);
+  const [loadingDots, setLoadingDots] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [collectionItems, setCollectionItems] = useState([]);
 
@@ -126,10 +126,26 @@ function MyCollection() {
                   {/* 2️⃣ Console cell (scrollable) */}
                   <div className="console-cell">
                     <div className="console-list">
-                      {(Array.isArray(game.Consoles) ? game.Consoles : [game.Console])
-                        .map(c => <div key={c} className="console-item">{c}</div>)}
+                      {(
+                        Array.isArray(game.Consoles)
+                          ? game.Consoles
+                          : game.Console.split(',')
+                      )
+                        // 1) Trim whitespace off each entry
+                        .map((c) => c.trim())
+                        // 2) Sort alphabetically
+                        .sort((a, b) => a.localeCompare(b))
+                        // 3) Render each as its own item
+                        .map((c) => (
+                          <div key={c} className="console-item">
+                            {c}
+                          </div>
+                        ))}
                     </div>
                   </div>
+
+
+
                 </div>
                 <div className="game-item-actions">
                   <button className="link-button" onClick={() => handleEditGameDetails(game)}>

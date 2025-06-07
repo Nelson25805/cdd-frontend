@@ -185,7 +185,6 @@ const AddGameToDatabase = () => {
           </button>
         </div>
         <div className="right-section">
-          <p className="game-information-titles">Platform</p>
           <div ref={platformWrapperRef} className="platform-selector">
             <p className="game-information-titles">Platform(s)</p>
 
