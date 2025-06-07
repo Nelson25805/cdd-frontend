@@ -48,7 +48,12 @@ const AddGameToDatabase = () => {
 
   const onSelectPlatform = (platform) => {
     if (!selectedPlatforms.includes(platform)) {
-      setSelectedPlatforms((prev) => [...prev, platform]);
+      setSelectedPlatforms((prev) => {
+        // add, then sort A→Z
+        return [...prev, platform].sort((a, b) =>
+          a.localeCompare(b)
+        );
+      });
     }
     setSearchPlatform('');
     setShowPlatformDropdown(false);
