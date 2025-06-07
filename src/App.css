@@ -81,16 +81,16 @@ input[type="email"] {
 /*TopLinks Styling */
 
 .App-header {
-  position: relative;       
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  
-  width: 100vw;     
-  left: 50%;               
-  margin-left: -50vw;     
-  box-sizing: border-box;    
+
+  width: 100vw;
+  left: 50%;
+  margin-left: -50vw;
+  box-sizing: border-box;
 }
 
 
@@ -236,6 +236,55 @@ input[type="email"] {
 .section-option.active {
   border-bottom: 2px solid #007bff;
 }
+
+.platform-selector {
+  position: relative;
+  margin-top: 8px;
+  width: 250px;
+}
+
+.platform-chips {
+  display: flex;
+  flex-wrap: wrap;        /* allow chips to flow into multiple rows */
+  gap: 6px;
+  max-width: 100%;        /* fill the 250px container */
+  max-height: 120px;      /* limit vertical size (adjust as you like) */
+  overflow-y: auto;       /* turn on vertical scrolling when overflow */
+  padding-right: 4px;     /* give space for the scrollbar */
+}
+
+
+.platform-chips::-webkit-scrollbar {
+  height: 6px;
+}
+
+.platform-chips::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.platform-chip {
+  background-color: #d9d9d9;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.chip-remove {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+
+
+
+
 
 .game-information {
   display: flex;
@@ -401,15 +450,20 @@ input[type="email"] {
   max-width: 400px;
 }
 
-.sort-filter-section > .sort-by-options {
-  display: flex;           /* ensure it’s a flex container */
-  flex-direction: row;     /* put <p> and <label>s side-by-side */
-  align-items: center;     /* vertically center the radio + its text */
-  gap: 1rem;               /* space between “Ascending” and “Descending” */
-  margin-bottom: 8px;      /* (optional) spacing under this group */
+.sort-filter-section>.sort-by-options {
+  display: flex;
+  /* ensure it’s a flex container */
+  flex-direction: row;
+  /* put <p> and <label>s side-by-side */
+  align-items: center;
+  /* vertically center the radio + its text */
+  gap: 1rem;
+  /* space between “Ascending” and “Descending” */
+  margin-bottom: 8px;
+  /* (optional) spacing under this group */
 }
 
-.sort-filter-section > div {
+.sort-filter-section>div {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -423,16 +477,17 @@ input[type="email"] {
 
 .filter-console-wrapper {
   position: relative;
-  width: 250px; /* match the old inline width */
-  margin-top: 8px; /* spacing if you like */
+  width: 250px;
+  /* match the old inline width */
+  margin-top: 8px;
+  /* spacing if you like */
 }
 
 .console-search-input {
-  width: 100%;
-  padding: 6px;
+  width: 100%;   /* will now be 250px because .platform-selector is 250px */
   box-sizing: border-box;
-  font-size: 1rem;
 }
+
 
 .console-suggestions {
   position: absolute;
@@ -472,11 +527,16 @@ input[type="email"] {
 
 
 .sort-by-options {
-  display: flex;         /* put children in a row */
-  flex-direction: row;   /* this is the default, but be explicit */
-  align-items: center;   /* vertically center the radios + text */
-  gap: 1rem;             /* space between “Ascending” and “Descending” */
-  margin-bottom: 8px;    /* optional spacing under the radio group */
+  display: flex;
+  /* put children in a row */
+  flex-direction: row;
+  /* this is the default, but be explicit */
+  align-items: center;
+  /* vertically center the radios + text */
+  gap: 1rem;
+  /* space between “Ascending” and “Descending” */
+  margin-bottom: 8px;
+  /* optional spacing under the radio group */
 }
 
 .sort-by-options p {
@@ -485,10 +545,14 @@ input[type="email"] {
 }
 
 .sort-by-option {
-  display: flex;        /* put input + text side-by-side */
-  align-items: center;  /* vertically center the circle and its text */
-  gap: 4px;             /* small gap between circle and label text */
-  cursor: pointer;      /* nice hover cursor */
+  display: flex;
+  /* put input + text side-by-side */
+  align-items: center;
+  /* vertically center the circle and its text */
+  gap: 4px;
+  /* small gap between circle and label text */
+  cursor: pointer;
+  /* nice hover cursor */
 }
 
 .sort-by-option input[type="radio"] {
@@ -496,10 +560,13 @@ input[type="email"] {
   height: 1rem;
 }
 
-.sort-by-options > label {
-  display: flex;           /* each label is its own flex row */
-  align-items: center;     /* center the circle and text vertically */
-  gap: 4px;                /* small gap between the radio circle and text */
+.sort-by-options>label {
+  display: flex;
+  /* each label is its own flex row */
+  align-items: center;
+  /* center the circle and text vertically */
+  gap: 4px;
+  /* small gap between the radio circle and text */
   cursor: pointer;
 }
 
@@ -569,8 +636,8 @@ input[type="email"] {
 }
 
 .name-list {
-  max-height: 7em;     
-  overflow-y: auto;    
+  max-height: 7em;
+  overflow-y: auto;
 }
 
 .game-item-name {
@@ -589,13 +656,13 @@ input[type="email"] {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  flex: 1;              
-  gap: 20px;           
+  flex: 1;
+  gap: 20px;
 }
 
 .name-cell {
   flex: 1;
-  min-width: 150px; 
+  min-width: 150px;
 }
 
 .link-button {
@@ -612,14 +679,14 @@ input[type="email"] {
 }
 
 .console-cell {
-  flex: 3;       
-  min-width: 150px;  
+  flex: 3;
+  min-width: 150px;
 }
 
 .console-list {
-  max-height: 7em;  
+  max-height: 7em;
   overflow-y: auto;
-  padding-right: 4px;  
+  padding-right: 4px;
 }
 
 .console-item {

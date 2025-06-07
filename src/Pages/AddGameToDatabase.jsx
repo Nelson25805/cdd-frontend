@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import '../App.css';
 import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import { addGameToDatabase } from '../Api';
 import { useNavigate } from 'react-router-dom';
+import { CONSOLE_OPTIONS } from '../Context/consoleOptions';
 
 const AddGameToDatabase = () => {
   const { user } = useUser();
@@ -11,11 +12,55 @@ const AddGameToDatabase = () => {
 
   const [formData, setFormData] = useState({
     'Game Info': {
-      platform: '',
       title: '',
     },
     'Cover Image': { image: null, imageName: 'No file chosen' }
   });
+
+  const [searchPlatform, setSearchPlatform] = useState('');
+  const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const platformWrapperRef = useRef(null);
+
+  // filter once ≥2 chars
+  const matchingPlatforms =
+    searchPlatform.length >= 2
+      ? CONSOLE_OPTIONS.filter((p) =>
+        p.toLowerCase().includes(searchPlatform.toLowerCase())
+      )
+      : [];
+
+  // close dropdown on outside click
+  useEffect(() => {
+    const onClick = (e) => {
+      if (platformWrapperRef.current && !platformWrapperRef.current.contains(e.target)) {
+        setShowPlatformDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  const onPlatformInputChange = (e) => {
+    setSearchPlatform(e.target.value);
+    setShowPlatformDropdown(e.target.value.length >= 2);
+  };
+
+  const onSelectPlatform = (platform) => {
+    if (!selectedPlatforms.includes(platform)) {
+      setSelectedPlatforms((prev) => [...prev, platform]);
+    }
+    setSearchPlatform('');
+    setShowPlatformDropdown(false);
+  };
+
+  const onRemovePlatform = (platform) => {
+    setSelectedPlatforms((prev) =>
+      prev.filter((p) => p !== platform)
+    );
+  };
+
+
 
   const [selectedSection, setSelectedSection] = useState('Game Info');
   const [displayedCoverImage, setDisplayedCoverImage] = useState(null);
@@ -67,10 +112,9 @@ const AddGameToDatabase = () => {
   };
 
   const handleAddGame = async () => {
-    const { platform, title } = formData['Game Info'];
-
-    if (!platform || !title) {
-      setErrorMessage('Please fill in all required fields: Platform and Title');
+    const title = formData['Game Info'].title;
+    if (selectedPlatforms.length === 0 || !title) {
+      setErrorMessage('Please fill in all required fields: at least one Platform and Title');
       return;
     }
 
@@ -78,7 +122,9 @@ const AddGameToDatabase = () => {
 
     const formDataObj = new FormData();
     formDataObj.append('Name', title);
-    formDataObj.append('Console', platform);
+    // send as comma-separated; update your server when you're ready to accept arrays
+    formDataObj.append('Console', selectedPlatforms.join(','));
+
     formDataObj.append('CoverArt', formData['Cover Image'].image);
 
     try {
@@ -140,31 +186,56 @@ const AddGameToDatabase = () => {
         </div>
         <div className="right-section">
           <p className="game-information-titles">Platform</p>
-          <select
-            name="platform"
-            value={formData['Game Info'].platform}
-            onChange={(e) => handleInputChange(e, 'Game Info')}
-            className='dropdown-box'
-          >
-            <option value="">Select Platform...</option>
-            <option value="Xbox">Xbox</option>
-            <option value="Xbox 360">Xbox 360</option>
-            <option value="Xbox One">Xbox One</option>
-            <option value="Nes">NES</option>
-            <option value="Gameboy">Gameboy</option>
-            <option value="Gameboy Color">Gameboy Color</option>
-            <option value="Snes">SNES</option>
-            <option value="Nintendo 64">Nintendo 64</option>
-            <option value="Gamecube">Gamecube</option>
-            <option value="Gameboy Advance">Gameboy Advance</option>
-            <option value="Wii">Wii</option>
-            <option value="Wii U">Wii U</option>
-            <option value="Nintendo Switch">Nintendo Switch</option>
-            <option value="Playstation 1">Playstation 1</option>
-            <option value="Playstation 2">Playstation 2</option>
-            <option value="Playstation 3">Playstation 3</option>
-            <option value="Playstation 4">Playstation 4</option>
-          </select>
+          <div ref={platformWrapperRef} className="platform-selector">
+            <p className="game-information-titles">Platform(s)</p>
+
+            {/* 1) Search input */}
+            <input
+              type="text"
+              placeholder="Type ≥2 letters..."
+              value={searchPlatform}
+              onChange={onPlatformInputChange}
+              onFocus={() => {
+                if (searchPlatform.length >= 2) setShowPlatformDropdown(true);
+              }}
+              className="console-search-input"
+            />
+
+            {/* 2) Dropdown */}
+            {showPlatformDropdown && matchingPlatforms.length > 0 && (
+              <ul className="console-suggestions">
+                {matchingPlatforms.map((p) => (
+                  <li
+                    key={p}
+                    className="console-suggestion-item"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => onSelectPlatform(p)}
+                  >
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* 3) Chips for selected items */}
+            {selectedPlatforms.length > 0 && (
+              <div className="platform-chips">
+                {selectedPlatforms.map((p) => (
+                  <span key={p} className="platform-chip">
+                    {p}
+                    <button
+                      type="button"
+                      className="chip-remove"
+                      onClick={() => onRemovePlatform(p)}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
