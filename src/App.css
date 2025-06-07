@@ -281,6 +281,23 @@ input[type="email"] {
   cursor: pointer;
 }
 
+.platform-input-wrapper {
+  position: relative;    /* makes the UL absolutely position itself here */
+  width: 250px;          /* match your input width */
+}
+
+.platform-input-wrapper .console-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background: #fff;
+  z-index: 1000;
+}
+
 
 
 

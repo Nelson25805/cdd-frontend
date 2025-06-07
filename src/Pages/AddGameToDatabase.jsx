@@ -185,38 +185,39 @@ const AddGameToDatabase = () => {
           </button>
         </div>
         <div className="right-section">
-          <div ref={platformWrapperRef} className="platform-selector">
+          <div className="platform-selector">
             <p className="game-information-titles">Platform(s)</p>
 
-            {/* 1) Search input */}
-            <input
-              type="text"
-              placeholder="Type ≥2 letters..."
-              value={searchPlatform}
-              onChange={onPlatformInputChange}
-              onFocus={() => {
-                if (searchPlatform.length >= 2) setShowPlatformDropdown(true);
-              }}
-              className="console-search-input"
-            />
+            {/* wrap input + dropdown here */}
+            <div ref={platformWrapperRef} className="platform-input-wrapper">
+              <input
+                type="text"
+                placeholder="Type ≥2 letters..."
+                value={searchPlatform}
+                onChange={onPlatformInputChange}
+                onFocus={() => {
+                  if (searchPlatform.length >= 2) setShowPlatformDropdown(true);
+                }}
+                className="console-search-input"
+              />
 
-            {/* 2) Dropdown */}
-            {showPlatformDropdown && matchingPlatforms.length > 0 && (
-              <ul className="console-suggestions">
-                {matchingPlatforms.map((p) => (
-                  <li
-                    key={p}
-                    className="console-suggestion-item"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => onSelectPlatform(p)}
-                  >
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            )}
+              {showPlatformDropdown && matchingPlatforms.length > 0 && (
+                <ul className="console-suggestions">
+                  {matchingPlatforms.map((p) => (
+                    <li
+                      key={p}
+                      className="console-suggestion-item"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => onSelectPlatform(p)}
+                    >
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
-            {/* 3) Chips for selected items */}
+            {/* chips below */}
             {selectedPlatforms.length > 0 && (
               <div className="platform-chips">
                 {selectedPlatforms.map((p) => (
@@ -234,6 +235,7 @@ const AddGameToDatabase = () => {
               </div>
             )}
           </div>
+
 
         </div>
       </div>
