@@ -34,6 +34,13 @@ body {
   margin-top: 0.5rem;
 }
 
+.error-text {
+  color: #b00;
+  margin: 8px 0;
+  font-size: 0.9rem;
+}
+
+
 .small-button {
   padding: 10px 20px;
   font-size: 16px;
@@ -243,16 +250,6 @@ input[type="email"] {
   width: 250px;
 }
 
-.platform-chips {
-  display: flex;
-  flex-wrap: wrap;        /* allow chips to flow into multiple rows */
-  gap: 6px;
-  max-width: 100%;        /* fill the 250px container */
-  max-height: 350px;      /* limit vertical size (adjust as you like) */
-  overflow-y: auto;       /* turn on vertical scrolling when overflow */
-  padding-right: 4px;     /* give space for the scrollbar */
-}
-
 
 .platform-chips::-webkit-scrollbar {
   height: 6px;
@@ -263,15 +260,6 @@ input[type="email"] {
   border-radius: 3px;
 }
 
-.platform-chip {
-  background-color: #d9d9d9;
-  padding: 4px 8px;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.9rem;
-}
 
 .chip-remove {
   background: none;
@@ -297,6 +285,114 @@ input[type="email"] {
   background: #fff;
   z-index: 1000;
 }
+
+
+
+
+
+
+/* Container for the two lists side by side */
+.dual-list-container {
+  display: flex;
+  gap: 16px;
+}
+
+/* Available / Selected panels */
+.dual-list-container .list {
+  flex: 1;
+}
+
+.dual-list-container .list h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Scrollable body inside each list */
+.dual-list-container .list .list-body {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 8px;
+  background: #fafafa;
+}
+
+/* Individual item in Available list */
+.dual-list-container .list.available .list-body > div {
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.dual-list-container .list.available .list-body > div:hover {
+  background: #eef;
+}
+
+/* Individual item in Selected list */
+.dual-list-container .list.selected .list-body > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+
+/* make the “×” button fully transparent & black text */
+.dual-list-container .list.selected .list-body button,
+.platform-chip .chip-remove {
+  background: none;     /* kill the gray fill */
+  border: none;         /* no border */
+  color: #000;          /* black “×” */
+  outline: none;        /* no focus ring */
+  padding: 0;           /* don’t add extra padding */
+}
+
+/* if any hover/focus style still shows a box, kill it too */
+.dual-list-container .list.selected .list-body button:hover,
+.dual-list-container .list.selected .list-body button:focus,
+.platform-chip .chip-remove:hover,
+.platform-chip .chip-remove:focus {
+  background: none;
+  outline: none;
+  opacity: 0.8;         /* still give a hint on hover */
+}
+
+
+/* optional: on hover, keep it black or darken */
+.dual-list-container .list.selected .list-body button:hover,
+.platform-chip .chip-remove:hover {
+  color: #000;          /* stays black */
+  opacity: 0.8;         /* slight feedback */
+}
+
+/* Chips style (if you still use them elsewhere) */
+.platform-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.platform-chip {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #e0f0ff;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.platform-chip .chip-remove {
+  margin-left: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+
+
 
 
 
