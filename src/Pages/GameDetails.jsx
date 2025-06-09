@@ -1,4 +1,4 @@
-// Importing necessary dependencies from React and other modules
+// src/Pages/GameDetails.jsx
 import { useState, useEffect } from 'react';
 import '../App.css';
 import { useUser } from '../Context/useUser';
@@ -7,162 +7,127 @@ import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchGameInfo, addGameDetails } from '../Api';
 
-// Functional component for GameDetails
-/*This component is used to  create a collection game record with
-details related to the game of the users choosing.*/
 const GameDetails = () => {
-    // Initializing state variables using React hooks
     const location = useLocation();
-    const game = new URLSearchParams(location.search).get('q');
-
+    const gameId = new URLSearchParams(location.search).get('q');
     const { user } = useUser();
     const userId = user?.userid;
     const navigate = useNavigate();
+
+    // Local UI state
     const [error, setError] = useState('');
-
-    // State variables for game details and form data
-    const [gameDetails, setGameDetails] = useState({
-        title: "...",
-        coverart: null,
-        platform: "",
-    });
-
-    const [availableConsoles, setAvailableConsoles] = useState([]);     // { consoleid, name }[]
-    const [selectedConsoles, setSelectedConsoles] = useState([]);       // same shape
-
-    const [formData, setFormData] = useState({
-        'Game Info': { platform: '', ownership: '', included: '' },
-        'Game Status': { title: '', condition: '', checkboxes: [], notes: '', pricePaid: '' },
-        'Cover Image': { image: null, imageName: 'No file chosen' },
-        'Game Log': { notes: '', gameCompletion: '', rating: 0, review: '', spoilerWarning: false },
-    });
-
-    // State variables for handling the active section, displayed cover image, and available sections
-    const [selectedSection, setSelectedSection] = useState('Game Info');
+    const [gameDetails, setGameDetails] = useState({ title: '...', coverart: null });
+    const [availableConsoles, setAvailableConsoles] = useState([]);
+    const [selectedConsoles, setSelectedConsoles] = useState([]);
     const [displayedCoverImage, setDisplayedCoverImage] = useState(null);
+
+    // Form sections
     const sections = ['Game Info', 'Game Status', 'Game Log'];
+    const [selectedSection, setSelectedSection] = useState(sections[0]);
 
-    // Effect to fetch game details when the component mounts or the game ID changes
+    // Nested form data
+    const [formData, setFormData] = useState({
+        'Game Info': { consoleIds: [], ownership: '', included: '' },
+        'Game Status': { checkboxes: [], notes: '', pricePaid: '' },
+        'Game Log': { gameCompletion: '', rating: 0, review: '', spoilerWarning: false },
+    });
+
+    // Load base info + console list
     useEffect(() => {
-        if (game) {
-            // Fetch game details based on the gameId
-            getGameDetails(game);
-        }
-    }, [game]);
-
-
-    const getGameDetails = async (gameId) => {
-        const token = localStorage.getItem('token');
-        const result = await fetchGameInfo(gameId, token);
-        if (result.success) {
-            const { gameDetails } = result;
-            setGameDetails(gameDetails);
-
-            // Populate the console options
-            setAvailableConsoles(gameDetails.consoles);
-            setSelectedConsoles([]);  // start with none selected
-
-            // Now set the cover image if present
-            if (gameDetails.coverart) {
+        if (!gameId) return;
+        (async () => {
+            const result = await fetchGameInfo(gameId);
+            if (result.success) {
+                const { title, coverart, consoles } = result.gameDetails;
+                setGameDetails({ title, coverart });
+                setAvailableConsoles(consoles);
                 setDisplayedCoverImage(
-                    `data:image/png;base64,${gameDetails.coverart}`
+                    coverart ? `data:image/png;base64,${coverart}` : null
                 );
             } else {
-                setDisplayedCoverImage(null);
+                alert(result.message);
             }
-        } else {
-            alert(result.message);
-        }
+        })();
+    }, [gameId]);
+
+    // Section tab click
+    const handleSectionClick = sec => {
+        setError('');
+        setSelectedSection(sec);
     };
 
-    // Event handler for clicking on a section
-    const handleSectionClick = (section) => {
-        setSelectedSection(section);
-    };
-
-    // Event handler for handling input changes in the form
+    // Generic input change
     const handleInputChange = (e, section = selectedSection) => {
-        const { name, value, type } = e.target;
-        setFormData((prevData) => {
-            const updatedSection = { ...prevData[section] };
-            if (type === 'radio') {
-                updatedSection[name] = value === updatedSection[name] ? '' : value;
-            } else if (type === 'checkbox') {
-                updatedSection[name] = e.target.checked
-                    ? [...(updatedSection[name] || []), value]
-                    : (updatedSection[name] || []).filter((item) => item !== value);
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => {
+            const sec = { ...prev[section] };
+            if (type === 'checkbox' && section === 'Game Status') {
+                sec.checkboxes = checked
+                    ? [...sec.checkboxes, name]
+                    : sec.checkboxes.filter(x => x !== name);
             } else {
-                updatedSection[name] = value;
+                sec[name] = type === 'checkbox' ? checked : value;
             }
-            return {
-                ...prevData,
-                [section]: updatedSection,
-            };
+            return { ...prev, [section]: sec };
         });
     };
 
-    // Event handler for handling checkbox changes
-    const handleCheckBoxChange = (e) => {
-        const { name, checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [selectedSection]: {
-                ...prevData[selectedSection],
-                checkboxes: checked
-                    ? [...prevData[selectedSection].checkboxes, name]
-                    : prevData[selectedSection].checkboxes.filter((item) => item !== name),
+    // Dual-list add/remove
+    const addConsole = c => {
+        setSelectedConsoles(sc =>
+            [...sc, c].sort((a, b) => a.name.localeCompare(b.name))
+        );
+        setAvailableConsoles(ac =>
+            ac.filter(x => x.consoleid !== c.consoleid)
+        );
+        setFormData(fd => ({
+            ...fd,
+            'Game Info': {
+                ...fd['Game Info'],
+                consoleIds: [...fd['Game Info'].consoleIds, c.consoleid],
+            },
+        }));
+    };
+    const removeConsole = c => {
+        setAvailableConsoles(ac =>
+            [...ac, c].sort((a, b) => a.name.localeCompare(b.name))
+        );
+        setSelectedConsoles(sc =>
+            sc.filter(x => x.consoleid !== c.consoleid)
+        );
+        setFormData(fd => ({
+            ...fd,
+            'Game Info': {
+                ...fd['Game Info'],
+                consoleIds: fd['Game Info'].consoleIds.filter(id => id !== c.consoleid),
             },
         }));
     };
 
-    // Event handler for handling notes changes
-    const handleNotesChange = (e) => {
-        const { value } = e.target;
-        handleInputChange({ target: { name: 'notes', value, type: 'textarea' } });
-    };
-
-    // Event handler for handling game completion changes
-    const handleGameCompletionChange = (e) => {
-        const { value } = e.target;
-        handleInputChange({ target: { name: 'gameCompletion', value, type: 'dropdown' } });
-    };
-
-    // Event handler for handling rating changes
-    const handleRatingChange = (rating) => {
-        handleInputChange({ target: { name: 'rating', value: rating, type: 'rating' } });
-    };
-
-    // Event handler for handling review changes
-    const handleReviewChange = (e) => {
-        const { value } = e.target;
-        handleInputChange({ target: { name: 'review', value, type: 'textarea' } });
-    };
-
-    // Event handler for handling spoiler changes
-    const handleSpoilerChange = (e) => {
-        const { checked } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            'Game Log': {
-                ...prevData['Game Log'],
-                spoilerWarning: checked,
-            },
-        }));
-    };
-
-    // Event handler for adding game details to the collection
-    // GameDetails.jsx
-
+    // Submit handler
     const handleAddGameDetails = async () => {
         setError('');
-     if (selectedConsoles.length === 0) {
-       setError('Please select at least one platform before adding.');
-       return;
-     }
-        // flatten the nested formData into exactly the API’s expected shape
+        const { consoleIds, ownership, included } = formData['Game Info'];
+
+        if (consoleIds.length === 0) {
+            setError('Please select at least one platform.');
+            setSelectedSection('Game Info');
+            return;
+        }
+        if (!ownership) {
+            setError('Please choose Physical or Digital ownership.');
+            setSelectedSection('Game Info');
+            return;
+        }
+        if (!included) {
+            setError('Please choose what’s included.');
+            setSelectedSection('Game Info');
+            return;
+        }
+
         const details = {
-            ownership: formData['Game Info'].ownership,
-            included: formData['Game Info'].included,
+            ownership,
+            included,
             checkboxes: formData['Game Status'].checkboxes,
             notes: formData['Game Status'].notes,
             completion: formData['Game Log'].gameCompletion,
@@ -170,11 +135,10 @@ const GameDetails = () => {
             spoiler: formData['Game Log'].spoilerWarning,
             price: parseFloat(formData['Game Status'].pricePaid) || null,
             rating: formData['Game Log'].rating,
-            consoleIds: selectedConsoles.map((c) => c.consoleid),
+            consoleIds,
         };
 
-        const result = await addGameDetails(userId, game, details);
-
+        const result = await addGameDetails(userId, gameId, details);
         if (result.success) {
             alert(result.message);
             navigate('/mycollection');
@@ -183,189 +147,179 @@ const GameDetails = () => {
         }
     };
 
-
-    // Render UI components
     return (
         <div className="App">
             <TopLinks user={user} />
+
+            {/* Section Tabs */}
             <div className="section-selector">
-                {/* Rendering section options */}
-                {sections.map((section) => (
+                {sections.map(sec => (
                     <div
-                        key={section}
-                        className={`section-option ${selectedSection === section && 'active'}`}
-                        onClick={() => handleSectionClick(section)}
+                        key={sec}
+                        className={`section-option ${selectedSection === sec && 'active'}`}
+                        onClick={() => handleSectionClick(sec)}
                     >
-                        {section}
+                        {sec}
                     </div>
                 ))}
             </div>
+
             <div className="game-information">
+                {/* Left Column */}
                 <div className="left-section">
-                    <div className='textbox-input'>
-                        <p className="game-information-titles">Title</p>
-                        {/* Input for the game title */}
-                        <input
-                            type="text"
-                            name="title"
-                            placeholder="Enter title..."
-                            value={gameDetails.title}
-                            onChange={(e) => handleInputChange(e, 'Game Status')}
-                            disabled
-                        />
-                    </div>
+                    <p className="game-information-titles">Title</p>
+                    <input value={gameDetails.title} disabled />
+
                     <p className="game-information-titles">Cover Art</p>
-                    <div className='display-image'>
-                        {/* Displaying the cover image */}
-                        {displayedCoverImage ? (
-                            <img src={displayedCoverImage} alt="" />
-                        ) : ('No image selected')}
+                    <div className="display-image">
+                        {displayedCoverImage ? <img src={displayedCoverImage} alt="" /> : 'No image selected'}
                     </div>
 
-                    {/* Button to add game details */}
-                    <button
-                        onClick={handleAddGameDetails}
-                        className='add-game-button'
-                    >
+                    <button onClick={handleAddGameDetails} className="add-game-button">
                         Add Game To Collection With Details
                     </button>
                 </div>
 
-                {/* -------- Game Info Section -------- */}
+                {/* Right Column: Game Info */}
                 {selectedSection === 'Game Info' && (
                     <div className="right-section">
                         {error && <p className="error-text">{error}</p>}
-                        <p className="game-information-titles">Platform(s)</p>
 
+                        {/* Platform Dual List */}
+                        <p className="game-information-titles">Platform(s)</p>
                         <div className="dual-list-container">
-                            {/* Available List */}
                             <div className="list available">
                                 <h4>Available</h4>
                                 <div className="list-body">
-                                    {availableConsoles
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .filter((c) => !selectedConsoles.some((s) => s.consoleid === c.consoleid))
-                                        .map((c) => (
-                                            <div
-                                                key={c.consoleid}
-                                                onClick={() => {
-                                                    const next = [...selectedConsoles, c]
-                                                        .sort((a, b) => a.name.localeCompare(b.name));
-                                                    setSelectedConsoles(next);
-                                                    setFormData(fd => ({
-                                                        ...fd,
-                                                        'Game Info': {
-                                                            ...fd['Game Info'],
-                                                            consoleIds: next.map((x) => x.consoleid),
-                                                        },
-                                                    }));
-                                                }}
-                                            >
-                                                {c.name}
-                                            </div>
-                                        ))}
+                                    {availableConsoles.map(c => (
+                                        <div key={c.consoleid} onClick={() => addConsole(c)}>
+                                            {c.name}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-
-                            {/* Selected List */}
                             <div className="list selected">
                                 <h4>Selected</h4>
                                 <div className="list-body">
-                                    {selectedConsoles
-                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                        .map((c) => (
-                                            <div
-                                                key={c.consoleid}
-                                            >
-                                                <span>{c.name}</span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const next = selectedConsoles
-                                                            .filter((x) => x.consoleid !== c.consoleid);
-                                                        setSelectedConsoles(next);
-                                                        setFormData(fd => ({
-                                                            ...fd,
-                                                            'Game Info': {
-                                                                ...fd['Game Info'],
-                                                                consoleIds: next.map((x) => x.consoleid),
-                                                            },
-                                                        }));
-                                                    }}
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        ))}
+                                    {selectedConsoles.map(c => (
+                                        <div key={c.consoleid}>
+                                            <span>{c.name}</span>
+                                            <button onClick={() => removeConsole(c)}>×</button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
+
+                        {/* Ownership Radios */}
+                        <p className="game-information-titles">Ownership</p>
+                        <div className="ownership-radio-buttons">
+                            <input
+                                type="radio"
+                                id="physical"
+                                name="ownership"
+                                value="physical"
+                                checked={formData['Game Info'].ownership === 'physical'}
+                                onChange={e => handleInputChange(e, 'Game Info')}
+                            />
+                            <label htmlFor="physical">Physical</label>
+                        </div>
+                        <div className="ownership-radio-buttons">
+                            <input
+                                type="radio"
+                                id="digital"
+                                name="ownership"
+                                value="digital"
+                                checked={formData['Game Info'].ownership === 'digital'}
+                                onChange={e => handleInputChange(e, 'Game Info')}
+                            />
+                            <label htmlFor="digital">Digital</label>
+                        </div>
+
+                        {/* Included Dropdown */}
+                        <p className="game-information-titles">What’s Included</p>
+                        <select
+                            name="included"
+                            value={formData['Game Info'].included}
+                            onChange={e => handleInputChange(e, 'Game Info')}
+                            className="dropdown-box"
+                        >
+                            <option value="">Select…</option>
+                            <option>Game Only</option>
+                            <option>Box Only</option>
+                            <option>Manual Only</option>
+                            <option>Box and Manual</option>
+                            <option>Box and Game</option>
+                            <option>Manual and Game</option>
+                            <option>Complete In Box</option>
+                            <option>Sealed</option>
+                            <option>Graded</option>
+                        </select>
                     </div>
                 )}
 
-
+                {/* Right Column: Game Status */}
                 {selectedSection === 'Game Status' && (
                     <div className="right-section">
-                        <div className='textbox-input'>
+                        <div className="textbox-input">
                             <p className="game-information-titles">Price you paid</p>
-                            {/* Input for entering the price paid */}
                             <input
                                 type="text"
                                 name="pricePaid"
                                 placeholder="Enter the price"
                                 value={formData['Game Status'].pricePaid}
-                                onChange={(e) => handleInputChange(e, 'Game Status')}
+                                onChange={e => handleInputChange(e, 'Game Status')}
                             />
                         </div>
-
-                        {/* Fieldset for selecting the condition of the game */}
-                        <fieldset className='condition-fieldset'>
+                        <fieldset className="condition-fieldset">
                             <legend>Condition of Game</legend>
-                            <div className='condition-checkbox-group'>
-                                {/* Checkbox options for different conditions */}
-                                {["No Blemishes", "Writing", "Stickers", "Torn Label", "Scratches", "Not Working", "Normal Wear"].map((text) => (
-                                    <div className='condition-checkbox-group-item' key={text}>
+                            <div className="condition-checkbox-group">
+                                {[
+                                    'No Blemishes',
+                                    'Writing',
+                                    'Stickers',
+                                    'Torn Label',
+                                    'Scratches',
+                                    'Not Working',
+                                    'Normal Wear',
+                                ].map(text => (
+                                    <div className="condition-checkbox-group-item" key={text}>
                                         <input
                                             type="checkbox"
                                             id={`checkbox-${text}`}
                                             name={text}
-                                            value={text}
                                             checked={formData['Game Status'].checkboxes.includes(text)}
-                                            onChange={handleCheckBoxChange}
+                                            onChange={e => handleInputChange(e, 'Game Status')}
                                         />
-                                        <label htmlFor={`checkbox-${text}`}>
-                                            {text}
-                                        </label>
+                                        <label htmlFor={`checkbox-${text}`}>{text}</label>
                                     </div>
                                 ))}
                             </div>
                         </fieldset>
-
                         <div className='game-status-section'>
                             <p className="game-information-titles">Notes</p>
-                            {/* Textarea for entering notes */}
                             <textarea
+                                name="notes"
                                 rows="4"
                                 placeholder="Enter your notes"
                                 value={formData['Game Status'].notes}
-                                onChange={handleNotesChange}
-                            ></textarea>
+                                onChange={e => handleInputChange(e, 'Game Status')}
+                            />
                         </div>
                     </div>
                 )}
 
+                {/* Right Column: Game Log */}
                 {selectedSection === 'Game Log' && (
                     <div className="right-section">
                         <p className="game-information-titles">Game Completion</p>
-                        {/* Dropdown for selecting game completion status */}
                         <select
                             name="gameCompletion"
                             value={formData['Game Log'].gameCompletion}
-                            onChange={handleGameCompletionChange}
-                            className='dropdown-box'
+                            onChange={e => handleInputChange(e, 'Game Log')}
+                            className="dropdown-box"
                         >
                             <option value="">Select Completion Status...</option>
-                            {/* Options for completion status */}
                             <option value="completed">100% Completed</option>
                             <option value="beaten">Beaten</option>
                             <option value="retired">Retired</option>
@@ -373,41 +327,41 @@ const GameDetails = () => {
                             <option value="abandoned">Abandoned</option>
                             <option value="backloged">Backloged</option>
                         </select>
-
                         <div>
                             <p className="game-information-titles">Rating</p>
-                            {/* StarRating component for selecting and displaying ratings */}
-                            <StarRating rating={formData['Game Log'].rating} onChange={handleRatingChange} starSize={50} />
+                            <StarRating
+                                rating={formData['Game Log'].rating}
+                                onChange={val =>
+                                    handleInputChange({ target: { name: 'rating', value: val, type: 'rating' } }, 'Game Log')
+                                }
+                                starSize={50}
+                            />
                         </div>
-
                         <p className="game-information-titles">Review</p>
-                        {/* Textarea for entering a review */}
                         <textarea
+                            name="review"
                             rows="4"
                             placeholder="Write your review"
                             value={formData['Game Log'].review}
-                            onChange={handleReviewChange}
-                        ></textarea>
-
+                            onChange={e => handleInputChange(e, 'Game Log')}
+                        />
                         <div className="spoiler-container">
-                            {/* Checkbox for indicating spoilers */}
                             <input
                                 type="checkbox"
                                 id="spoilerCheckbox"
                                 name="spoilerWarning"
                                 checked={formData['Game Log'].spoilerWarning}
-                                onChange={handleSpoilerChange}
+                                onChange={e => handleInputChange(e, 'Game Log')}
                                 className="spoiler-checkbox"
                             />
                             <label htmlFor="spoilerCheckbox">
-                                <span>Spoiler</span>
-                                <span>Warning</span>
+                                <span>Spoiler</span> <span>Warning</span>
                             </label>
                         </div>
                     </div>
                 )}
             </div>
-        </div >
+        </div>
     );
 };
 

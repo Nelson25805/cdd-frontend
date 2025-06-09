@@ -121,8 +121,8 @@ const EditGameDetails = () => {
             notes: formData['Game Status'].notes,
             gameCompletion: formData['Game Log'].gameCompletion,
             review: formData['Game Log'].review,
-            spoilerWarning: formData['Game Log'].spoilerWarning,
-            pricePaid: parseFloat(formData['Game Status'].pricePaid) || null,
+            spoiler: formData['Game Log'].spoilerWarning,
+            price: parseFloat(formData['Game Status'].pricePaid) || null,
             rating: formData['Game Log'].rating,
             consoleIds: formData['Game Info'].consoleIds,
         };
