@@ -53,13 +53,16 @@ const EditGameDetails = () => {
                     'Game Status': {
                         checkboxes: Array.isArray(gamedetails.condition) ? gamedetails.condition : [],
                         notes: gamedetails.notes || '',
-                        pricePaid: gamedetails.price != null ? gamedetails.price : ''
+                        pricePaid: gamedetails.price != null
+                            ? gamedetails.price.toString()
+                            : ''
                     },
                     'Game Log': {
                         gameCompletion: gamedetails.completion || '',
                         rating: gamedetails.rating || 0,
                         review: gamedetails.review || '',
-                        spoilerWarning: Boolean(gamedetails.spoiler),
+                        spoilerWarning: Number(gamedetails.spoiler) === 1,
+
                     },
                 });
                 const selIds = gameinfo.consoles.map(c => c.consoleid);
@@ -121,7 +124,7 @@ const EditGameDetails = () => {
             notes: formData['Game Status'].notes,
             gameCompletion: formData['Game Log'].gameCompletion,
             review: formData['Game Log'].review,
-            spoiler: formData['Game Log'].spoilerWarning,
+            spoiler: formData['Game Log'].spoilerWarning ? 1 : 0,
             price: parseFloat(formData['Game Status'].pricePaid) || null,
             rating: formData['Game Log'].rating,
             consoleIds: formData['Game Info'].consoleIds,
