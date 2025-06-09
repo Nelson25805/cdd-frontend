@@ -1,39 +1,48 @@
+// src/Pages/AddGameToDatabase.jsx
 import { useState, useEffect, useRef } from 'react';
 import '../App.css';
 import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import { addGameToDatabase } from '../Api';
 import { useNavigate } from 'react-router-dom';
+// Now each option is an object: { consoleid, name }
 import { CONSOLE_OPTIONS } from '../Context/consoleOptions';
 
 const AddGameToDatabase = () => {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    'Game Info': {
-      title: '',
-    },
-    'Cover Image': { image: null, imageName: 'No file chosen' }
-  });
+  // We only need title in formData now
+  const [title, setTitle] = useState('');
 
+  // Cover upload state
+  const [coverFile, setCoverFile] = useState(null);
+  const [displayedCoverImage, setDisplayedCoverImage] = useState(null);
+
+  // Multi-select console state
   const [searchPlatform, setSearchPlatform] = useState('');
   const [showPlatformDropdown, setShowPlatformDropdown] = useState(false);
-  const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState([]); // array of {consoleid, name}
   const platformWrapperRef = useRef(null);
 
-  // filter once ≥2 chars
+  // Suggestion logic
   const matchingPlatforms =
     searchPlatform.length >= 2
-      ? CONSOLE_OPTIONS.filter((p) =>
-        p.toLowerCase().includes(searchPlatform.toLowerCase())
-      )
+      ? CONSOLE_OPTIONS.filter((p) => {
+        const optionName = typeof p === 'string' ? p : p.name;
+        return optionName
+          .toLowerCase()
+          .includes(searchPlatform.toLowerCase());
+      })
       : [];
 
-  // close dropdown on outside click
+  // Click-outside hides dropdown
   useEffect(() => {
     const onClick = (e) => {
-      if (platformWrapperRef.current && !platformWrapperRef.current.contains(e.target)) {
+      if (
+        platformWrapperRef.current &&
+        !platformWrapperRef.current.contains(e.target)
+      ) {
         setShowPlatformDropdown(false);
       }
     };
@@ -47,13 +56,12 @@ const AddGameToDatabase = () => {
   };
 
   const onSelectPlatform = (platform) => {
-    if (!selectedPlatforms.includes(platform)) {
-      setSelectedPlatforms((prev) => {
-        // add, then sort A→Z
-        return [...prev, platform].sort((a, b) =>
-          a.localeCompare(b)
-        );
-      });
+    if (!selectedPlatforms.find((p) => p.consoleid === platform.consoleid)) {
+      setSelectedPlatforms((prev) =>
+        [...prev, platform].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      );
     }
     setSearchPlatform('');
     setShowPlatformDropdown(false);
@@ -61,190 +69,128 @@ const AddGameToDatabase = () => {
 
   const onRemovePlatform = (platform) => {
     setSelectedPlatforms((prev) =>
-      prev.filter((p) => p !== platform)
+      prev.filter((p) => p.consoleid !== platform.consoleid)
     );
   };
 
+  const handleCoverChange = (e) => {
+    const file = e.target.files[0];
+    setCoverFile(file);
+    if (file) {
+      setDisplayedCoverImage(URL.createObjectURL(file));
+    }
+  };
 
-
-  const [selectedSection, setSelectedSection] = useState('Game Info');
-  const [displayedCoverImage, setDisplayedCoverImage] = useState(null);
-  const [, setSelectedCoverName] = useState('No file chosen');
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const sections = ['Game Info'];
-
-  const handleSectionClick = (section) => {
-    setSelectedSection(section);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value, type } = e.target;
-    setFormData((prevData) => {
-      const updatedSection = { ...prevData['Game Info'] };
-      if (type === 'radio') {
-        updatedSection[name] = value === updatedSection[name] ? '' : value;
-      } else if (type === 'checkbox') {
-        updatedSection[name] = e.target.checked
-          ? [...(updatedSection[name] || []), value]
-          : (updatedSection[name] || []).filter((item) => item !== value);
-      } else {
-        updatedSection[name] = value;
-      }
-      return {
-        ...prevData,
-        'Game Info': updatedSection,
-      };
-    });
-  };
-
-  const handleCoverChange = (e) => {
-    e.preventDefault();
-    const newImage = e.target.files[0];
-    if (newImage) {
-      setFormData((prevData) => ({
-        ...prevData,
-        'Cover Image': {
-          ...prevData['Cover Image'],
-          image: newImage,
-          imageName: newImage.name,
-        },
-      }));
-
-      setDisplayedCoverImage(URL.createObjectURL(newImage));
-      setSelectedCoverName(newImage.name);
-    }
-  };
-
   const handleAddGame = async () => {
-    const title = formData['Game Info'].title;
-    if (selectedPlatforms.length === 0 || !title) {
-      setErrorMessage('Please fill in all required fields: at least one Platform and Title');
+    if (!title.trim() || selectedPlatforms.length === 0 || !coverFile) {
+      setErrorMessage(
+        'Please provide Title, Cover Art, and at least one Platform'
+      );
       return;
     }
-
     setErrorMessage(null);
 
-    const formDataObj = new FormData();
-    formDataObj.append('Name', title);
-    // send as comma-separated; update your server when you're ready to accept arrays
-    formDataObj.append('Console', selectedPlatforms.join(','));
-
-    formDataObj.append('CoverArt', formData['Cover Image'].image);
+    // Build form-data
+    const fd = new FormData();
+    fd.append('Name', title.trim());
+    // Pass consoles as JSON string
+    fd.append(
+      'Consoles',
+      JSON.stringify(selectedPlatforms.map((p) => p.consoleid))
+    );
+    fd.append('CoverArt', coverFile);
 
     try {
-      await addGameToDatabase(formDataObj, user.token);
+      await addGameToDatabase(fd, user.token);
       alert('Game added successfully!');
       navigate('/search');
-    } catch (error) {
-      if (error && error.error) {
-        setErrorMessage(error.error);
-      } else {
-        setErrorMessage('Failed to add game to the database');
-      }
+    } catch (err) {
+      setErrorMessage(err.message || 'Failed to add game');
     }
   };
 
   return (
     <div className="App">
       <TopLinks user={user} />
-      <div className="section-selector">
-        {sections.map((section) => (
-          <div
-            key={section}
-            className={`section-option ${selectedSection === section && 'active'}`}
-            onClick={() => handleSectionClick(section)}
-          >
-            {section}
-          </div>
-        ))}
-      </div>
+
       <div className="game-information">
         <div className="left-section">
-          <div className='textbox-input'>
-            <p className="game-information-titles">Title</p>
-            <input
-              type="text"
-              name="title"
-              placeholder="Enter title..."
-              value={formData['Game Info'].title}
-              onChange={(e) => handleInputChange(e, 'Game Info')}
-            />
-          </div>
+          <p className="game-information-titles">Title</p>
+          <input
+            type="text"
+            placeholder="Enter title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
           <p className="game-information-titles">Cover Art</p>
-          <div className='display-image'>
+          <div className="display-image">
             {displayedCoverImage ? (
-              <img
-                src={displayedCoverImage}
-                alt=""
-              />
-            ) : ('No image selected'
+              <img src={displayedCoverImage} alt="cover preview" />
+            ) : (
+              'No image selected'
             )}
           </div>
           <input type="file" accept="image/*" onChange={handleCoverChange} />
-          <button
-            onClick={handleAddGame}
-            className='add-game-button'
-          >
+
+          <button onClick={handleAddGame} className="add-game-button">
             Add Game
           </button>
+          {errorMessage && (
+            <div className="error-message">{errorMessage}</div>
+          )}
         </div>
-        <div className="right-section">
-          <div className="platform-selector">
-            <p className="game-information-titles">Platform(s)</p>
 
-            {/* wrap input + dropdown here */}
+        <div className="right-section">
+          <p className="game-information-titles">Platform(s)</p>
+          <div className="platform-selector">
             <div ref={platformWrapperRef} className="platform-input-wrapper">
               <input
                 type="text"
                 placeholder="Type ≥2 letters..."
                 value={searchPlatform}
                 onChange={onPlatformInputChange}
-                onFocus={() => {
-                  if (searchPlatform.length >= 2) setShowPlatformDropdown(true);
-                }}
+                onFocus={() =>
+                  searchPlatform.length >= 2 && setShowPlatformDropdown(true)
+                }
                 className="console-search-input"
               />
-
               {showPlatformDropdown && matchingPlatforms.length > 0 && (
                 <ul className="console-suggestions">
-                  {matchingPlatforms.map((p) => (
-                    <li
-                      key={p}
-                      className="console-suggestion-item"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => onSelectPlatform(p)}
-                    >
-                      {p}
-                    </li>
-                  ))}
+                  {matchingPlatforms.map((p) => {
+                    const optionName = typeof p === 'string' ? p : p.name;
+                    return (
+                      <li
+                        key={optionName}
+                        className="console-suggestion-item"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => onSelectPlatform(p)}
+                      >
+                        {optionName}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
 
-            {/* chips below */}
-            {selectedPlatforms.length > 0 && (
-              <div className="platform-chips">
-                {selectedPlatforms.map((p) => (
-                  <span key={p} className="platform-chip">
-                    {p}
-                    <button
-                      type="button"
-                      className="chip-remove"
-                      onClick={() => onRemovePlatform(p)}
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
+            {selectedPlatforms.map((p) => (
+              <span key={p.consoleid} className="platform-chip">
+                {p.name}
+                <button
+                  type="button"
+                  className="chip-remove"
+                  onClick={() => onRemovePlatform(p)}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
           </div>
-
-
         </div>
       </div>
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
     </div>
   );
 };

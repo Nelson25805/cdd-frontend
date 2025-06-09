@@ -18,6 +18,7 @@ const GameDetails = () => {
     const { user } = useUser();
     const userId = user?.userid;
     const navigate = useNavigate();
+    const [error, setError] = useState('');
 
     // State variables for game details and form data
     const [gameDetails, setGameDetails] = useState({
@@ -25,6 +26,9 @@ const GameDetails = () => {
         coverart: null,
         platform: "",
     });
+
+    const [availableConsoles, setAvailableConsoles] = useState([]);     // { consoleid, name }[]
+    const [selectedConsoles, setSelectedConsoles] = useState([]);       // same shape
 
     const [formData, setFormData] = useState({
         'Game Info': { platform: '', ownership: '', included: '' },
@@ -47,14 +51,24 @@ const GameDetails = () => {
     }, [game]);
 
 
-    const getGameDetails = async (game) => {
+    const getGameDetails = async (gameId) => {
         const token = localStorage.getItem('token');
-        const result = await fetchGameInfo(game, token);
+        const result = await fetchGameInfo(gameId, token);
         if (result.success) {
             const { gameDetails } = result;
             setGameDetails(gameDetails);
+
+            // Populate the console options
+            setAvailableConsoles(gameDetails.consoles);
+            setSelectedConsoles([]);  // start with none selected
+
+            // Now set the cover image if present
             if (gameDetails.coverart) {
-                setDisplayedCoverImage(`data:image/png;base64,${gameDetails.coverart}`);
+                setDisplayedCoverImage(
+                    `data:image/png;base64,${gameDetails.coverart}`
+                );
+            } else {
+                setDisplayedCoverImage(null);
             }
         } else {
             alert(result.message);
@@ -137,18 +151,38 @@ const GameDetails = () => {
     };
 
     // Event handler for adding game details to the collection
+    // GameDetails.jsx
+
     const handleAddGameDetails = async () => {
-        const token = localStorage.getItem('token');
-        console.log('This is the frontend UserId: ', userId);
-        const result = await addGameDetails(userId, game, formData, token);
+        setError('');
+     if (selectedConsoles.length === 0) {
+       setError('Please select at least one platform before adding.');
+       return;
+     }
+        // flatten the nested formData into exactly the API’s expected shape
+        const details = {
+            ownership: formData['Game Info'].ownership,
+            included: formData['Game Info'].included,
+            checkboxes: formData['Game Status'].checkboxes,
+            notes: formData['Game Status'].notes,
+            completion: formData['Game Log'].gameCompletion,
+            review: formData['Game Log'].review,
+            spoiler: formData['Game Log'].spoilerWarning,
+            price: parseFloat(formData['Game Status'].pricePaid) || null,
+            rating: formData['Game Log'].rating,
+            consoleIds: selectedConsoles.map((c) => c.consoleid),
+        };
+
+        const result = await addGameDetails(userId, game, details);
+
         if (result.success) {
             alert(result.message);
             navigate('/mycollection');
         } else {
-            []
             alert(result.message);
         }
     };
+
 
     // Render UI components
     return (
@@ -197,87 +231,78 @@ const GameDetails = () => {
                     </button>
                 </div>
 
-                {/* Rendering form sections based on the selected section */}
+                {/* -------- Game Info Section -------- */}
                 {selectedSection === 'Game Info' && (
                     <div className="right-section">
-                        <p className="game-information-titles">Platform</p>
-                        {/* Dropdown for selecting the platform */}
-                        <select
-                            name="platform"
-                            value={gameDetails.platform}
-                            onChange={(e) => handleInputChange(e, 'Game Info')}
-                            className='dropdown-box'
-                            disabled
-                        >
-                            <option value="">Select Platform...</option>
-                            {/* Options for different platforms */}
-                            <option value="">Select Platform...</option>
-                            <option value="Xbox">Xbox</option>
-                            <option value="Xbox 360">Xbox 360</option>
-                            <option value="Xbox One">Xbox One</option>
-                            <option value="Nes">NES</option>
-                            <option value="Gameboy">Gameboy</option>
-                            <option value="Gameboy Color">Gameboy Color</option>
-                            <option value="Snes">SNES</option>
-                            <option value="Nintendo 64">Nintendo 64</option>
-                            <option value="Gamecube">Gamecube</option>
-                            <option value="Gameboy Advance">Gameboy Advance</option>
-                            <option value="Wii">Wii</option>
-                            <option value="Wii U">Wii U</option>
-                            <option value="Nintendo Switch">Nintendo Switch</option>
-                            <option value="Playstation 1">Playstation 1</option>
-                            <option value="Playstation 2">Playstation 2</option>
-                            <option value="Playstation 3">Playstation 3</option>
-                            <option value="Playstation 4">Playstation 4</option>
-                        </select>
+                        {error && <p className="error-text">{error}</p>}
+                        <p className="game-information-titles">Platform(s)</p>
 
-                        <p className="game-information-titles">Ownership</p>
-                        {/* Radio buttons for selecting ownership type */}
-                        <div className='ownership-radio-buttons'>
-                            <input
-                                type="radio"
-                                id="physical"
-                                name="ownership"
-                                value="physical"
-                                checked={formData['Game Info'].ownership === 'physical'}
-                                onChange={(e) => handleInputChange(e, 'Game Info')}
-                            />
-                            <label htmlFor="physical">Physical</label>
-                        </div>
-                        <div className='ownership-radio-buttons'>
-                            <input
-                                type="radio"
-                                id="digital"
-                                name="ownership"
-                                value="digital"
-                                checked={formData['Game Info'].ownership === 'digital'}
-                                onChange={(e) => handleInputChange(e, 'Game Info')}
-                            />
-                            <label htmlFor="digital">Digital</label>
-                        </div>
+                        <div className="dual-list-container">
+                            {/* Available List */}
+                            <div className="list available">
+                                <h4>Available</h4>
+                                <div className="list-body">
+                                    {availableConsoles
+                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                        .filter((c) => !selectedConsoles.some((s) => s.consoleid === c.consoleid))
+                                        .map((c) => (
+                                            <div
+                                                key={c.consoleid}
+                                                onClick={() => {
+                                                    const next = [...selectedConsoles, c]
+                                                        .sort((a, b) => a.name.localeCompare(b.name));
+                                                    setSelectedConsoles(next);
+                                                    setFormData(fd => ({
+                                                        ...fd,
+                                                        'Game Info': {
+                                                            ...fd['Game Info'],
+                                                            consoleIds: next.map((x) => x.consoleid),
+                                                        },
+                                                    }));
+                                                }}
+                                            >
+                                                {c.name}
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
 
-                        <p className="game-information-titles">What`s Included</p>
-                        {/* Dropdown for selecting what's included */}
-                        <select
-                            value={formData['Game Info'].included}
-                            onChange={(e) => handleInputChange(e, 'Game Info')}
-                            name="included"
-                            className='dropdown-box'
-                        >
-                            <option value="">Select What`s Included...</option>
-                            {/* Options for what's included */}
-                            <option value="Game Only">Game Only</option>
-                            <option value="Box Only">Box Only</option>
-                            <option value="Manual Only">Manual Only</option>
-                            <option value="Box And Manual">Box and Manual</option>
-                            <option value="Box And Game">Box and Game</option>
-                            <option value="Manual And Game">Manual and Game</option>
-                            <option value="Complete In Box">Complete In Box</option>
-                            <option value="Sealed">Sealed</option>
-                            <option value="Graded">Graded</option>
-                        </select>
+                            {/* Selected List */}
+                            <div className="list selected">
+                                <h4>Selected</h4>
+                                <div className="list-body">
+                                    {selectedConsoles
+                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                        .map((c) => (
+                                            <div
+                                                key={c.consoleid}
+                                            >
+                                                <span>{c.name}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const next = selectedConsoles
+                                                            .filter((x) => x.consoleid !== c.consoleid);
+                                                        setSelectedConsoles(next);
+                                                        setFormData(fd => ({
+                                                            ...fd,
+                                                            'Game Info': {
+                                                                ...fd['Game Info'],
+                                                                consoleIds: next.map((x) => x.consoleid),
+                                                            },
+                                                        }));
+                                                    }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
+
 
                 {selectedSection === 'Game Status' && (
                     <div className="right-section">
@@ -382,7 +407,7 @@ const GameDetails = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

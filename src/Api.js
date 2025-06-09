@@ -2,14 +2,14 @@ import axios from 'axios';
 import TokenManager from './Context/TokenManager';
 
 // base URL
-//const API_BASE_URL = 'http://localhost:5000';
-const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
+const API_BASE_URL = 'http://localhost:5000';
+//const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 
 // create axios instance with credentials
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
-  withCredentials: true,           
+  withCredentials: true,
 });
 
 // attach access token to headers
@@ -110,24 +110,21 @@ export const addGameToDatabase = async (formData) => {
 };
 
 
-// New function to search games based on a query
+// New function to search games based on a query// src/Api.js
 export const searchGames = async (query) => {
-  try {
-    const response = await apiClient.get('/api/search', {
-      params: { q: query },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error searching games:', error);
-    throw error;
-  }
+  const response = await apiClient.get('/api/search', { params: { q: query } });
+  // if the server wrapped it, pull out .results; otherwise assume it's already an array
+  return Array.isArray(response.data)
+    ? response.data
+    : response.data.results || [];
 };
 
 
 // Function to add a game to the user's wishlist
-export const addToWishlist = async (userId, gameId) => {
+export const addToWishlist = async (userId, gameId, consoleIds) => {
   try {
-    const response = await apiClient.post(`/api/add-to-wishlist/${userId}/${gameId}`, {}, {
+    const response = await apiClient.post(`/api/add-to-wishlist/${userId}/${gameId}`,
+      { consoleIds }, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -228,58 +225,54 @@ export const removeGameFromCollection = async (userId, gameId) => {
   }
 };
 
-export const fetchGameInfo = async (game) => {
+/**
+ * Add a game to the user's collection on specific consoles.
+ */
+export const addToCollection = async (userId, gameId, consoleIds) => {
   try {
-    const response = await apiClient.get(`/api/game-info/${game}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await apiClient.post(
+      `/api/add-to-collection/${userId}/${gameId}`,
+      { consoleIds },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error adding to collection:', error);
+    throw error;
+  }
+};
 
-    if (response.status === 200) {
-      const { gameDetails } = response.data;
-      return {
-        success: true,
-        gameDetails: {
-          title: gameDetails.name,
-          coverart: gameDetails.coverart,
-          platform: gameDetails.console,
-        },
-      };
-    } else {
+
+export const fetchGameInfo = async (gameId) => {
+  try {
+    const { data, status } = await apiClient.get(`/api/game-info/${gameId}`);
+    if (status !== 200) {
       return { success: false, message: 'Failed to fetch game details.' };
     }
-  } catch (error) {
-    console.error('Error fetching game details:', error);
+    const { gameDetails } = data;
+    return {
+      success: true,
+      gameDetails: {
+        title: gameDetails.name,
+        coverart: gameDetails.coverart,
+        consoles: gameDetails.consoles,   // ← array of { consoleid, name }
+      },
+    };
+  } catch (err) {
+    console.error('Error fetching game details:', err);
     return { success: false, message: 'Error fetching game details.' };
   }
 };
 
-export const addGameDetails = async (userId, game, formData) => {
-  const { ownership } = formData['Game Info'];
-  const { checkboxes, notes, pricePaid } = formData['Game Status'];
-  const { gameCompletion, rating, review, spoilerWarning } = formData['Game Log'];
-
+export const addGameDetails = async (userId, gameId, details) => {
   try {
-    const response = await apiClient.post(`/api/add-game-details/${userId}/${game}`, {
-      userId,
-      gameId: game,
-      gameDetails: {
-        ownership,
-        included: formData['Game Info'].included,
-        checkboxes: checkboxes.join(', '),
-        notes,
-        completion: gameCompletion,
-        review,
-        spoiler: spoilerWarning,
-        price: parseFloat(pricePaid) || null,
-        rating: parseInt(rating) || null,
-      },
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await apiClient.post(
+      `/api/add-game-details/${userId}/${gameId}`,
+      details,
+      {
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
 
     if (response.status === 200) {
       return { success: true, message: 'Game details added successfully!' };
@@ -293,16 +286,18 @@ export const addGameDetails = async (userId, game, formData) => {
 };
 
 
+
 // Fetch detailed game information
-export const fetchGameDetails = async (userId, game) => {
+export const fetchGameDetails = async (userId, gameId) => {
   try {
-    const response = await apiClient.get(`/api/get-game-details/${userId}/${game}`);
-    return response.data.gameDetails;
+    const response = await apiClient.get(`/api/get-game-details/${userId}/${gameId}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching detailed game info:', error);
     throw error;
   }
 };
+
 
 
 // Edit game details

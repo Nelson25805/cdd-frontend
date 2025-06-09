@@ -46,9 +46,13 @@ const Search = () => {
     if (!Array.isArray(searchResults)) return [];
 
     // filter
-    const filtered = searchResults.filter((g) =>
-      filterConsole === 'All' ? true : g.Console === filterConsole
-    );
+    const filtered = searchResults.filter((g) => {
+      if (filterConsole === 'All') return true;
+      // g.Consoles is now an array of {consoleid,name}
+      return Array.isArray(g.Consoles)
+        ? g.Consoles.some((c) => c.name === filterConsole)
+        : false;
+    });
     // sort
     filtered.sort((a, b) => {
       const dir = sortDirection === 'Ascending' ? 1 : -1;
@@ -64,7 +68,7 @@ const Search = () => {
     let active = true;
     const fetchResults = async () => {
       try {
-        const { results } = await searchGames(searchQuery, token);
+        const results = await searchGames(searchQuery, token);
         if (!active) return;
         setSearchResults(Array.isArray(results) ? results : []);
       } catch {
@@ -188,21 +192,15 @@ const Search = () => {
                   {/* 2️⃣ Console cell (scrollable) */}
                   <div className="console-cell">
                     <div className="console-list">
-                      {(
-                        Array.isArray(game.Consoles)
-                          ? game.Consoles
-                          : game.Console.split(',')
-                      )
-                        // 1) Trim whitespace off each entry
-                        .map((c) => c.trim())
-                        // 2) Sort alphabetically
+                      {Array.isArray(game.Consoles) && game.Consoles
+                        .map((c) => c.name)           // pull out just the names
                         .sort((a, b) => a.localeCompare(b))
-                        // 3) Render each as its own item
-                        .map((c) => (
-                          <div key={c} className="console-item">
-                            {c}
+                        .map((name) => (
+                          <div key={name} className="console-item">
+                            {name}
                           </div>
-                        ))}
+                        ))
+                      }
                     </div>
                   </div>
 

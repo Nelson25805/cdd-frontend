@@ -9,7 +9,7 @@ import '../App.css';
 import { useSortFilter } from '../Context/useSortFilter';
 import SortFilterControls from '../Context/SortFilterControls';
 
-function MyCollection() {
+export default function MyCollection() {
   const [itemsLoaded, setItemsLoaded] = useState(false);
   const [loadingDots, setLoadingDots] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -70,9 +70,12 @@ function MyCollection() {
 
   // 3️⃣ apply filter, sort, paginate using context values
   const applySortAndFilter = () => {
-    const filtered = collectionItems.filter(g =>
-      filterConsole === 'All' ? true : g.Console === filterConsole
-    );
+    const filtered = collectionItems.filter((g) => {
+      if (filterConsole === 'All') return true;
+      return Array.isArray(g.Consoles)
+        ? g.Consoles.some((c) => c.name === filterConsole)
+        : false;
+    });
     filtered.sort((a, b) => {
       const dir = sortDirection === 'Ascending' ? 1 : -1;
       return a.Name.localeCompare(b.Name) * dir;
@@ -83,9 +86,12 @@ function MyCollection() {
 
   // total pages based on filtered length
   const totalPages = Math.ceil(
-    collectionItems.filter(g =>
-      filterConsole === 'All' ? true : g.Console === filterConsole
-    ).length / itemsPerPage
+    collectionItems.filter((g) => {
+      if (filterConsole === 'All') return true;
+      return Array.isArray(g.Consoles)
+        ? g.Consoles.some((c) => c.name === filterConsole)
+        : false;
+    }).length / itemsPerPage
   );
 
   return (
@@ -99,9 +105,7 @@ function MyCollection() {
           <SortFilterControls />
 
           <div className="game-section">
-            {(!itemsLoaded && loadingDots) && (
-              <p>Loading…{loadingDots}</p>
-            )}
+            {!itemsLoaded && <p>Loading…{loadingDots}</p>}
 
             <div className="game-item-header">
               <div className="game-item-header-photo"><p>Photo</p></div>
@@ -112,47 +116,47 @@ function MyCollection() {
               <div className="game-item-header-actions"><p>Actions</p></div>
             </div>
 
-            {applySortAndFilter().map(game => (
+            {applySortAndFilter().map((game) => (
               <div key={game.GameId} className="game-item">
-                <img src={`data:image/png;base64,${game.CoverArt}`} alt={game.Name} />
+                <img
+                  src={`data:image/jpg;base64,${game.CoverArt}`}
+                  alt={game.Name}
+                />
+
                 <div className="game-item-name-console">
-                  {/* 1️⃣ Name cell (scrollable) */}
+                  {/* Name */}
                   <div className="name-cell">
                     <div className="name-list">
                       <p className="game-item-name">{game.Name}</p>
                     </div>
                   </div>
 
-                  {/* 2️⃣ Console cell (scrollable) */}
+                  {/* Consoles */}
                   <div className="console-cell">
                     <div className="console-list">
-                      {(
-                        Array.isArray(game.Consoles)
-                          ? game.Consoles
-                          : game.Console.split(',')
-                      )
-                        // 1) Trim whitespace off each entry
-                        .map((c) => c.trim())
-                        // 2) Sort alphabetically
+                      {(Array.isArray(game.Consoles) ? game.Consoles.map(c => c.name) : [])
                         .sort((a, b) => a.localeCompare(b))
-                        // 3) Render each as its own item
-                        .map((c) => (
-                          <div key={c} className="console-item">
-                            {c}
+                        .map((name) => (
+                          <div key={name} className="console-item">
+                            {name}
                           </div>
                         ))}
                     </div>
                   </div>
-
-
-
                 </div>
+
                 <div className="game-item-actions">
-                  <button className="link-button" onClick={() => handleEditGameDetails(game)}>
+                  <button
+                    className="link-button"
+                    onClick={() => handleEditGameDetails(game)}
+                  >
                     Edit
                   </button>
                   <span> | </span>
-                  <button className="link-button" onClick={() => handleRemoveGame(game.GameId)}>
+                  <button
+                    className="link-button"
+                    onClick={() => handleRemoveGame(game.GameId)}
+                  >
                     Remove
                   </button>
                 </div>
@@ -174,5 +178,3 @@ function MyCollection() {
     </div>
   );
 }
-
-export default MyCollection;
