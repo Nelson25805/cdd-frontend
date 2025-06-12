@@ -12,12 +12,12 @@ const SortFilterControls = () => {
     setFilterConsole,
   } = useSortFilter();
 
-  // 1) RESET sortDirection → "Ascending" every time this component mounts
+  // 1) RESET sortDirection → "Ascending" every mount
   useEffect(() => {
     setSortDirection('Ascending');
   }, [setSortDirection]);
 
-  // 2) RESET filterConsole → "All" every time this component mounts
+  // 2) RESET filterConsole → "All" every mount
   useEffect(() => {
     setFilterConsole('All');
   }, [setFilterConsole]);
@@ -26,10 +26,7 @@ const SortFilterControls = () => {
   const [searchTerm, setSearchTerm] = useState(
     filterConsole === 'All' ? '' : filterConsole
   );
-  // Whether to show the dropdown
   const [showDropdown, setShowDropdown] = useState(false);
-
-  // Ref on the wrapper to detect clicks outside
   const wrapperRef = useRef(null);
 
   // Sync local searchTerm whenever filterConsole changes
@@ -41,15 +38,20 @@ const SortFilterControls = () => {
     }
   }, [filterConsole]);
 
-  // Filtered list of console names matching searchTerm (only once 2+ letters typed)
+  // 3) Safely coerce CONSOLE_OPTIONS into an array of strings
+  const consoleNames = CONSOLE_OPTIONS.map(opt =>
+    typeof opt === 'string' ? opt : opt.name
+  );
+
+  // 4) Filter suggestions only when searchTerm >= 2 chars
   const matchingConsoles =
     searchTerm.length >= 2
-      ? CONSOLE_OPTIONS.filter((name) =>
+      ? consoleNames.filter(name =>
           name.toLowerCase().includes(searchTerm.toLowerCase())
         )
       : [];
 
-  // Click‐outside logic: if user clicks outside of the wrapper, close dropdown
+  // Click‐outside logic to close dropdown
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -65,31 +67,29 @@ const SortFilterControls = () => {
     };
   }, [wrapperRef]);
 
-  // Handler when user types into the search box
+  // Handle typing
   const onInputChange = (e) => {
     const val = e.target.value;
     setSearchTerm(val);
 
-    // If they clear it fully, reset filterConsole to “All”
     if (val === '') {
       setFilterConsole('All');
       setShowDropdown(false);
     } else if (val.length >= 2) {
       setShowDropdown(true);
     } else {
-      // If length < 2, don’t show any suggestions
       setShowDropdown(false);
     }
   };
 
-  // Handler when user clicks a suggestion
+  // When user picks a console
   const onSelectConsole = (consoleName) => {
     setSearchTerm(consoleName);
     setFilterConsole(consoleName);
     setShowDropdown(false);
   };
 
-  // If user hits Enter in the box when there’s exactly one match, pick it automatically
+  // Enter to select if only one match
   const onKeyDown = (e) => {
     if (e.key === 'Enter' && matchingConsoles.length === 1) {
       onSelectConsole(matchingConsoles[0]);
@@ -122,7 +122,6 @@ const SortFilterControls = () => {
         </label>
       </div>
 
-
       <div ref={wrapperRef} className="filter-console-wrapper">
         <p>Filter By Console:</p>
         <input
@@ -133,23 +132,17 @@ const SortFilterControls = () => {
           onChange={onInputChange}
           onKeyDown={onKeyDown}
           onFocus={() => {
-            if (searchTerm.length >= 2) {
-              setShowDropdown(true);
-            }
+            if (searchTerm.length >= 2) setShowDropdown(true);
           }}
         />
 
-        {/* Dropdown suggestions */}
         {showDropdown && matchingConsoles.length > 0 && (
           <ul className="console-suggestions">
             {matchingConsoles.map((name) => (
               <li
                 key={name}
                 className="console-suggestion-item"
-                onMouseDown={(e) => {
-                  // Prevent the input from losing focus before the click handler fires
-                  e.preventDefault();
-                }}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => onSelectConsole(name)}
               >
                 {name}
@@ -158,11 +151,8 @@ const SortFilterControls = () => {
           </ul>
         )}
 
-        {/* “Showing all consoles” hint */}
         {searchTerm === '' && filterConsole === 'All' && (
-          <p className="console-hint">
-            Showing all consoles
-          </p>
+          <p className="console-hint">Showing all consoles</p>
         )}
       </div>
     </div>
