@@ -24,7 +24,6 @@ export default function MyCollection() {
   // 2️⃣ Grab sort/filter values from context
   const { sortDirection, filterConsole } = useSortFilter();
 
-  const handleNextPage = () => setCurrentPage((p) => p + 1);
   const handlePrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
 
   // fetch only when userId changes
@@ -68,31 +67,34 @@ export default function MyCollection() {
     navigate(`/editgamedetails?q=${encodeURIComponent(game.GameId)}`);
   };
 
-  // 3️⃣ apply filter, sort, paginate using context values
-  const applySortAndFilter = () => {
-    const filtered = collectionItems.filter((g) => {
-      if (filterConsole === 'All') return true;
-      return Array.isArray(g.Consoles)
-        ? g.Consoles.some((c) => c.name === filterConsole)
-        : false;
-    });
-    filtered.sort((a, b) => {
-      const dir = sortDirection === 'Ascending' ? 1 : -1;
-      return a.Name.localeCompare(b.Name) * dir;
-    });
-    const start = (currentPage - 1) * itemsPerPage;
-    return filtered.slice(start, start + itemsPerPage);
-  };
+  // 3️⃣ Build one filtered array
+  const filteredResults = collectionItems.filter((g) => {
+    if (filterConsole === 'All') return true;
+    return Array.isArray(g.Consoles)
+      ? g.Consoles.some((c) => c.name === filterConsole)
+      : false;
+  });
 
-  // total pages based on filtered length
-  const totalPages = Math.ceil(
-    collectionItems.filter((g) => {
-      if (filterConsole === 'All') return true;
-      return Array.isArray(g.Consoles)
-        ? g.Consoles.some((c) => c.name === filterConsole)
-        : false;
-    }).length / itemsPerPage
-  );
+  // 4️⃣ Sort it
+  const sortedResults = [...filteredResults].sort((a, b) => {
+    const dir = sortDirection === 'Ascending' ? 1 : -1;
+    return a.Name.localeCompare(b.Name) * dir;
+  });
+
+  // 5️⃣ Slice out this page
+  const start = (currentPage - 1) * itemsPerPage;
+  const pageResults = sortedResults.slice(start, start + itemsPerPage);
+
+  // 6️⃣ Compute total pages (ensure at least 1)
+  const rawTotal = Math.ceil(filteredResults.length / itemsPerPage);
+  const totalPages = rawTotal > 0 ? rawTotal : 1;
+
+  // 7️⃣ Clamp currentPage if filter reduces totalPages
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   return (
     <div className="App">
@@ -116,7 +118,7 @@ export default function MyCollection() {
               <div className="game-item-header-actions"><p>Actions</p></div>
             </div>
 
-            {applySortAndFilter().map((game) => (
+            {pageResults.map((game) => (
               <div key={game.GameId} className="game-item">
                 <img
                   src={`data:image/jpg;base64,${game.CoverArt}`}
@@ -168,9 +170,12 @@ export default function MyCollection() {
                 Previous
               </button>
               <span> Page {currentPage} of {totalPages} </span>
-              <button onClick={handleNextPage} disabled={currentPage === totalPages}>
-                Next
-              </button>
+              <button
+              onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+              disabled={currentPage >= totalPages}
+            >
+               Next
+             </button>
             </div>
           </div>
         </main>

@@ -37,31 +37,8 @@ const Search = () => {
   useEffect(() => {
     if (!token) navigate('/login');
   }, [token, navigate]);
-
-  const handleNextPage = () => setCurrentPage((p) => p + 1);
+  
   const handlePrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
-
-  // 3️⃣ Use context values in your filtering/sorting/pagination
-  const applySortAndFilter = () => {
-    if (!Array.isArray(searchResults)) return [];
-
-    // filter
-    const filtered = searchResults.filter((g) => {
-      if (filterConsole === 'All') return true;
-      // g.Consoles is now an array of {consoleid,name}
-      return Array.isArray(g.Consoles)
-        ? g.Consoles.some((c) => c.name === filterConsole)
-        : false;
-    });
-    // sort
-    filtered.sort((a, b) => {
-      const dir = sortDirection === 'Ascending' ? 1 : -1;
-      return a.Name.localeCompare(b.Name) * dir;
-    });
-    // paginate
-    const start = (currentPage - 1) * itemsPerPage;
-    return filtered.slice(start, start + itemsPerPage);
-  };
 
   // Fetch on query/token change
   useEffect(() => {
@@ -140,14 +117,37 @@ const Search = () => {
     }
   };
 
-  // Calculate total pages for UI
-  const totalPages = Math.ceil(
-    (Array.isArray(searchResults)
-      ? searchResults.filter((g) =>
-        filterConsole === 'All' ? true : g.Console === filterConsole
-      ).length
-      : 0) / itemsPerPage
-  );
+  // 1️⃣ Build the filtered list once, so we can both paginate and count correctly
+  const filteredResults = Array.isArray(searchResults)
+    ? searchResults.filter((g) => {
+      if (filterConsole === 'All') return true;
+      return Array.isArray(g.Consoles)
+        ? g.Consoles.some((c) => c.name === filterConsole)
+        : false;
+    })
+    : [];
+
+  // 2️⃣ Sort that filtered list
+  const sortedResults = [...filteredResults].sort((a, b) => {
+    const dir = sortDirection === 'Ascending' ? 1 : -1;
+    return a.Name.localeCompare(b.Name) * dir;
+  });
+
+  // 3️⃣ Then paginate
+  const start = (currentPage - 1) * itemsPerPage;
+  const pageResults = sortedResults.slice(start, start + itemsPerPage);
+
+  // 4️⃣ Now compute totalPages based on the filtered length
+  const rawTotal = Math.ceil(filteredResults.length / itemsPerPage);
+  const totalPages = rawTotal > 0 ? rawTotal : 1; // ensure at least 1 page
+
+  // 5️⃣ Clamp currentPage in case the filter changed it to > totalPages
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
 
   return (
     <div className="App">
@@ -171,7 +171,7 @@ const Search = () => {
               <div className="game-item-header-actions"><p>Actions</p></div>
             </div>
 
-            {applySortAndFilter().map((game) => (
+            {pageResults.map((game) => (
               <div key={game.GameId} className="game-item">
                 <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
 
@@ -223,7 +223,10 @@ const Search = () => {
                 Previous
               </button>
               <span> Page {currentPage} of {totalPages} </span>
-              <button onClick={handleNextPage} disabled={currentPage === totalPages}>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage >= totalPages}
+              >
                 Next
               </button>
             </div>

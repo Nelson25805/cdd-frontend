@@ -22,7 +22,6 @@ function MyWishlist() {
   // 2️⃣ get context values
   const { sortDirection, filterConsole } = useSortFilter();
 
-  const handleNextPage = () => setCurrentPage((p) => p + 1);
   const handlePrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
 
   const fetchWishlistItems = useCallback(async () => {
@@ -65,24 +64,29 @@ function MyWishlist() {
 
   if (userLoading) return <div>Loading user data…</div>;
 
-  // 3️⃣ filter, sort, paginate
-  const applySortAndFilter = () => {
-    const filtered = wishlistItems.filter(g =>
-      filterConsole === 'All' ? true : g.Console === filterConsole
-    );
-    filtered.sort((a, b) => {
-      const dir = sortDirection === 'Ascending' ? 1 : -1;
-      return a.Name.localeCompare(b.Name) * dir;
-    });
-    const start = (currentPage - 1) * itemsPerPage;
-    return filtered.slice(start, start + itemsPerPage);
-  };
-
-  const totalPages = Math.ceil(
-    wishlistItems.filter(g =>
-      filterConsole === 'All' ? true : g.Console === filterConsole
-    ).length / itemsPerPage
+  // 3️⃣ Build one filtered array…
+  const filteredResults = wishlistItems.filter(g =>
+    filterConsole === 'All'
+      ? true
+      : Array.isArray(g.Consoles)
+        ? g.Consoles.some(c => c.name === filterConsole)
+        : false
   );
+
+  // 4️⃣ Sort it
+  const sortedResults = [...filteredResults].sort((a, b) => {
+    const dir = sortDirection === 'Ascending' ? 1 : -1;
+    return a.Name.localeCompare(b.Name) * dir;
+  });
+
+  // 5️⃣ Slice out just this page
+  const start = (currentPage - 1) * itemsPerPage;
+  const pageResults = sortedResults.slice(start, start + itemsPerPage);
+
+  // 6️⃣ Compute total pages
+  const rawTotal = Math.ceil(filteredResults.length / itemsPerPage);
+  const totalPages = rawTotal > 0 ? rawTotal : 1;
+
 
   return (
     <div className="App">
@@ -106,7 +110,7 @@ function MyWishlist() {
               <div className="game-item-header-actions"><p>Actions</p></div>
             </div>
 
-            {applySortAndFilter().map(game => (
+            {pageResults.map(game => (
               <div key={game.GameId} className="game-item">
                 <img src={`data:image/png;base64,${game.CoverArt}`} alt={game.Name} />
                 <div className="game-item-name-console">
@@ -147,7 +151,9 @@ function MyWishlist() {
                 Previous
               </button>
               <span> Page {currentPage} of {totalPages} </span>
-              <button onClick={handleNextPage} disabled={currentPage === totalPages}>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                disabled={currentPage >= totalPages}>
                 Next
               </button>
             </div>
