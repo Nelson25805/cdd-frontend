@@ -5,7 +5,7 @@ import TopLinks from '../Context/TopLinks';
 import { useUser } from '../Context/useUser';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
-import { searchGames, addToWishlist, checkGameDetails } from '../Api';
+import { searchGames, checkGameDetails, checkWishlist } from '../Api';
 
 // 1️⃣ Import the context hook and controls component
 import { useSortFilter } from '../Context/useSortFilter';
@@ -97,33 +97,27 @@ const Search = () => {
   }, []);
 
   // Wishlist / Details handlers unchanged…
-  const handleAddToWishlist = async (game) => {
-    if (!token) {
-      // not logged in, bounce to login
-      return navigate('/login');
-    }
 
+  const handleAddToWishlist = async (game) => {
+    if (!token) return navigate('/login');
+    navigate(`/WishlistDetails?q=${encodeURIComponent(game.GameId)}`);
+    // first ask the server whether it's already in the wishlist
     try {
-      console.log('UserId:', userId, 'GameId:', game.GameId);
-      const response = await addToWishlist(userId, game.GameId);
-      console.log('Added to wishlist:', response);
-      alert('Game added to wishlist successfully!');
-    } catch (error) {
-      // If the server sends a 409 Conflict for “already in wishlist”
-      if (error.response?.status === 409) {
+      const { hasWishlist } = await checkWishlist(userId, game.GameId);
+      if (hasWishlist) {
         return alert('This game is already in your wishlist.');
       }
 
-      // Otherwise fallback to the generic error
-      console.error('Error adding to wishlist:', error);
-      const msg =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        'Unknown error';
-      alert('Error adding game to wishlist: ' + msg);
+      // otherwise proceed to your WishlistDetails page
+      navigate(`/WishlistDetails?q=${encodeURIComponent(game.GameId)}`);
+    } catch (err) {
+      console.error('Error checking wishlist:', err);
+      alert('Unable to check wishlist status right now.');
     }
   };
+
+
+
 
   const handleGameDetails = async (game) => {
     if (!token) {
@@ -214,10 +208,11 @@ const Search = () => {
                   >
                     + Collection (With Details)
                   </button>
-                  <button className="link-button"
+                  <button
+                    className="link-button"
                     onClick={() => handleAddToWishlist(game)}
                   >
-                    + Wishlist
+                    + Wishlist (Select Platforms)
                   </button>
                 </div>
               </div>

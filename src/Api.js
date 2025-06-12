@@ -2,8 +2,8 @@ import axios from 'axios';
 import TokenManager from './Context/TokenManager';
 
 // base URL
-//const API_BASE_URL = 'http://localhost:5000';
-const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
+const API_BASE_URL = 'http://localhost:5000';
+//const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 
 // create axios instance with credentials
 const apiClient = axios.create({
@@ -119,21 +119,27 @@ export const searchGames = async (query) => {
     : response.data.results || [];
 };
 
+// Function to check if a game is in the user's wishlist
+export const checkWishlist = async (userId, gameId) => {
+  try {
+    const response = await apiClient.get(
+      `/api/check-wishlist/${userId}/${gameId}`,
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+    return response.data;   // { hasWishlist: boolean }
+  } catch (err) {
+    console.error('Error checking wishlist:', err);
+    throw err;
+  }
+};
 
 // Function to add a game to the user's wishlist
 export const addToWishlist = async (userId, gameId, consoleIds) => {
-  try {
-    const response = await apiClient.post(`/api/add-to-wishlist/${userId}/${gameId}`,
-      { consoleIds }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error adding to wishlist:', error);
-    throw error;
-  }
+  const response = await apiClient.post(
+    `/api/add-game-wishlist/${userId}/${gameId}`,
+    { consoleIds }
+  );
+  return response.data;
 };
 
 
