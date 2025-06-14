@@ -18,6 +18,7 @@ import AdminRoute from './Context/AdminRoute.jsx';
 import { SortFilterProvider } from './Context/SortFilterContext.jsx';
 import { Outlet } from 'react-router-dom';
 import WishlistDetails from './Pages/WishlistDetails.jsx';
+import EditWishlistDetails from './Pages/EditWishlistDetails.jsx';
 
 const SortFilterLayout = () => (
   <SortFilterProvider>
@@ -53,6 +54,7 @@ const App = () => {
             <Route path="/AccountSettings" element={<AccountSettings />} />
             <Route path="/EditGameDetails" element={<EditGameDetails />} />
             <Route path="/WishlistDetails" element={<WishlistDetails />} />
+            <Route path="/EditWishlistDetails" element={<EditWishlistDetails />} />
 
 
             {/* Admin-only route nested within PrivateRoute */}

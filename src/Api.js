@@ -174,6 +174,30 @@ export const removeFromWishlist = async (userId, gameId) => {
   }
 };
 
+// fetch the consoles currently on the wishlist entry
+export const fetchWishlistDetails = async (userId, gameId) => {
+  try {
+    const response = await apiClient.get(
+      `/api/get-wishlist-details/${userId}/${gameId}`
+    );
+    // server should respond with { consoles: [ { consoleid, name }, … ] }
+    return response.data;
+  } catch (err) {
+    console.error("Error in fetchWishlistDetails:", err.response?.data || err);
+    throw err;
+  }
+};
+
+// update only the consoles on the wishlist entry
+export const editWishlistDetails = async (userId, gameId, { consoleIds }) => {
+  const res = await apiClient.put(
+    `/api/edit-wishlist/${userId}/${gameId}`,
+    { consoleIds },
+    { headers: { 'Content-Type':'application/json' } }
+  );
+  return { success: res.status === 200 };
+};
+
 
 // Function to check if a user has game details
 export const checkGameDetails = async (userId, gameId) => {

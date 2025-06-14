@@ -3,6 +3,7 @@ import TopLinks from '../Context/TopLinks';
 import { useUser } from '../Context/useUser';
 import { getWishlist, removeFromWishlist } from '../Api';
 import '../App.css';
+import { useNavigate } from 'react-router-dom';
 
 // 1️⃣ shared context + controls
 import { useSortFilter } from '../Context/useSortFilter';
@@ -15,6 +16,7 @@ function MyWishlist() {
   const itemsPerPage = 5;
   const [wishlistItems, setWishlistItems] = useState([]);
   const [, setLoading] = useState(false);
+    const navigate = useNavigate();
 
   const { user, loading: userLoading } = useUser();
   const userId = user?.userid;
@@ -139,9 +141,14 @@ function MyWishlist() {
 
                 </div>
                 <div className="game-item-actions">
+                  <button className="link-button" onClick={() => navigate(`/EditWishlistDetails?q=${game.GameId}`)}>
+                    Edit
+                  </button>
+                  <span> | </span>
                   <button className="link-button" onClick={() => handleRemove(game.GameId)}>
                     Remove
                   </button>
+                  
                 </div>
               </div>
             ))}
