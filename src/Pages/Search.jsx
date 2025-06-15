@@ -206,13 +206,13 @@ const Search = () => {
                     className="link-button"
                     onClick={() => handleGameDetails(game)}
                   >
-                    + Collection (With Details)
+                    + Add To Collection
                   </button>
                   <button
                     className="link-button"
                     onClick={() => handleAddToWishlist(game)}
                   >
-                    + Wishlist (Select Platforms)
+                    + Add To Wishlist
                   </button>
                 </div>
               </div>
