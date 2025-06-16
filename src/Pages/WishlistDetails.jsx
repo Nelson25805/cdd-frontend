@@ -56,44 +56,48 @@ export default function WishlistDetails() {
     return (
         <div className="App">
             <TopLinks user={user} />
-            <div className="left-section">
-                <p className="game-information-titles">Title</p>
-                <input value={gameDetails.title} disabled />
-                <p className="game-information-titles">Cover Art</p>
-                <div className="display-image">
-                    {gameDetails.coverart ? (
-                        <img src={`data:image/png;base64,${gameDetails.coverart}`} alt="" />
-                    ) : (
-                        'No image'
-                    )}
-                </div>
-                <button onClick={handleSave} className="add-game-button">
-                    Add to Wishlist
-                </button>
-                {error && <p className="error-text">{error}</p>}
-            </div>
+            <div className="game-information">
 
-            <div className="right-section">
-                <p className="game-information-titles">Platforms</p>
-                <div className="dual-list-container">
-                    <div className="list available">
-                        <h4>Available</h4>
-                        <div className="list-body">
-                            {availableConsoles.map(c => (
-                                <div key={c.consoleid} onClick={() => addConsole(c)}>
-                                    {c.name}
-                                </div>
-                            ))}
-                        </div>
+
+                <div className="left-section">
+                    <p className="game-information-titles">Title</p>
+                    <input value={gameDetails.title} disabled />
+                    <p className="game-information-titles">Cover Art</p>
+                    <div className="display-image">
+                        {gameDetails.coverart ? (
+                            <img src={`data:image/png;base64,${gameDetails.coverart}`} alt="" />
+                        ) : (
+                            'No image'
+                        )}
                     </div>
-                    <div className="list selected">
-                        <h4>Selected</h4>
-                        <div className="list-body">
-                            {selectedConsoles.map(c => (
-                                <div key={c.consoleid}>
-                                    {c.name} <button onClick={() => removeConsole(c)}>×</button>
-                                </div>
-                            ))}
+                    <button onClick={handleSave} className="add-game-button">
+                        Add to Wishlist
+                    </button>
+                    {error && <p className="error-text">{error}</p>}
+                </div>
+
+                <div className="right-section">
+                    <p className="game-information-titles">Platforms</p>
+                    <div className="dual-list-container">
+                        <div className="list available">
+                            <h4>Available</h4>
+                            <div className="list-body">
+                                {availableConsoles.map(c => (
+                                    <div key={c.consoleid} onClick={() => addConsole(c)}>
+                                        {c.name}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="list selected">
+                            <h4>Selected</h4>
+                            <div className="list-body">
+                                {selectedConsoles.map(c => (
+                                    <div key={c.consoleid}>
+                                        {c.name} <button onClick={() => removeConsole(c)}>×</button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
