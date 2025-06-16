@@ -114,16 +114,6 @@ const GameDetails = () => {
             setSelectedSection('Game Info');
             return;
         }
-        if (!ownership) {
-            setError('Please choose Physical or Digital ownership.');
-            setSelectedSection('Game Info');
-            return;
-        }
-        if (!included) {
-            setError('Please choose what’s included.');
-            setSelectedSection('Game Info');
-            return;
-        }
 
         const details = {
             ownership,
