@@ -290,6 +290,23 @@ input[type="email"] {
   z-index: 1000;
 }
 
+/* in App.css or a module (e.g. CoverImage.module.css) */
+
+.cover-image {
+  width: 100%;           /* fill the container’s width */
+  height: auto;          /* preserve aspect ratio */
+  object-fit: contain;   /* ensure the entire image is visible */
+  background: #f0f0f0;   /* light gray behind empty areas */
+  border-radius: 4px;
+}
+
+
+.game-item-photo {
+  max-width: 120px;
+  max-height: 160px;
+  margin-right: 1rem;
+}
+
 
 
 

@@ -10,6 +10,7 @@ import { searchGames, checkGameDetails, checkWishlist } from '../Api';
 // 1️⃣ Import the context hook and controls component
 import { useSortFilter } from '../Context/useSortFilter';
 import SortFilterControls from '../Context/SortFilterControls';
+import CoverImage from '../Context/CoverImage';
 
 
 const Search = () => {
@@ -173,7 +174,7 @@ const Search = () => {
 
             {pageResults.map((game) => (
               <div key={game.GameId} className="game-item">
-                <img src={`data:image/jpg;base64,${game.CoverArt}`} alt={game.Name} />
+                <CoverImage cover={game.CoverArt} alt={game.Name} className="game-item-photo" />
 
                 <div className="game-item-name-console">
                   {/* 1️⃣ Name cell (scrollable) */}
@@ -199,6 +200,7 @@ const Search = () => {
                   </div>
 
                 </div>
+                
 
 
                 <div className="game-item-actions">
@@ -216,7 +218,9 @@ const Search = () => {
                   </button>
                 </div>
               </div>
+              
             ))}
+            
 
             <div className="pagination-controls">
               <button onClick={handlePrevPage} disabled={currentPage === 1}>
