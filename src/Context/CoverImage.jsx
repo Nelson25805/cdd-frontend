@@ -1,4 +1,3 @@
-// src/components/CoverImage.jsx
 import PropTypes from 'prop-types';
 import getImageSrc from '../Context/imageHelper';
 // if you put it in src/assets, import it:
@@ -6,7 +5,11 @@ import getImageSrc from '../Context/imageHelper';
 
 const placeholder = '/no-cover.png';
 
-export default function CoverImage({ cover, alt, className }) {
+export default function CoverImage({
+  cover = null,
+  alt = '',
+  className = '',
+}) {
   const src = cover
     ? getImageSrc(cover)
     : placeholder;
@@ -33,10 +36,4 @@ CoverImage.propTypes = {
   alt: PropTypes.string,
   /** Additional CSS classes */
   className: PropTypes.string,
-};
-
-CoverImage.defaultProps = {
-  cover: null,
-  alt: '',
-  className: '',
 };
