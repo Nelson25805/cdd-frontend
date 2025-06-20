@@ -38,7 +38,7 @@ const Search = () => {
   useEffect(() => {
     if (!token) navigate('/login');
   }, [token, navigate]);
-  
+
   const handlePrevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
 
   // Fetch on query/token change
@@ -174,7 +174,9 @@ const Search = () => {
 
             {pageResults.map((game) => (
               <div key={game.GameId} className="game-item">
-                <CoverImage cover={game.CoverArt} alt={game.Name} className="game-item-photo" />
+                <div className="game-item-photo">
+                  <CoverImage cover={game.CoverArt} alt={game.Name} />
+                </div>
 
                 <div className="game-item-name-console">
                   {/* 1️⃣ Name cell (scrollable) */}
@@ -200,7 +202,7 @@ const Search = () => {
                   </div>
 
                 </div>
-                
+
 
 
                 <div className="game-item-actions">
@@ -218,9 +220,9 @@ const Search = () => {
                   </button>
                 </div>
               </div>
-              
+
             ))}
-            
+
 
             <div className="pagination-controls">
               <button onClick={handlePrevPage} disabled={currentPage === 1}>

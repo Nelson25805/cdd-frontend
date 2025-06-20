@@ -1,29 +1,34 @@
 // src/utils/imageHelper.js
-// Utility to normalize cover image sources (base64 or IGDB URL fragment)
 
 /**
- * Returns a valid <img> src for a given cover string.
- * - If it starts with '//' assumes IGDB URL fragment and prefixes https:
- * - If it looks like base64 (no leading //), prefixes a data URI header
- * - Otherwise returns the original string
+ * Returns a valid <img> src for a given cover string,
+ * but uses a larger IGDB size instead of the tiny thumb.
  *
- * @param {string} cover - The raw cover value from the API
- * @returns {string} A normalized image src
+ * IGDB size tokens include:
+ *  • t_thumb        – 90×90
+ *  • t_cover_small  – 90×128
+ *  • t_cover_big    – 264×374
+ *  • t_720p         – 720×960
+ *  etc.
  */
-export function getImageSrc(cover) {
+export function getImageSrc(cover, size = 'cover_big') {
   if (!cover) {
-    // No cover provided
     return '';
   }
 
-  // IGDB URL fragment: //images.igdb.com/...
+  // If it’s an IGDB fragment (starts with “//images.igdb.com…”),
+  // replace the “t_…” part with your chosen size token:
   if (cover.startsWith('//')) {
-    return `https:${cover}`;
+    // e.g. "//images.igdb.com/igdb/image/upload/t_thumb/co7k6g.jpg"
+    return `https:${cover.replace(/t_[^/]+/, `t_${size}`)}`;
   }
 
-  // Base64 blob (assumes raw base64 string without data URI prefix)
-  // You may adjust this check if you store other formats
-  return `data:image/jpeg;base64,${cover}`;
+  // Otherwise assume it’s base64 or a full URL already:
+  if (/^[A-Za-z0-9+/=]+$/.test(cover)) {
+    return `data:image/jpeg;base64,${cover}`;
+  }
+
+  return cover;
 }
 
 export default getImageSrc;
