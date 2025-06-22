@@ -64,7 +64,7 @@ export default function WishlistDetails() {
                     <p className="game-information-titles">Title</p>
                     <input value={gameDetails.title} disabled />
                     <p className="game-information-titles">Cover Art</p>
-                    <div className="display-image">
+                    <div className="game-item-photo">
                         {gameDetails.coverart
                             ? <CoverImage
                                 cover={gameDetails.coverart}

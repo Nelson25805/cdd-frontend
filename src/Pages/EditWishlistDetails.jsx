@@ -86,7 +86,7 @@ export default function EditWishlistDetails() {
           <input value={title} disabled />
 
           <p className="game-information-titles">Cover</p>
-          <div className="display-image">
+          <div className="game-item-photo">
             {cover
               ? <CoverImage cover={cover} alt={title} />
               : 'No image'
