@@ -6,6 +6,7 @@ import StarRating from '../Context/StarRating';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchGameInfo, fetchGameDetails, editGameDetails } from '../Api';
+import CoverImage from '../Context/CoverImage';
 
 const EditGameDetails = () => {
     const location = useLocation();
@@ -39,7 +40,7 @@ const EditGameDetails = () => {
                 if (basic.success) {
                     const { title, coverart, consoles } = basic.gameDetails;
                     setGameTitle(title || '');
-                    setDisplayedCoverImage(coverart ? `data:image/png;base64,${coverart}` : null);
+                    setDisplayedCoverImage(coverart || null);
                     allConsoles = consoles;
                 }
                 const detail = await fetchGameDetails(userId, gameId);
@@ -162,9 +163,12 @@ const EditGameDetails = () => {
                         <input value={gameTitle || ''} disabled />
                     </div>
                     <p className="game-information-titles">Cover Art</p>
-                    <div className="display-image">
-                        {displayedCoverImage ? <img src={displayedCoverImage} alt="" /> : 'No image'}
+                    <div className="game-item-photo">
+                        {displayedCoverImage
+                            ? <CoverImage cover={displayedCoverImage} alt={gameTitle} />
+                            : 'No image'}
                     </div>
+
                     <button onClick={handleSave} className="add-game-button">Save Changes</button>
                 </div>
 

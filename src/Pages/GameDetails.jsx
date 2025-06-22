@@ -6,6 +6,7 @@ import StarRating from '../Context/StarRating';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchGameInfo, addGameDetails } from '../Api';
+import CoverImage from '../Context/CoverImage';
 
 const GameDetails = () => {
     const location = useLocation();
@@ -161,8 +162,11 @@ const GameDetails = () => {
                     <input value={gameDetails.title} disabled />
 
                     <p className="game-information-titles">Cover Art</p>
-                    <div className="display-image">
-                        {displayedCoverImage ? <img src={displayedCoverImage} alt="" /> : 'No image selected'}
+                    <div className="game-item-photo">
+                        {displayedCoverImage ? <CoverImage
+                            cover={gameDetails.coverart}
+                            alt={gameDetails.title}
+                        /> : 'No image selected'}
                     </div>
 
                     <button onClick={handleAddGameDetails} className="add-game-button">

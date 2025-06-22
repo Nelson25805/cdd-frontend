@@ -8,6 +8,7 @@ import '../App.css';
 // 1️⃣ Import the context hook and controls component
 import { useSortFilter } from '../Context/useSortFilter';
 import SortFilterControls from '../Context/SortFilterControls';
+import CoverImage from '../Context/CoverImage';
 
 export default function MyCollection() {
   const [itemsLoaded, setItemsLoaded] = useState(false);
@@ -120,64 +121,62 @@ export default function MyCollection() {
 
             {pageResults.map((game) => (
               <div key={game.GameId} className="game-item">
-                <img
-                  src={`data:image/jpg;base64,${game.CoverArt}`}
-                  alt={game.Name}
-                />
+                <div className="game-item-photo">
+                  <CoverImage cover={game.CoverArt} alt={game.Name} />
+                </div>
+                  <div className="game-item-name-console">
+                    {/* Name */}
+                    <div className="name-cell">
+                      <div className="name-list">
+                        <p className="game-item-name">{game.Name}</p>
+                      </div>
+                    </div>
 
-                <div className="game-item-name-console">
-                  {/* Name */}
-                  <div className="name-cell">
-                    <div className="name-list">
-                      <p className="game-item-name">{game.Name}</p>
+                    {/* Consoles */}
+                    <div className="console-cell">
+                      <div className="console-list">
+                        {(Array.isArray(game.Consoles) ? game.Consoles.map(c => c.name) : [])
+                          .sort((a, b) => a.localeCompare(b))
+                          .map((name) => (
+                            <div key={name} className="console-item">
+                              {name}
+                            </div>
+                          ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Consoles */}
-                  <div className="console-cell">
-                    <div className="console-list">
-                      {(Array.isArray(game.Consoles) ? game.Consoles.map(c => c.name) : [])
-                        .sort((a, b) => a.localeCompare(b))
-                        .map((name) => (
-                          <div key={name} className="console-item">
-                            {name}
-                          </div>
-                        ))}
-                    </div>
+                  <div className="game-item-actions">
+                    <button
+                      className="link-button"
+                      onClick={() => handleEditGameDetails(game)}
+                    >
+                      Edit
+                    </button>
+                    <span> | </span>
+                    <button
+                      className="link-button"
+                      onClick={() => handleRemoveGame(game.GameId)}
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
+            ))}
 
-                <div className="game-item-actions">
-                  <button
-                    className="link-button"
-                    onClick={() => handleEditGameDetails(game)}
-                  >
-                    Edit
+                <div className="pagination-controls">
+                  <button onClick={handlePrevPage} disabled={currentPage === 1}>
+                    Previous
                   </button>
-                  <span> | </span>
+                  <span> Page {currentPage} of {totalPages} </span>
                   <button
-                    className="link-button"
-                    onClick={() => handleRemoveGame(game.GameId)}
+                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                    disabled={currentPage >= totalPages}
                   >
-                    Remove
+                    Next
                   </button>
                 </div>
               </div>
-            ))}
-
-            <div className="pagination-controls">
-              <button onClick={handlePrevPage} disabled={currentPage === 1}>
-                Previous
-              </button>
-              <span> Page {currentPage} of {totalPages} </span>
-              <button
-              onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-              disabled={currentPage >= totalPages}
-            >
-               Next
-             </button>
-            </div>
-          </div>
         </main>
       </div>
     </div>
