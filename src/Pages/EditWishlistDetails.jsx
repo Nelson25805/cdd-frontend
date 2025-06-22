@@ -4,7 +4,12 @@ import '../App.css';
 import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchWishlistDetails, editWishlistDetails, fetchGameInfo } from '../Api';
+import {
+  fetchWishlistDetails,
+  editWishlistDetails,
+  fetchGameInfo
+} from '../Api';
+import CoverImage from '../Context/CoverImage';
 
 export default function EditWishlistDetails() {
   const { user } = useUser();
@@ -12,11 +17,10 @@ export default function EditWishlistDetails() {
   const navigate = useNavigate();
   const gameId = new URLSearchParams(useLocation().search).get('q');
 
-  // No more allConsoles state
   const [available, setAvailable] = useState([]);
   const [selected,  setSelected]  = useState([]);
   const [title,     setTitle]     = useState('…');
-  const [cover,     setCover]     = useState(null);
+  const [cover,     setCover]     = useState(null);   // raw cover token
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState('');
 
@@ -29,31 +33,28 @@ export default function EditWishlistDetails() {
       let consoles = [];
       if (gi.success) {
         setTitle(gi.gameDetails.title);
-        setCover(
-          gi.gameDetails.coverart
-            ? `data:image/png;base64,${gi.gameDetails.coverart}`
-            : null
-        );
-        consoles = gi.gameDetails.consoles; // raw array
+        // store raw base64 or URL fragment, not a full data URI
+        setCover(gi.gameDetails.coverart || null);
+        consoles = gi.gameDetails.consoles;
       }
 
       // 2️⃣ Fetch existing wishlist consoles
       const wl = await fetchWishlistDetails(userId, gameId);
-      const pickedIds = wl.consoles.map((c) => c.consoleid);
+      const pickedIds = wl.consoles.map(c => c.consoleid);
 
-      // 3️⃣ Derive available & selected from that fetched `consoles`
-      setSelected(   consoles.filter((c) => pickedIds.includes(c.consoleid)) );
-      setAvailable( consoles.filter((c) => !pickedIds.includes(c.consoleid)) );
+      // 3️⃣ Derive available & selected arrays
+      setSelected(   consoles.filter(c => pickedIds.includes(c.consoleid)) );
+      setAvailable( consoles.filter(c => !pickedIds.includes(c.consoleid)) );
 
       setLoading(false);
     })();
   }, [userId, gameId]);
 
-  const addC = (c) => {
+  const addC = c => {
     setSelected(s => [...s, c].sort((a, b) => a.name.localeCompare(b.name)));
     setAvailable(a => a.filter(x => x.consoleid !== c.consoleid));
   };
-  const remC = (c) => {
+  const remC = c => {
     setAvailable(a => [...a, c].sort((a, b) => a.name.localeCompare(b.name)));
     setSelected(s => s.filter(x => x.consoleid !== c.consoleid));
   };
@@ -83,10 +84,15 @@ export default function EditWishlistDetails() {
         <div className="left-section">
           <p className="game-information-titles">Title</p>
           <input value={title} disabled />
+
           <p className="game-information-titles">Cover</p>
           <div className="display-image">
-            {cover ? <img src={cover} /> : 'No image'}
+            {cover
+              ? <CoverImage cover={cover} alt={title} />
+              : 'No image'
+            }
           </div>
+
           <button onClick={handleSave} className="add-game-button">Save</button>
           {error && <p className="error-text">{error}</p>}
         </div>

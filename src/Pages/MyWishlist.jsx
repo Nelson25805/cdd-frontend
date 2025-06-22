@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 // 1️⃣ shared context + controls
 import { useSortFilter } from '../Context/useSortFilter';
 import SortFilterControls from '../Context/SortFilterControls';
+import CoverImage from '../Context/CoverImage';
 
 function MyWishlist() {
   const [itemsLoaded, setItemsLoaded] = useState(false);
@@ -16,7 +17,7 @@ function MyWishlist() {
   const itemsPerPage = 5;
   const [wishlistItems, setWishlistItems] = useState([]);
   const [, setLoading] = useState(false);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const { user, loading: userLoading } = useUser();
   const userId = user?.userid;
@@ -114,7 +115,9 @@ function MyWishlist() {
 
             {pageResults.map(game => (
               <div key={game.GameId} className="game-item">
-                <img src={`data:image/png;base64,${game.CoverArt}`} alt={game.Name} />
+                <div className="game-item-photo">
+                  <CoverImage cover={game.CoverArt} alt={game.Name} />
+                </div>
                 <div className="game-item-name-console">
                   {/* 1️⃣ Name cell (scrollable) */}
                   <div className="name-cell">
@@ -148,7 +151,7 @@ function MyWishlist() {
                   <button className="link-button" onClick={() => handleRemove(game.GameId)}>
                     Remove
                   </button>
-                  
+
                 </div>
               </div>
             ))}

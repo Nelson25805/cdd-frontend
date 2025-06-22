@@ -5,6 +5,7 @@ import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchGameInfo, addToWishlist } from '../Api';
+import CoverImage from '../Context/CoverImage';
 
 export default function WishlistDetails() {
     const location = useLocation();
@@ -64,11 +65,13 @@ export default function WishlistDetails() {
                     <input value={gameDetails.title} disabled />
                     <p className="game-information-titles">Cover Art</p>
                     <div className="display-image">
-                        {gameDetails.coverart ? (
-                            <img src={`data:image/png;base64,${gameDetails.coverart}`} alt="" />
-                        ) : (
-                            'No image'
-                        )}
+                        {gameDetails.coverart
+                            ? <CoverImage
+                                cover={gameDetails.coverart}
+                                alt={gameDetails.title}
+                            />
+                            : 'No image'
+                        }
                     </div>
                     <button onClick={handleSave} className="add-game-button">
                         Add to Wishlist
