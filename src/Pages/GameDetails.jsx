@@ -1,4 +1,3 @@
-// src/Pages/GameDetails.jsx
 import { useState, useEffect } from 'react';
 import '../App.css';
 import { useUser } from '../Context/useUser';

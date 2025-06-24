@@ -1,4 +1,3 @@
-// src/Pages/Search.jsx
 import { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
