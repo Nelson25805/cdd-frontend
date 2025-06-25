@@ -19,6 +19,9 @@ import { SortFilterProvider } from './Context/SortFilterContext.jsx';
 import { Outlet } from 'react-router-dom';
 import WishlistDetails from './Pages/WishlistDetails.jsx';
 import EditWishlistDetails from './Pages/EditWishlistDetails.jsx';
+import UserSearch from './Pages/UserSearch';
+import UserProfile from './Pages/UserProfile';
+import MessageThread from './Pages/MessageThread';
 
 const SortFilterLayout = () => (
   <SortFilterProvider>
@@ -55,6 +58,11 @@ const App = () => {
             <Route path="/EditGameDetails" element={<EditGameDetails />} />
             <Route path="/WishlistDetails" element={<WishlistDetails />} />
             <Route path="/EditWishlistDetails" element={<EditWishlistDetails />} />
+
+                        {/* Friend & messaging routes: */}
+            <Route path="/users"            element={<UserSearch />} />
+            <Route path="/users/:id"        element={<UserProfile />} />
+            <Route path="/messages/:thread" element={<MessageThread />} />
 
 
             {/* Admin-only route nested within PrivateRoute */}
