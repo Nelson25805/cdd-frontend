@@ -2,8 +2,8 @@ import axios from 'axios';
 import TokenManager from './Context/TokenManager';
 
 // base URL
-//const API_BASE_URL = 'http://localhost:5000';
-const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
+const API_BASE_URL = 'http://localhost:5000';
+//const API_BASE_URL = 'https://cdd-backend-liqx.onrender.com';
 
 // create axios instance with credentials
 const apiClient = axios.create({
@@ -415,4 +415,79 @@ export const fetchReportData = async (reportType) => {
     console.error('Error fetching report data:', error);
     return null;
   }
+};
+
+
+// src/Api.js (append at bottom)
+
+//
+// ───────────── USER SEARCH & FRIEND REQUESTS ─────────────
+//
+
+/**
+ * Find users by username (partial match).
+ * Returns an array of { id, username, isFriend, requestSent }.
+ */
+export const searchUsers = async (query) => {
+  const res = await apiClient.get('/api/users/search', { params: { q: query } });
+  return res.data; 
+};
+
+/** Send a friend request to userId */
+export const sendFriendRequest = async (targetUserId) => {
+  const res = await apiClient.post(`/api/friends/request/${targetUserId}`);
+  return res.data; 
+};
+
+/** Cancel a pending friend request to userId */
+export const cancelFriendRequest = async (targetUserId) => {
+  const res = await apiClient.delete(`/api/friends/request/${targetUserId}`);
+  return res.data;
+};
+
+/** Unfriend an existing friend */
+export const unfriend = async (targetUserId) => {
+  const res = await apiClient.delete(`/api/friends/${targetUserId}`);
+  return res.data;
+};
+
+//
+// ───────────── USER PROFILE & COLLECTION/WISHLIST ─────────────
+//
+
+/** Get a user’s public profile (avatar, bio, isFriend, chatThreadId) */
+export const getUserProfile = async (userId) => {
+  const res = await apiClient.get(`/api/users/${userId}/profile`);
+  return res.data;
+};
+
+/** Get another user’s collection of games */
+export const getUserCollection = async (userId) => {
+  const res = await apiClient.get(`/api/users/${userId}/collection`);
+  return Array.isArray(res.data) ? res.data : res.data.results;
+};
+
+/** Get another user’s wishlist of games */
+export const getUserWishlist = async (userId) => {
+  const res = await apiClient.get(`/api/users/${userId}/wishlist`);
+  return Array.isArray(res.data) ? res.data : res.data.results;
+};
+
+//
+// ───────────── MESSAGING ─────────────
+//
+
+/** Fetch messages in a given thread */
+export const getMessages = async (threadId) => {
+  const res = await apiClient.get(`/api/messages/${threadId}`);
+  return res.data;  // [{ id, senderId, senderName, text, timestamp }, …]
+};
+
+/**
+ * Send a new message in a thread.
+ * Returns the new message object.
+ */
+export const sendMessage = async (threadId, text) => {
+  const res = await apiClient.post(`/api/messages/${threadId}`, { text });
+  return res.data;
 };
