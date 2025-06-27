@@ -1,7 +1,6 @@
 // src/Pages/UserProfile.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useUser } from '../Context/useUser';
 import {
   getUserProfile,
   getUserCollection,
@@ -12,7 +11,6 @@ import CoverImage from '../Context/CoverImage';
 export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token, user } = useUser();
 
   const [profile,    setProfile]    = useState(null);
   const [collection, setCollection] = useState([]);

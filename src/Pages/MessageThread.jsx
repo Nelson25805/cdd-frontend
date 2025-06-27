@@ -1,12 +1,10 @@
 // src/Pages/MessageThread.jsx
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useUser } from '../Context/useUser';
 import { getMessages, sendMessage } from '../Api';
 
 export default function MessageThread() {
   const { thread } = useParams();
-  const { token } = useUser();
 
   const [messages, setMessages] = useState([]);
   const [draft, setDraft]     = useState('');
