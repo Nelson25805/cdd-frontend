@@ -7,14 +7,16 @@ import {
   getUserWishlist
 } from '../Api';
 import CoverImage from '../Context/CoverImage';
+// import default avatar from src/assets
+import defaultAvatar from '../assets/default-avatar.jpg';
 
 export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [profile,    setProfile]    = useState(null);
+  const [profile, setProfile] = useState(null);
   const [collection, setCollection] = useState([]);
-  const [wishlist,   setWishlist]   = useState([]);
+  const [wishlist, setWishlist] = useState([]);
 
   useEffect(() => {
     if (!id) return;
@@ -36,7 +38,10 @@ export default function UserProfile() {
     <div className="App">
       <h1>{profile.username}</h1>
 
-      <CoverImage cover={profile.avatar} alt={profile.username} />
+      <CoverImage
+        cover={profile.avatar || defaultAvatar}
+        alt={profile.username}
+      />
 
       {profile.isFriend ? (
         <button
@@ -46,7 +51,7 @@ export default function UserProfile() {
           Message
         </button>
       ) : (
-        <button className="small-button" onClick={() => {/* send/friend logic */}}>
+        <button className="small-button" onClick={() => {/* send/friend logic */ }}>
           Add Friend
         </button>
       )}
@@ -55,13 +60,13 @@ export default function UserProfile() {
       <div className="game-list">
         {collection.length
           ? collection.map(g => (
-              <div key={g.GameId} className="game-item-small">
-                <Link to={`/GameDetails?q=${g.GameId}`}>
-                  <CoverImage cover={g.CoverArt} alt={g.Name} />
-                  <p>{g.Name}</p>
-                </Link>
-              </div>
-            ))
+            <div key={g.GameId} className="game-item-small">
+              <Link to={`/GameDetails?q=${g.GameId}`}>
+                <CoverImage cover={g.CoverArt} alt={g.Name} />
+                <p>{g.Name}</p>
+              </Link>
+            </div>
+          ))
           : <p>No games in collection</p>
         }
       </div>
@@ -70,13 +75,13 @@ export default function UserProfile() {
       <div className="game-list">
         {wishlist.length
           ? wishlist.map(g => (
-              <div key={g.GameId} className="game-item-small">
-                <Link to={`/WishlistDetails?q=${g.GameId}`}>
-                  <CoverImage cover={g.CoverArt} alt={g.Name} />
-                  <p>{g.Name}</p>
-                </Link>
-              </div>
-            ))
+            <div key={g.GameId} className="game-item-small">
+              <Link to={`/WishlistDetails?q=${g.GameId}`}>
+                <CoverImage cover={g.CoverArt} alt={g.Name} />
+                <p>{g.Name}</p>
+              </Link>
+            </div>
+          ))
           : <p>No games in wishlist</p>
         }
       </div>
