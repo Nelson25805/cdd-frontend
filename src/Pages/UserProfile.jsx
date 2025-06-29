@@ -9,6 +9,7 @@ import {
 import CoverImage from '../Context/CoverImage';
 // import default avatar from src/assets
 import defaultAvatar from '../assets/default-avatar.jpg';
+import TopLinks from '../Context/TopLinks';
 
 export default function UserProfile() {
   const { id } = useParams();
@@ -36,12 +37,25 @@ export default function UserProfile() {
 
   return (
     <div className="App">
+      <TopLinks />
       <h1>{profile.username}</h1>
 
       <CoverImage
         cover={profile.avatar || defaultAvatar}
         alt={profile.username}
+        className="profile-avatar"
       />
+
+      <div className="profile-stats">
+        <Link to={`/users/${id}/collection`} className="stat-card">
+          <h3>Collection</h3>
+          <p>{collection.length} {collection.length === 1 ? 'game' : 'games'}</p>
+        </Link>
+        <Link to={`/users/${id}/wishlist`} className="stat-card">
+          <h3>Wishlist</h3>
+          <p>{wishlist.length} {wishlist.length === 1 ? 'game' : 'games'}</p>
+        </Link>
+      </div>
 
       {profile.isFriend ? (
         <button
@@ -51,40 +65,13 @@ export default function UserProfile() {
           Message
         </button>
       ) : (
-        <button className="small-button" onClick={() => {/* send/friend logic */ }}>
+        <button
+          className="small-button"
+          onClick={() => {/* send/friend logic */}}
+        >
           Add Friend
         </button>
       )}
-
-      <h2>{profile.username}’s Collection</h2>
-      <div className="game-list">
-        {collection.length
-          ? collection.map(g => (
-            <div key={g.GameId} className="game-item-small">
-              <Link to={`/GameDetails?q=${g.GameId}`}>
-                <CoverImage cover={g.CoverArt} alt={g.Name} />
-                <p>{g.Name}</p>
-              </Link>
-            </div>
-          ))
-          : <p>No games in collection</p>
-        }
-      </div>
-
-      <h2>{profile.username}’s Wishlist</h2>
-      <div className="game-list">
-        {wishlist.length
-          ? wishlist.map(g => (
-            <div key={g.GameId} className="game-item-small">
-              <Link to={`/WishlistDetails?q=${g.GameId}`}>
-                <CoverImage cover={g.CoverArt} alt={g.Name} />
-                <p>{g.Name}</p>
-              </Link>
-            </div>
-          ))
-          : <p>No games in wishlist</p>
-        }
-      </div>
     </div>
   );
 }
