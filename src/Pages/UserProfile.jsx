@@ -38,7 +38,7 @@ export default function UserProfile() {
   return (
     <div className="App">
       <TopLinks />
-      <h1>{profile.username}</h1>
+      <h1>{profile.username} Profile Page</h1>
 
       <CoverImage
         cover={profile.avatar || defaultAvatar}
@@ -46,9 +46,10 @@ export default function UserProfile() {
         className="profile-avatar"
       />
 
+      <h2>Game Stats</h2>
       <div className="profile-stats">
         <Link to={`/users/${id}/collection`} className="stat-card">
-          <h3>Collection</h3>
+          <h3>My Collection</h3>
           <p>{collection.length} {collection.length === 1 ? 'game' : 'games'}</p>
         </Link>
         <Link to={`/users/${id}/wishlist`} className="stat-card">
@@ -67,7 +68,7 @@ export default function UserProfile() {
       ) : (
         <button
           className="small-button"
-          onClick={() => {/* send/friend logic */}}
+          onClick={() => {/* send/friend logic */ }}
         >
           Add Friend
         </button>
