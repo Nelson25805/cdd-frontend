@@ -51,17 +51,20 @@ const App = () => {
             <Route element={<SortFilterLayout />}>
               <Route path="/MyCollection" element={<MyCollection />} />
               <Route path="/MyWishlist" element={<MyWishlist />} />
-              <Route path="/Search"      element={<Search />} />
-+           </Route>
+              <Route path="/Search" element={<Search />} />
+              {/* Viewing someone else's collection/wishlist */}
+              <Route path="/users/:userId/collection" element={<MyCollection />} />
+              <Route path="/users/:userId/wishlist" element={<MyWishlist />} />
+            </Route>
 
             <Route path="/AccountSettings" element={<AccountSettings />} />
             <Route path="/EditGameDetails" element={<EditGameDetails />} />
             <Route path="/WishlistDetails" element={<WishlistDetails />} />
             <Route path="/EditWishlistDetails" element={<EditWishlistDetails />} />
 
-                        {/* Friend & messaging routes: */}
-            <Route path="/users"            element={<UserSearch />} />
-            <Route path="/users/:id"        element={<UserProfile />} />
+            {/* Friend & messaging routes: */}
+            <Route path="/users" element={<UserSearch />} />
+            <Route path="/users/:id" element={<UserProfile />} />
             <Route path="/messages/:thread" element={<MessageThread />} />
 
 
