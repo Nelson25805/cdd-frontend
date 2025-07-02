@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { searchUsers, sendFriendRequest, cancelFriendRequest } from '../Api';
 import { useUser } from '../Context/useUser';
 import { Link } from 'react-router-dom';
+import TopLinks from '../Context/TopLinks';
 
 export default function UserSearch() {
   const { token } = useUser();
@@ -15,6 +16,7 @@ export default function UserSearch() {
 
   return (
     <div>
+      <TopLinks />
       <h1>Find other players</h1>
       <input value={q} onChange={e => setQ(e.target.value)} />
       <button onClick={doSearch}>Search</button>
