@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getMessages, sendMessage } from '../Api';
+import TopLinks from '../Context/TopLinks';
 
 export default function MessageThread() {
   const { thread } = useParams();
@@ -37,6 +38,7 @@ export default function MessageThread() {
 
   return (
     <div className="App">
+      <TopLinks />
       <h1>Chat Thread</h1>
       <div className="message-list">
         {messages.map(m => (
