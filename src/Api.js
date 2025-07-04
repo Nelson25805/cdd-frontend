@@ -418,8 +418,6 @@ export const fetchReportData = async (reportType) => {
 };
 
 
-// src/Api.js (append at bottom)
-
 //
 // ───────────── USER SEARCH & FRIEND REQUESTS ─────────────
 //
@@ -489,5 +487,17 @@ export const getMessages = async (threadId) => {
  */
 export const sendMessage = async (threadId, text) => {
   const res = await apiClient.post(`/api/messages/${threadId}`, { text });
+  return res.data;
+};
+
+// Fetch pending requests for the logged‑in user
+export const getIncomingFriendRequests = async () => {
+  const res = await apiClient.get('/api/friends/requests/incoming');
+  return res.data; // [{ requesterId, username, avatar, sentAt }, …]
+};
+
+// Accept an incoming request
+export const acceptFriendRequest = async (requesterId) => {
+  const res = await apiClient.post(`/api/friends/accept/${requesterId}`);
   return res.data;
 };

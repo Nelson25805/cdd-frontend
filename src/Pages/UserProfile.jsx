@@ -4,10 +4,11 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   getUserProfile,
   getUserCollection,
-  getUserWishlist
+  getUserWishlist,
+  sendFriendRequest,
+  cancelFriendRequest
 } from '../Api';
 import CoverImage from '../Context/CoverImage';
-// import default avatar from src/assets
 import defaultAvatar from '../assets/default-avatar.jpg';
 import TopLinks from '../Context/TopLinks';
 
@@ -15,9 +16,10 @@ export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile]       = useState(null);
   const [collection, setCollection] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist]     = useState([]);
+  const [requestSent, setRequestSent] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -25,6 +27,8 @@ export default function UserProfile() {
       try {
         const p = await getUserProfile(id);
         setProfile(p);
+        // initialize requestSent flag from API
+        setRequestSent(!!p.requestSent);
         setCollection(await getUserCollection(id));
         setWishlist(await getUserWishlist(id));
       } catch (err) {
@@ -35,10 +39,29 @@ export default function UserProfile() {
 
   if (!profile) return <div>Loading profile…</div>;
 
+  // Handlers for friend requests
+  const handleAddFriend = async () => {
+    try {
+      await sendFriendRequest(id);
+      setRequestSent(true);
+    } catch (err) {
+      console.error('Failed to send friend request:', err);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    try {
+      await cancelFriendRequest(id);
+      setRequestSent(false);
+    } catch (err) {
+      console.error('Failed to cancel friend request:', err);
+    }
+  };
+
   return (
     <div className="App">
       <TopLinks />
-      <h1>{profile.username} Profile Page</h1>
+      <h1>{profile.username}’s Profile</h1>
 
       <CoverImage
         cover={profile.avatar || defaultAvatar}
@@ -49,7 +72,7 @@ export default function UserProfile() {
       <h2>Game Stats</h2>
       <div className="profile-stats">
         <Link to={`/users/${id}/collection`} className="stat-card">
-          <h3>My Collection</h3>
+          <h3>Collection</h3>
           <p>{collection.length} {collection.length === 1 ? 'game' : 'games'}</p>
         </Link>
         <Link to={`/users/${id}/wishlist`} className="stat-card">
@@ -58,6 +81,7 @@ export default function UserProfile() {
         </Link>
       </div>
 
+      {/* Friend / messaging button */}
       {profile.isFriend ? (
         <button
           className="small-button"
@@ -65,11 +89,12 @@ export default function UserProfile() {
         >
           Message
         </button>
+      ) : requestSent ? (
+        <button className="small-button" onClick={handleCancelRequest}>
+          Cancel Request
+        </button>
       ) : (
-        <button
-          className="small-button"
-          onClick={() => {/* send/friend logic */ }}
-        >
+        <button className="small-button" onClick={handleAddFriend}>
           Add Friend
         </button>
       )}

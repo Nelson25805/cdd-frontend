@@ -1,36 +1,76 @@
+// src/Pages/UserSearch.jsx
 import { useState } from 'react';
-import { searchUsers, sendFriendRequest, cancelFriendRequest } from '../Api';
-import { useUser } from '../Context/useUser';
+import {
+  searchUsers,
+  sendFriendRequest,
+  cancelFriendRequest
+} from '../Api';
 import { Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
 
 export default function UserSearch() {
-  const { token } = useUser();
   const [q, setQ] = useState('');
   const [results, setResults] = useState([]);
 
   const doSearch = async () => {
-    const users = await searchUsers(q, token);
-    setResults(users);
+    try {
+      const users = await searchUsers(q);
+      setResults(users);
+    } catch (err) {
+      console.error('Search failed:', err);
+    }
+  };
+
+  const handleSendRequest = async id => {
+    try {
+      await sendFriendRequest(id);
+      setResults(rs =>
+        rs.map(u => (u.id === id ? { ...u, requestSent: true } : u))
+      );
+    } catch (err) {
+      console.error('Failed to send request:', err);
+    }
+  };
+
+  const handleCancelRequest = async id => {
+    try {
+      await cancelFriendRequest(id);
+      setResults(rs =>
+        rs.map(u => (u.id === id ? { ...u, requestSent: false } : u))
+      );
+    } catch (err) {
+      console.error('Failed to cancel request:', err);
+    }
   };
 
   return (
     <div>
       <TopLinks />
       <h1>Find other players</h1>
-      <input value={q} onChange={e => setQ(e.target.value)} />
+      <input
+        placeholder="Username…"
+        value={q}
+        onChange={e => setQ(e.target.value)}
+      />
       <button onClick={doSearch}>Search</button>
 
       <ul>
         {results.map(u => (
           <li key={u.id}>
-            <Link to={`/users/${u.id}`}>{u.username}</Link>
-            {u.isFriend
-              ? <button onClick={() => {/* maybe unfriend */}}>Unfriend</button>
-              : u.requestSent
-                ? <button onClick={() => cancelFriendRequest(u.id)}>Cancel</button>
-                : <button onClick={() => sendFriendRequest(u.id)}>Add Friend</button>
-            }
+            <Link to={`/users/${u.id}`}>{u.username}</Link>{' '}
+            {u.isFriend ? (
+              <button /* implement unfriend here */>
+                Unfriend
+              </button>
+            ) : u.requestSent ? (
+              <button onClick={() => handleCancelRequest(u.id)}>
+                Cancel Request
+              </button>
+            ) : (
+              <button onClick={() => handleSendRequest(u.id)}>
+                Add Friend
+              </button>
+            )}
           </li>
         ))}
       </ul>
