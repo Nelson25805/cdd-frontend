@@ -3,7 +3,8 @@ import { useState } from 'react';
 import {
   searchUsers,
   sendFriendRequest,
-  cancelFriendRequest
+  cancelFriendRequest,
+  unfriend
 } from '../Api';
 import { Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
@@ -59,7 +60,12 @@ export default function UserSearch() {
           <li key={u.id}>
             <Link to={`/users/${u.id}`}>{u.username}</Link>{' '}
             {u.isFriend ? (
-              <button /* implement unfriend here */>
+              <button
+                onClick={async () => {
+                  await unfriend(u.id);
+                  doSearch();
+                }}
+              >
                 Unfriend
               </button>
             ) : u.requestSent ? (
@@ -72,6 +78,7 @@ export default function UserSearch() {
               </button>
             )}
           </li>
+
         ))}
       </ul>
     </div>

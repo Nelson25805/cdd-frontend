@@ -1,123 +1,149 @@
-// src/Pages/MessageThread.jsx
 import { useState, useEffect } from 'react';
-//import { useParams, useNavigate } from 'react-router-dom';
-import { useParams,} from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
 import {
   getMessages,
   sendMessage,
   getIncomingFriendRequests,
   acceptFriendRequest,
-  cancelFriendRequest
+  cancelFriendRequest,
+  getFriends,
+  unfriend
 } from '../Api';
 
 export default function MessageThread() {
   const { thread } = useParams();
-  //const navigate = useNavigate();
-  const isInbox = thread === 'inbox';
+  const navigate = useNavigate();
 
-  // ——— Inbox state ———
+  const isInbox = thread === 'inbox';
+  const isLobby = thread === 'friends';   // new
+  const isChat = !isInbox && !isLobby;
+
+  // — Inbox state —
   const [requests, setRequests] = useState([]);
 
-  // ——— Chat state ———
-  const [messages, setMessages] = useState([]);
-  const [draft,    setDraft]    = useState('');
+  // — Lobby state —
+  const [friends, setFriends] = useState([]);
 
-  // Fetch inbox once
+  // — Chat state —
+  const [messages, setMessages] = useState([]);
+  const [draft, setDraft] = useState('');
+
+  // 1) Load pending friend requests
   useEffect(() => {
     if (!isInbox) return;
     (async () => {
-      try {
-        const data = await getIncomingFriendRequests();
-        setRequests(data);
-      } catch (err) {
-        console.error('Error loading friend requests:', err);
-      }
+      const data = await getIncomingFriendRequests();
+      setRequests(data);
     })();
   }, [isInbox]);
 
-  // Poll chat every 2s
+  // 2) Load friends lobby
   useEffect(() => {
-    if (isInbox) return;
-    let id = setInterval(async () => {
+    if (!isLobby) return;
+    (async () => {
       try {
-        const msgs = await getMessages(thread);
-        setMessages(msgs);
+        const list = await getFriends();
+        setFriends(list);
       } catch (err) {
-        console.error('Error fetching messages:', err);
+        console.error('Error loading friends list:', err);
       }
+    })();
+  }, [isLobby]);
+
+  // 3) Poll chat every 2s
+  useEffect(() => {
+    // only poll when we’ve got a real thread id
+    if (!thread || isInbox || isLobby) return;
+    let id = setInterval(async () => {
+      const msgs = await getMessages(thread);
+      setMessages(msgs);
     }, 2000);
     return () => clearInterval(id);
-  }, [thread, isInbox]);
+  }, [thread, isInbox, isLobby]);
 
   const onSend = async () => {
     if (!draft.trim()) return;
-    try {
-      await sendMessage(thread, draft);
-      setDraft('');
-      const msgs = await getMessages(thread);
-      setMessages(msgs);
-    } catch (err) {
-      console.error('Error sending message:', err);
-    }
+    await sendMessage(thread, draft);
+    setDraft('');
+    const msgs = await getMessages(thread);
+    setMessages(msgs);
   };
 
   const handleAccept = async requesterId => {
-    try {
-      await acceptFriendRequest(requesterId);
-      // after accepting, supabase creates the chat thread; fetch its ID
-      // simplest: reload profile or navigate to new thread, but here we'll just remove the request
-      setRequests(r => r.filter(req => req.requesterId !== requesterId));
-    } catch (err) {
-      console.error('Error accepting request:', err);
-    }
+    const { threadId } = await acceptFriendRequest(requesterId);
+    navigate(`/messages/${threadId}`);
   };
-
   const handleDecline = async requesterId => {
-    try {
-      await cancelFriendRequest(requesterId);
-      setRequests(r => r.filter(req => req.requesterId !== requesterId));
-    } catch (err) {
-      console.error('Error declining request:', err);
-    }
+    await cancelFriendRequest(requesterId);
+    setRequests(r => r.filter(r => r.requesterId !== requesterId));
   };
 
   return (
     <div className="App">
       <TopLinks />
-      {isInbox ? (
+
+      {/* Inbox view */}
+      {isInbox && (
         <>
           <h1>Friend Requests</h1>
-          {requests.length === 0 ? (
-            <p>No pending requests.</p>
-          ) : (
-            <ul className="request-list">
+          {requests.length === 0
+            ? <p>No pending requests.</p>
+            : <ul>
               {requests.map(r => (
-                <li key={r.requesterId} className="request-item">
-                  <strong>{r.username}</strong>
-                  <button
-                    className="small-button"
-                    onClick={() => handleAccept(r.requesterId)}
-                  >
-                    Accept
-                  </button>
-                  <button
-                    className="small-button"
-                    onClick={() => handleDecline(r.requesterId)}
-                  >
-                    Decline
-                  </button>
+                <li key={r.requesterId}>
+                  {r.username}
+                  <button onClick={() => handleAccept(r.requesterId)}>Accept</button>
+                  <button onClick={() => handleDecline(r.requesterId)}>Decline</button>
                 </li>
               ))}
             </ul>
-          )}
+          }
         </>
-      ) : (
+      )}
+
+      {/* Friends lobby */}
+      {isLobby && (
         <>
-          <h1>Chat Thread</h1>
+          <h1>Your Friends</h1>
+          {friends.length === 0
+            ? <p>You have no friends yet.</p>
+            : <ul>
+              {friends.map(f => (
+                <li key={f.id}>
+                  {f.username}
+                  <button onClick={() => navigate(`/messages/${f.threadId}`)}>
++                     Chat
++                   </button>
++                   <button
+                     className="small-button"
+                     onClick={async () => {
+                       try {
+                         await unfriend(f.id);
+                         // reload your lobby list
+                         const updated = await getFriends();
+                         setFriends(updated);
+                       } catch (err) {
+                         console.error('Unfriend failed', err);
+                       }
+                     }}
+                   >
+                     Unfriend
+                   </button>
+                </li>
+              ))}
+            </ul>
+          }
+        </>
+      )}
+
+      {/* Chat thread */}
+      {isChat && (
+        <>
+          <h1>Chat</h1>
           <div className="message-list">
             {messages.map(m => (
-              <div key={m.id} className="message-item">
+              <div key={m.id}>
                 <strong>{m.senderName}:</strong> {m.text}
               </div>
             ))}
@@ -125,12 +151,10 @@ export default function MessageThread() {
           <textarea
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            placeholder="Type your message…"
+            placeholder="Type…"
             rows={3}
           />
-          <button onClick={onSend} className="small-button">
-            Send
-          </button>
+          <button onClick={onSend}>Send</button>
         </>
       )}
     </div>
