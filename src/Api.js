@@ -501,3 +501,11 @@ export const acceptFriendRequest = async (requesterId) => {
   const res = await apiClient.post(`/api/friends/accept/${requesterId}`);
   return res.data;
 };
+
+
+
+/** Get your current friends + thread IDs */
+export const getFriends = async () => {
+  const res = await apiClient.get('/api/friends');
+  return res.data; // [{ id, username, avatar, threadId }, …]
+};
