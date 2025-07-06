@@ -509,3 +509,24 @@ export const getFriends = async () => {
   const res = await apiClient.get('/api/friends');
   return res.data; // [{ id, username, avatar, threadId }, …]
 };
+
+
+// in Api.js, under your other exports…
+
+/** Fetch pending incoming requests _to_ a user */
+export const getUserIncomingRequests = async (userId) => {
+  const res = await apiClient.get(`/api/users/${userId}/requests/incoming`);
+  return res.data; // [{ id, username, avatar, sentAt }, …]
+};
+
+/** Fetch pending outgoing requests _from_ a user */
+export const getUserOutgoingRequests = async (userId) => {
+  const res = await apiClient.get(`/api/users/${userId}/requests/outgoing`);
+  return res.data; // [{ id, username, avatar, sentAt }, …]
+};
+
+/** Fetch accepted friends for a user */
+export const getUserFriends = async (userId) => {
+  const res = await apiClient.get(`/api/users/${userId}/friends`);
+  return res.data; // [{ id, username, avatar, friendedAt }, …]
+};

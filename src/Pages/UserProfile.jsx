@@ -5,6 +5,9 @@ import {
   getUserProfile,
   getUserCollection,
   getUserWishlist,
+  getUserIncomingRequests,
+  getUserOutgoingRequests,
+  getUserFriends,
   sendFriendRequest,
   cancelFriendRequest
 } from '../Api';
@@ -21,20 +24,24 @@ export default function UserProfile() {
   const [wishlist, setWishlist]     = useState([]);
   const [requestSent, setRequestSent] = useState(false);
 
+  const [incoming, setIncoming] = useState([]);
+  const [outgoing, setOutgoing] = useState([]);
+  const [friends, setFriends]   = useState([]);
+
   useEffect(() => {
     if (!id) return;
     (async () => {
-      try {
-        const p = await getUserProfile(id);
-        setProfile(p);
-        // initialize requestSent flag from API
-        setRequestSent(!!p.requestSent);
-        setCollection(await getUserCollection(id));
-        setWishlist(await getUserWishlist(id));
-      } catch (err) {
-        console.error('Error loading profile:', err);
-      }
-    })();
+      const p  = await getUserProfile(id);
+      setProfile(p);
+      setRequestSent(!!p.requestSent);
+      setCollection(await getUserCollection(id));
+      setWishlist(await getUserWishlist(id));
+
+      // ** new calls **
+      setIncoming(await getUserIncomingRequests(id));
+      setOutgoing(await getUserOutgoingRequests(id));
+      setFriends(await getUserFriends(id));
+    })().catch(console.error);
   }, [id]);
 
   if (!profile) return <div>Loading profile…</div>;
@@ -98,6 +105,37 @@ export default function UserProfile() {
           Add Friend
         </button>
       )}
+    <section className="friend-lists">
+        <h2>Friends ({friends.length})</h2>
+        <ul>
+          {friends.map(u => (
+            <li key={u.id}>
+              <img src={u.avatar} alt="" className="tiny-avatar"/>
+              {u.username}
+            </li>
+          ))}
+        </ul>
+
+        <h2>Pending Incoming Requests ({incoming.length})</h2>
+        <ul>
+          {incoming.map(u => (
+            <li key={u.id}>
+              <img src={u.avatar} alt="" className="tiny-avatar"/>
+              {u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+            </li>
+          ))}
+        </ul>
+
+        <h2>Pending Outgoing Requests ({outgoing.length})</h2>
+        <ul>
+          {outgoing.map(u => (
+            <li key={u.id}>
+              <img src={u.avatar} alt="" className="tiny-avatar"/>
+              {u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
