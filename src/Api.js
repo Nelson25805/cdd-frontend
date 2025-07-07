@@ -449,6 +449,15 @@ export const unfriend = async (targetUserId) => {
   return res.data;
 };
 
+/** Decline (delete) an incoming friend request */
+export const declineFriendRequest = async (requesterId) => {
+  const res = await apiClient.delete(
+    `/api/friends/requests/incoming/${requesterId}`
+  );
+  return res.data;
+};
+
+
 //
 // ───────────── USER PROFILE & COLLECTION/WISHLIST ─────────────
 //

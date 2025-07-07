@@ -9,7 +9,10 @@ import {
   getUserOutgoingRequests,
   getUserFriends,
   sendFriendRequest,
-  cancelFriendRequest
+  cancelFriendRequest,
+  acceptFriendRequest,
+  declineFriendRequest,
+  unfriend
 } from '../Api';
 import CoverImage from '../Context/CoverImage';
 import defaultAvatar from '../assets/default-avatar.jpg';
@@ -19,9 +22,9 @@ export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [profile, setProfile]       = useState(null);
-  const [collection, setCollection] = useState([]);
-  const [wishlist, setWishlist]     = useState([]);
+  const [profile, setProfile]         = useState(null);
+  const [collection, setCollection]   = useState([]);
+  const [wishlist, setWishlist]       = useState([]);
   const [requestSent, setRequestSent] = useState(false);
 
   const [incoming, setIncoming] = useState([]);
@@ -31,13 +34,12 @@ export default function UserProfile() {
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const p  = await getUserProfile(id);
+      const p = await getUserProfile(id);
       setProfile(p);
       setRequestSent(!!p.requestSent);
       setCollection(await getUserCollection(id));
       setWishlist(await getUserWishlist(id));
 
-      // ** new calls **
       setIncoming(await getUserIncomingRequests(id));
       setOutgoing(await getUserOutgoingRequests(id));
       setFriends(await getUserFriends(id));
@@ -46,23 +48,43 @@ export default function UserProfile() {
 
   if (!profile) return <div>Loading profile…</div>;
 
-  // Handlers for friend requests
+  // send / cancel outgoing to this profile user
   const handleAddFriend = async () => {
-    try {
-      await sendFriendRequest(id);
-      setRequestSent(true);
-    } catch (err) {
-      console.error('Failed to send friend request:', err);
-    }
+    await sendFriendRequest(id);
+    setRequestSent(true);
+  };
+  const handleCancelRequest = async () => {
+    await cancelFriendRequest(id);
+    setRequestSent(false);
   };
 
-  const handleCancelRequest = async () => {
-    try {
-      await cancelFriendRequest(id);
-      setRequestSent(false);
-    } catch (err) {
-      console.error('Failed to cancel friend request:', err);
+  // incoming requests
+  const handleAccept = async (requesterId) => {
+    await acceptFriendRequest(requesterId);
+    const accepted = incoming.find(u => u.id === requesterId);
+    setIncoming(prev => prev.filter(u => u.id !== requesterId));
+    if (accepted) {
+      setFriends(prev => [
+        ...prev,
+        { ...accepted, friendedAt: new Date().toISOString() }
+      ]);
     }
+  };
+  const handleDecline = async (requesterId) => {
+    await declineFriendRequest(requesterId);
+    setIncoming(prev => prev.filter(u => u.id !== requesterId));
+  };
+
+  // outgoing requests
+  const handleCancelOutgoing = async (targetId) => {
+    await cancelFriendRequest(targetId);
+    setOutgoing(prev => prev.filter(u => u.id !== targetId));
+  };
+
+  // remove an existing friend
+  const handleRemoveFriend = async (friendId) => {
+    await unfriend(friendId);
+    setFriends(prev => prev.filter(u => u.id !== friendId));
   };
 
   return (
@@ -88,7 +110,6 @@ export default function UserProfile() {
         </Link>
       </div>
 
-      {/* Friend / messaging button */}
       {profile.isFriend ? (
         <button
           className="small-button"
@@ -105,33 +126,60 @@ export default function UserProfile() {
           Add Friend
         </button>
       )}
-    <section className="friend-lists">
+
+      <section className="friend-lists">
         <h2>Friends ({friends.length})</h2>
         <ul>
           {friends.map(u => (
             <li key={u.id}>
-              <img src={u.avatar} alt="" className="tiny-avatar"/>
+              <img src={u.avatar} alt="" className="tiny-avatar" />
               {u.username}
+              <button
+                className="tiny-button"
+                onClick={() => handleRemoveFriend(u.id)}
+              >
+                Remove
+              </button>
             </li>
           ))}
         </ul>
 
-        <h2>Pending Incoming Requests ({incoming.length})</h2>
+        <h2>Incoming Requests ({incoming.length})</h2>
         <ul>
           {incoming.map(u => (
             <li key={u.id}>
-              <img src={u.avatar} alt="" className="tiny-avatar"/>
-              {u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+              <img src={u.avatar} alt="" className="tiny-avatar" />
+              {u.username}{' '}
+              <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+              <button
+                className="tiny-button"
+                onClick={() => handleAccept(u.id)}
+              >
+                Accept
+              </button>
+              <button
+                className="tiny-button"
+                onClick={() => handleDecline(u.id)}
+              >
+                Decline
+              </button>
             </li>
           ))}
         </ul>
 
-        <h2>Pending Outgoing Requests ({outgoing.length})</h2>
+        <h2>Outgoing Requests ({outgoing.length})</h2>
         <ul>
           {outgoing.map(u => (
             <li key={u.id}>
-              <img src={u.avatar} alt="" className="tiny-avatar"/>
-              {u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+              <img src={u.avatar} alt="" className="tiny-avatar" />
+              {u.username}{' '}
+              <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+              <button
+                className="tiny-button"
+                onClick={() => handleCancelOutgoing(u.id)}
+              >
+                Cancel
+              </button>
             </li>
           ))}
         </ul>
