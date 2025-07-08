@@ -132,7 +132,11 @@ export default function UserProfile() {
         <ul>
           {friends.map(u => (
             <li key={u.id}>
-              <img src={u.avatar} alt="" className="tiny-avatar" />
+              <img
+                src={u.avatar || defaultAvatar}
+                alt={`${u.username}'s avatar`}
+                className="tiny-avatar"
+              />
               {u.username}
               <button
                 className="tiny-button"
@@ -148,7 +152,11 @@ export default function UserProfile() {
         <ul>
           {incoming.map(u => (
             <li key={u.id}>
-              <img src={u.avatar} alt="" className="tiny-avatar" />
+              <img
+                src={u.avatar || defaultAvatar}
+                alt={`${u.username}'s avatar`}
+                className="tiny-avatar"
+              />
               {u.username}&nbsp;
               <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
               <button
@@ -171,7 +179,11 @@ export default function UserProfile() {
         <ul>
           {outgoing.map(u => (
             <li key={u.id}>
-              <img src={u.avatar} alt="" className="tiny-avatar" />
+              <img
+                src={u.avatar || defaultAvatar}
+                alt={`${u.username}'s avatar`}
+                className="tiny-avatar"
+              />
               {u.username}&nbsp;
               <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
               <button
