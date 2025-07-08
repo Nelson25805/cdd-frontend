@@ -1,3 +1,4 @@
+// src/Pages/Register.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../Api';
@@ -12,65 +13,62 @@ const Register = () => {
     email: '',
     admin: false,
   });
+  const [avatarFile, setAvatarFile] = useState(null);
+
   const { setUser, setToken } = useUser();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? e.target.checked : value,
-    });
+  // Handle text input and checkbox changes
+  const handleChange = e => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
-  const handleSubmit = async (e) => {
+  // Handle file selection for avatar
+  const handleFileChange = e => {
+    setAvatarFile(e.target.files[0] || null);
+  };
+
+  // Submit registration form
+  const handleSubmit = async e => {
     e.preventDefault();
-  
-    if (!formData.username || !formData.password || !formData.email) {
+    const { username, password, email } = formData;
+    if (!username || !password || !email) {
       alert('Please fill in all the fields.');
       return;
     }
-  
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       alert('Please enter a valid email address.');
       return;
     }
-  
+
+    // Build FormData payload with file
+    const payload = new FormData();
+    payload.append('username', formData.username);
+    payload.append('email',    formData.email);
+    payload.append('password', formData.password);
+    payload.append('admin',    formData.admin);
+    if (avatarFile) payload.append('avatar', avatarFile);
+
     try {
-      const userData = await registerUser(
-        formData.username,
-        formData.email,
-        formData.password,
-        formData.admin
-      );
-  
-      // Store user and token in context
-      setUser(userData.user);
-      setToken(userData.token);
-
-      console.log('User Data before token manager:', userData);
-  
-      // If a refresh token is returned, store it as well
-      if (userData.refreshToken) {
-        TokenManager.setRefreshToken(userData.refreshToken);
-      }
-
-      console.log('User Data after token manager:', userData);
-
-  
-      navigate('/'); // Redirect to home or another protected route after successful registration
-    } catch (error) {
-      console.error('Registration failed:', error);
-      alert('Registration failed: ' + error.message);
+      const { accessToken, user } = await registerUser(payload);
+      TokenManager.setAccessToken(accessToken);
+      setUser(user);
+      setToken(accessToken);
+      navigate('/');
+    } catch (err) {
+      console.error('Registration failed:', err);
+      alert(err.message);
     }
   };
-  
 
   return (
-    <div>
+    <div className="register-page">
       <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="input-container">
           <label htmlFor="username">Username</label>
           <input
@@ -82,17 +80,7 @@ const Register = () => {
             onChange={handleChange}
           />
         </div>
-        <div className="input-container">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-        </div>
+
         <div className="input-container">
           <label htmlFor="email">Email</label>
           <input
@@ -104,7 +92,20 @@ const Register = () => {
             onChange={handleChange}
           />
         </div>
+
         <div className="input-container">
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="input-container checkbox-container">
           <label htmlFor="admin">Admin</label>
           <input
             type="checkbox"
@@ -114,12 +115,25 @@ const Register = () => {
             onChange={handleChange}
           />
         </div>
+
+        <div className="input-container">
+          <label htmlFor="avatar">Avatar (optional)</label>
+          <input
+            type="file"
+            id="avatar"
+            name="avatar"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+        </div>
+
         <button className="big-button" type="submit">
           Register
         </button>
       </form>
-      <button className="big-button" onClick={() => navigate('/login')}>
-        Login
+
+      <button className="big-button login-button" onClick={() => navigate('/login')}>
+        Already have an account? Login
       </button>
     </div>
   );
