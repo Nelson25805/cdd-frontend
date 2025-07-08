@@ -149,7 +149,7 @@ export default function UserProfile() {
           {incoming.map(u => (
             <li key={u.id}>
               <img src={u.avatar} alt="" className="tiny-avatar" />
-              {u.username}{' '}
+              {u.username}&nbsp;
               <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
               <button
                 className="tiny-button"
@@ -172,7 +172,7 @@ export default function UserProfile() {
           {outgoing.map(u => (
             <li key={u.id}>
               <img src={u.avatar} alt="" className="tiny-avatar" />
-              {u.username}{' '}
+              {u.username}&nbsp;
               <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
               <button
                 className="tiny-button"
