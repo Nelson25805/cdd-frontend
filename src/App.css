@@ -883,14 +883,13 @@ input[type="email"] {
 }
 
 .profile-avatar {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;     /* crop/zoom to fill */
-  border-radius: 50%;    /* make it round */
-  /* optional border/shadow */
-  border: 2px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 150px;        /* larger container */
+  height: 150px;       /* keep it square if you want a round mask */
+  border-radius: 50%;  /* still round */
+  object-fit: contain; /* show full image, letter‑boxed */
+  background-color: gray; /* optional: grey background behind letter‑box */
 }
+
 
 /* Container for the two stat cards */
 .profile-stats {
@@ -953,13 +952,23 @@ input[type="email"] {
   margin: 0.5em 0;
 }
 .tiny-avatar {
-  width: 24px;
-  height: 24px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   margin-right: 8px;
+  object-fit: contain; /* show full image, letter‑boxed */
+  background-color: gray; /* optional: grey background behind letter‑box */
 }
+
 .tiny-button {
   margin-left: 8px;
   font-size: 1.1rem;
   padding: 2px 6px;
 }
+
+
+
+
+
+
+
