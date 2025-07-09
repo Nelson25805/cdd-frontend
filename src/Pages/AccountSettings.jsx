@@ -15,6 +15,7 @@ function AccountSettings() {
   const { setUser, user, token } = useUser();
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState('');
+  const [avatarError, setAvatarError] = useState(null);
 
   const [formData, setFormData] = useState({
     displayUsername: '',
@@ -53,26 +54,53 @@ function AccountSettings() {
   // when user picks a new file:
   const handleAvatarChange = e => {
     const file = e.target.files[0] || null;
-    setAvatarFile(file);
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setAvatarPreview(url);
-    } else {
+
+    // 1. clear old errors
+    setAvatarError(null);
+
+    // 2. if nothing selected, reset to current avatar
+    if (!file) {
+      setAvatarFile(null);
       setAvatarPreview(user.avatar || '');
+      return;
     }
+
+    // 3. validate type
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('Please select a valid image file (jpg, png, etc.)');
+      setAvatarFile(null);
+      setAvatarPreview(user.avatar || '');
+      return;
+    }
+
+    // 4. valid image: set file & preview
+    setAvatarFile(file);
+    const url = URL.createObjectURL(file);
+    setAvatarPreview(url);
   };
 
   // upload the selected file
   const handleAvatarUpload = async () => {
-    if (!avatarFile) return;
+    if (!avatarFile) {
+      setAvatarError('No file selected to upload.');
+      return;
+    }
     const fd = new FormData();
     fd.append('avatar', avatarFile);
-    const { avatar } = await updateAvatar(fd);
-    // update context user
-    setUser(u => ({ ...u, avatar }));
-    // revoke preview URL
-    URL.revokeObjectURL(avatarPreview);
-    setAvatarFile(null);
+    try {
+      const { avatar } = await updateAvatar(fd);
+      // update context user
+      setUser(u => ({ ...u, avatar }));
+      // revoke preview URL
+      URL.revokeObjectURL(avatarPreview);
+      setAvatarFile(null);
+      setAvatarError(null);
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      setAvatarError(
+        err.message || 'Upload failed. Please try again with a valid image.'
+      );
+    }
   };
 
   // remove the avatar
@@ -212,10 +240,16 @@ function AccountSettings() {
               accept="image/*"
               onChange={handleAvatarChange}
             />
+            {avatarError && (
+              <div className="error-message" style={{ marginTop: '4px' }}>
+                {avatarError}
+              </div>
+            )}
             {avatarFile && (
               <button
                 className="small-button"
                 onClick={handleAvatarUpload}
+                disabled={!!avatarError}
               >
                 Upload
               </button>
