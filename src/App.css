@@ -887,7 +887,7 @@ input[type="email"] {
   height: 150px;       /* keep it square if you want a round mask */
   border-radius: 50%;  /* still round */
   object-fit: contain; /* show full image, letter‑boxed */
-  background-color: gray; /* optional: grey background behind letter‑box */
+  background-color: rgba(221,221,221,255);
 }
 
 
@@ -944,7 +944,7 @@ input[type="email"] {
 .friend-lists ul {
   list-style: none;
   padding: 0;
-  font-size: 1.0rem;
+  font-size: 1.5rem;
 }
 .friend-lists li {
   display: flex;
@@ -957,7 +957,7 @@ input[type="email"] {
   border-radius: 50%;
   margin-right: 8px;
   object-fit: contain; /* show full image, letter‑boxed */
-  background-color: gray; /* optional: grey background behind letter‑box */
+  background-color: rgba(221,221,221,255);
 }
 
 .tiny-button {
