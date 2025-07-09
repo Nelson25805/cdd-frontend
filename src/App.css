@@ -968,6 +968,27 @@ input[type="email"] {
 
 
 
+.avatar-section {
+  margin-bottom: 2em;
+}
+.avatar-section img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 0.5em;
+}
+.avatar-section input {
+  display: inline-block;
+}
+.avatar-section .small-button {
+  margin-left: 0.5em;
+}
+
+
+
+
 
 
 

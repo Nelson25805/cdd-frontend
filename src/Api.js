@@ -402,6 +402,19 @@ export const updateEmail = async (userId, newEmail) => {
   }
 };
 
+// upload a new avatar
+export const updateAvatar = async (formData) => {
+  const res = await apiClient.post('/api/users/avatar', formData);
+  return res.data; // { avatar: '<publicUrl>' }
+};
+
+// remove current avatar
+export const removeAvatar = async () => {
+  const res = await apiClient.delete('/api/users/avatar');
+  return res.data; // { avatar: null }
+};
+
+
 
 export const fetchReportData = async (reportType) => {
   try {

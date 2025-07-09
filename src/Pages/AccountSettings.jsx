@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
+import defaultAvatar from '../assets/default-avatar.jpg';
 import {
-  checkUsername, updateUsername, updatePassword,
-   checkEmail, updateEmail } from '../Api';
+  checkUsername, updateUsername,
+  updatePassword,
+  checkEmail, updateEmail,
+  updateAvatar,
+  removeAvatar
+} from '../Api';
 import '../App.css';
 
 function AccountSettings() {
   const { setUser, user, token } = useUser();
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState('');
 
   const [formData, setFormData] = useState({
     displayUsername: '',
@@ -25,13 +32,14 @@ function AccountSettings() {
   // ─── Separate error states ───────────────────────────────────
   const [usernameError, setUsernameError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
-  const [emailError, setEmailError]     = useState(null);
+  const [emailError, setEmailError] = useState(null);
 
   useEffect(() => {
     if (user) {
+      setAvatarPreview(user.avatar || '');
       setFormData({
         displayUsername: user.username || '',
-        displayEmail:    user.email    || '',
+        displayEmail: user.email || '',
         newUsername: '',
         confirmUsername: '',
         newPassword: '',
@@ -41,6 +49,38 @@ function AccountSettings() {
       });
     }
   }, [user]);
+
+  // when user picks a new file:
+  const handleAvatarChange = e => {
+    const file = e.target.files[0] || null;
+    setAvatarFile(file);
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setAvatarPreview(url);
+    } else {
+      setAvatarPreview(user.avatar || '');
+    }
+  };
+
+  // upload the selected file
+  const handleAvatarUpload = async () => {
+    if (!avatarFile) return;
+    const fd = new FormData();
+    fd.append('avatar', avatarFile);
+    const { avatar } = await updateAvatar(fd);
+    // update context user
+    setUser(u => ({ ...u, avatar }));
+    // revoke preview URL
+    URL.revokeObjectURL(avatarPreview);
+    setAvatarFile(null);
+  };
+
+  // remove the avatar
+  const handleAvatarRemove = async () => {
+    await removeAvatar();
+    setUser(u => ({ ...u, avatar: null }));
+    setAvatarPreview('');
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -153,10 +193,43 @@ function AccountSettings() {
   };
 
   return (
-    <div className= "App">
+    <div className="App">
       <TopLinks />
       <main className="main-content">
         <h1>Account Settings</h1>
+
+        {/* Avatar section */}
+        <section className="avatar-section">
+          <h2>Your Avatar</h2>
+          <img
+            src={avatarPreview || defaultAvatar}
+            alt="Your avatar"
+            className="profile-avatar"
+          />
+          <div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+            />
+            {avatarFile && (
+              <button
+                className="small-button"
+                onClick={handleAvatarUpload}
+              >
+                Upload
+              </button>
+            )}
+            {(user.avatar || avatarPreview) && !avatarFile && (
+              <button
+                className="small-button"
+                onClick={handleAvatarRemove}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </section>
 
         {/* Display current info */}
         <div className="info-section">
