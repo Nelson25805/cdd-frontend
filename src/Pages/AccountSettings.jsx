@@ -3,9 +3,12 @@ import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import defaultAvatar from '../assets/default-avatar.jpg';
 import {
-  checkUsername, updateUsername,
+  getUserProfile,
+  checkUsername,
+  updateUsername,
   updatePassword,
-  checkEmail, updateEmail,
+  checkEmail,
+  updateEmail,
   updateAvatar,
   removeAvatar
 } from '../Api';
@@ -29,57 +32,52 @@ function AccountSettings() {
   });
 
   const [loading, setLoading] = useState(false);
-
-  // ─── Separate error states ───────────────────────────────────
   const [usernameError, setUsernameError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
   const [emailError, setEmailError] = useState(null);
 
+  // On mount (and when user changes), fetch full profile including avatar_url
   useEffect(() => {
-    if (user) {
-      setAvatarPreview(user.avatar || '');
-      setFormData({
-        displayUsername: user.username || '',
-        displayEmail: user.email || '',
-        newUsername: '',
-        confirmUsername: '',
-        newPassword: '',
-        confirmPassword: '',
-        newEmail: '',
-        confirmEmail: '',
-      });
-    }
-  }, [user]);
+    if (!user) return;
 
-  // when user picks a new file:
+    // 1) Fetch only avatar_url from profile endpoint
+    (async () => {
+      try {
+        const profile = await getUserProfile(user.userid, token);
+        setAvatarPreview(profile.avatar || '');
+      } catch (err) {
+        console.error('Failed to load avatar:', err);
+        setAvatarPreview('');
+      }
+    })();
+
+    // 2) Seed formData display fields from context user
+    setFormData(fd => ({
+      ...fd,
+      displayUsername: user.username || '',
+      displayEmail: user.email || ''
+    }));
+  }, [user, token]);
+
+
   const handleAvatarChange = e => {
     const file = e.target.files[0] || null;
-
-    // 1. clear old errors
     setAvatarError(null);
-
-    // 2. if nothing selected, reset to current avatar
     if (!file) {
       setAvatarFile(null);
       setAvatarPreview(user.avatar || '');
       return;
     }
-
-    // 3. validate type
     if (!file.type.startsWith('image/')) {
       setAvatarError('Please select a valid image file (jpg, png, etc.)');
       setAvatarFile(null);
       setAvatarPreview(user.avatar || '');
       return;
     }
-
-    // 4. valid image: set file & preview
     setAvatarFile(file);
-    const url = URL.createObjectURL(file);
-    setAvatarPreview(url);
+    setAvatarPreview(URL.createObjectURL(file));
   };
 
-  // upload the selected file
   const handleAvatarUpload = async () => {
     if (!avatarFile) {
       setAvatarError('No file selected to upload.');
@@ -88,64 +86,46 @@ function AccountSettings() {
     const fd = new FormData();
     fd.append('avatar', avatarFile);
     try {
-      const { avatar } = await updateAvatar(fd);
-      // update context user
+      const { avatar } = await updateAvatar(fd, token);
       setUser(u => ({ ...u, avatar }));
-      // revoke preview URL
       URL.revokeObjectURL(avatarPreview);
       setAvatarFile(null);
       setAvatarError(null);
+      setAvatarPreview(avatar);
     } catch (err) {
       console.error('Avatar upload failed:', err);
-      setAvatarError(
-        err.message || 'Upload failed. Please try again with a valid image.'
-      );
+      setAvatarError(err.message || 'Upload failed. Please try again.');
     }
   };
 
-  // remove the avatar
   const handleAvatarRemove = async () => {
-    await removeAvatar();
-    setUser(u => ({ ...u, avatar: null }));
-    setAvatarPreview('');
+    try {
+      await removeAvatar(token);
+      setUser(u => ({ ...u, avatar: null }));
+      setAvatarPreview('');
+    } catch (err) {
+      console.error('Avatar remove failed:', err);
+    }
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value, type, checked } = e.target;
-    setFormData(fd => ({
-      ...fd,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setFormData(fd => ({ ...fd, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  // ─── Update Username ────────────────────────────────────────
   const handleUpdateUsername = async () => {
-    // clear only this section’s error
     setUsernameError(null);
     setLoading(true);
     try {
       const { newUsername, confirmUsername } = formData;
-      if (newUsername !== confirmUsername) {
-        throw new Error('Usernames must match.');
-      }
-      if (newUsername === user.username) {
-        throw new Error('New username is the same as current.');
-      }
-      if (!newUsername) {
-        throw new Error('Username cannot be empty.');
-      }
+      if (newUsername !== confirmUsername) throw new Error('Usernames must match.');
+      if (newUsername === user.username) throw new Error('New username is the same as current.');
+      if (!newUsername) throw new Error('Username cannot be empty.');
       const { exists } = await checkUsername(newUsername, token);
-      if (exists) {
-        throw new Error('That username is already taken.');
-      }
+      if (exists) throw new Error('That username is already taken.');
       await updateUsername(user.userid, newUsername, token);
       setUser(u => ({ ...u, username: newUsername }));
-      setFormData(fd => ({
-        ...fd,
-        displayUsername: newUsername,
-        newUsername: '',
-        confirmUsername: ''
-      }));
+      setFormData(fd => ({ ...fd, displayUsername: newUsername, newUsername: '', confirmUsername: '' }));
       alert('Username updated successfully!');
     } catch (err) {
       console.error(err);
@@ -155,24 +135,15 @@ function AccountSettings() {
     }
   };
 
-  // ─── Update Password ────────────────────────────────────────
   const handleUpdatePassword = async () => {
     setPasswordError(null);
     setLoading(true);
     try {
       const { newPassword, confirmPassword } = formData;
-      if (newPassword !== confirmPassword) {
-        throw new Error('Passwords must match.');
-      }
-      if (!newPassword) {
-        throw new Error('Password cannot be empty.');
-      }
+      if (newPassword !== confirmPassword) throw new Error('Passwords must match.');
+      if (!newPassword) throw new Error('Password cannot be empty.');
       await updatePassword(user.userid, newPassword, token);
-      setFormData(fd => ({
-        ...fd,
-        newPassword: '',
-        confirmPassword: ''
-      }));
+      setFormData(fd => ({ ...fd, newPassword: '', confirmPassword: '' }));
       alert('Password updated successfully!');
     } catch (err) {
       console.error(err);
@@ -182,35 +153,21 @@ function AccountSettings() {
     }
   };
 
-  // ─── Update Email ───────────────────────────────────────────
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleUpdateEmail = async () => {
     setEmailError(null);
     setLoading(true);
     try {
       const { newEmail, confirmEmail } = formData;
-      if (newEmail !== confirmEmail) {
-        throw new Error('Emails must match.');
-      }
-      if (!isValidEmail(newEmail)) {
-        throw new Error('Invalid email format.');
-      }
-      if (newEmail === user.email) {
-        throw new Error('New email is the same as current.');
-      }
+      if (newEmail !== confirmEmail) throw new Error('Emails must match.');
+      if (!isValidEmail(newEmail)) throw new Error('Invalid email format.');
+      if (newEmail === user.email) throw new Error('New email is the same as current.');
       const { exists } = await checkEmail(newEmail, token);
-      if (exists) {
-        throw new Error('That email is already in use.');
-      }
+      if (exists) throw new Error('That email is already in use.');
       await updateEmail(user.userid, newEmail, token);
       setUser(u => ({ ...u, email: newEmail }));
-      setFormData(fd => ({
-        ...fd,
-        displayEmail: newEmail,
-        newEmail: '',
-        confirmEmail: ''
-      }));
+      setFormData(fd => ({ ...fd, displayEmail: newEmail, newEmail: '', confirmEmail: '' }));
       alert('Email updated successfully!');
     } catch (err) {
       console.error(err);
@@ -240,132 +197,48 @@ function AccountSettings() {
               accept="image/*"
               onChange={handleAvatarChange}
             />
-            {avatarError && (
-              <div className="error-message" style={{ marginTop: '4px' }}>
-                {avatarError}
-              </div>
-            )}
-            {avatarFile && (
-              <button
-                className="small-button"
-                onClick={handleAvatarUpload}
-                disabled={!!avatarError}
-              >
-                Upload
-              </button>
-            )}
-            {(user.avatar || avatarPreview) && !avatarFile && (
-              <button
-                className="small-button"
-                onClick={handleAvatarRemove}
-              >
-                Remove
-              </button>
+            {avatarError && <div className="error-message">{avatarError}</div>}
+            {avatarFile && <button onClick={handleAvatarUpload}>Upload</button>}
+            {!avatarFile && avatarPreview && (
+              <button onClick={handleAvatarRemove}>Remove</button>
             )}
           </div>
         </section>
 
         {/* Display current info */}
         <div className="info-section">
-          <div>
-            <label>Current Username: {formData.displayUsername}</label>
-          </div>
-          <div>
-            <label>Current Email: {formData.displayEmail}</label>
-          </div>
+          <div><label>Current Username: {formData.displayUsername}</label></div>
+          <div><label>Current Email: {formData.displayEmail}</label></div>
         </div>
 
         <form>
           <div className="change-section">
-
             {/* Username Section */}
             <div>
               <label>Change Username</label>
-              <input
-                name="newUsername"
-                placeholder="Enter new username"
-                value={formData.newUsername}
-                onChange={handleChange}
-              />
-              <input
-                name="confirmUsername"
-                placeholder="Confirm new username"
-                value={formData.confirmUsername}
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={handleUpdateUsername}
-                disabled={loading}
-                className="big-button"
-              >
-                Change Username
-              </button>
-              {usernameError && (
-                <div className="error-message">{usernameError}</div>
-              )}
+              <input name="newUsername" placeholder="Enter new username" value={formData.newUsername} onChange={handleChange} />
+              <input name="confirmUsername" placeholder="Confirm new username" value={formData.confirmUsername} onChange={handleChange} />
+              <button type="button" onClick={handleUpdateUsername} disabled={loading} className="big-button">Change Username</button>
+              {usernameError && <div className="error-message">{usernameError}</div>}
             </div>
 
             {/* Password Section */}
             <div>
               <label>Change Password</label>
-              <input
-                type="password"
-                name="newPassword"
-                placeholder="Enter new password"
-                value={formData.newPassword}
-                onChange={handleChange}
-              />
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm new password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={handleUpdatePassword}
-                disabled={loading}
-                className="big-button"
-              >
-                Change Password
-              </button>
-              {passwordError && (
-                <div className="error-message">{passwordError}</div>
-              )}
+              <input type="password" name="newPassword" placeholder="Enter new password" value={formData.newPassword} onChange={handleChange} />
+              <input type="password" name="confirmPassword" placeholder="Confirm new password" value={formData.confirmPassword} onChange={handleChange} />
+              <button type="button" onClick={handleUpdatePassword} disabled={loading} className="big-button">Change Password</button>
+              {passwordError && <div className="error-message">{passwordError}</div>}
             </div>
 
             {/* Email Section */}
             <div>
               <label>Change Email</label>
-              <input
-                type="email"
-                name="newEmail"
-                placeholder="Enter new email"
-                value={formData.newEmail}
-                onChange={handleChange}
-              />
-              <input
-                type="email"
-                name="confirmEmail"
-                placeholder="Confirm new email"
-                value={formData.confirmEmail}
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={handleUpdateEmail}
-                disabled={loading}
-                className="big-button"
-              >
-                Change Email
-              </button>
-              {emailError && (
-                <div className="error-message">{emailError}</div>
-              )}
+              <input type="email" name="newEmail" placeholder="Enter new email" value={formData.newEmail} onChange={handleChange} />
+              <input type="email" name="confirmEmail" placeholder="Confirm new email" value={formData.confirmEmail} onChange={handleChange} />
+              <button type="button" onClick={handleUpdateEmail} disabled={loading} className="big-button">Change Email</button>
+              {emailError && <div className="error-message">{emailError}</div>}
             </div>
-
           </div>
         </form>
       </main>
