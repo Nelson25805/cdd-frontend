@@ -23,6 +23,9 @@ import UserSearch from './Pages/UserSearch';
 import UserProfile from './Pages/UserProfile';
 import MessageThread from './Pages/MessageThread';
 
+import ChatList from './Pages/ChatList.jsx';
+import ChatLog from './Pages/ChatLog.jsx';
+
 const SortFilterLayout = () => (
   <SortFilterProvider>
     <Outlet />
@@ -68,6 +71,10 @@ const App = () => {
             <Route path="/messages/inbox" element={<MessageThread />} />
             <Route path="/messages/friends" element={<MessageThread />} />
             <Route path="/messages/:thread" element={<MessageThread />} />
+
+            <Route path="/messages" element={<ChatList />} />
+            <Route path="/messages/:threadId" element={<ChatLog />} />
+
 
 
 

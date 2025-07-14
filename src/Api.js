@@ -193,7 +193,7 @@ export const editWishlistDetails = async (userId, gameId, { consoleIds }) => {
   const res = await apiClient.put(
     `/api/edit-wishlist/${userId}/${gameId}`,
     { consoleIds },
-    { headers: { 'Content-Type':'application/json' } }
+    { headers: { 'Content-Type': 'application/json' } }
   );
   return { success: res.status === 200 };
 };
@@ -441,13 +441,13 @@ export const fetchReportData = async (reportType) => {
  */
 export const searchUsers = async (query) => {
   const res = await apiClient.get('/api/users/search', { params: { q: query } });
-  return res.data; 
+  return res.data;
 };
 
 /** Send a friend request to userId */
 export const sendFriendRequest = async (targetUserId) => {
   const res = await apiClient.post(`/api/friends/request/${targetUserId}`);
-  return res.data; 
+  return res.data;
 };
 
 /** Cancel a pending friend request to userId */
@@ -552,3 +552,23 @@ export const getUserFriends = async (userId) => {
   const res = await apiClient.get(`/api/users/${userId}/friends`);
   return res.data; // [{ id, username, avatar, friendedAt }, …]
 };
+
+
+export async function getUserThreads() {
+  const res = await apiClient.get('/api/threads');
+  return res.data;
+}
+
+export async function getThreadMessages(threadId) {
+  const res = await apiClient.get(`/api/threads/${threadId}/messages`);
+  return res.data;
+}
+
+export async function sendMessageToThread(threadId, text) {
+  const res = await apiClient.post(
+    `/api/threads/${threadId}/messages`,
+    { text }
+  );
+  return res.data;
+}
+
