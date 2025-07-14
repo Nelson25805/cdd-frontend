@@ -22,14 +22,16 @@ export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [profile, setProfile]         = useState(null);
-  const [collection, setCollection]   = useState([]);
-  const [wishlist, setWishlist]       = useState([]);
+  const [profile, setProfile] = useState(null);
+  const [collection, setCollection] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
   const [requestSent, setRequestSent] = useState(false);
 
   const [incoming, setIncoming] = useState([]);
   const [outgoing, setOutgoing] = useState([]);
-  const [friends, setFriends]   = useState([]);
+  const [friends, setFriends] = useState([]);
+
+  const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -81,10 +83,21 @@ export default function UserProfile() {
     setOutgoing(prev => prev.filter(u => u.id !== targetId));
   };
 
-  // remove an existing friend
-  const handleRemoveFriend = async (friendId) => {
+  // When “Remove” clicked, show inline confirm buttons
+  const promptRemove = friendId => {
+    setConfirmRemoveId(friendId);
+  };
+
+  // User clicks “Cancel”
+  const cancelRemove = () => {
+    setConfirmRemoveId(null);
+  };
+
+  // User clicks “Confirm”
+  const confirmRemove = async friendId => {
     await unfriend(friendId);
-    setFriends(prev => prev.filter(u => u.id !== friendId));
+    setFriends(f => f.filter(u => u.id !== friendId));
+    setConfirmRemoveId(null);
   };
 
   return (
@@ -129,72 +142,101 @@ export default function UserProfile() {
 
       <section className="friend-lists">
         <h2>Friends ({friends.length})</h2>
-        <ul>
-          {friends.map(u => (
-            <li key={u.id}>
-              <img
-                src={u.avatar || defaultAvatar}
-                alt={`${u.username}'s avatar`}
-                className="tiny-avatar"
-              />
-              {u.username}
-              <button
-                className="tiny-button"
-                onClick={() => handleRemoveFriend(u.id)}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
+          <ul>
+            {friends.map(u => (
+              <li key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img
+                  src={u.avatar || defaultAvatar}
+                  alt={`${u.username}'s avatar`}
+                  className="tiny-avatar"
+                />
+                <span style={{ flexGrow: 1 }}>{u.username}</span>
 
-        <h2>Incoming Requests ({incoming.length})</h2>
-        <ul>
-          {incoming.map(u => (
-            <li key={u.id}>
-              <img
-                src={u.avatar || defaultAvatar}
-                alt={`${u.username}'s avatar`}
-                className="tiny-avatar"
-              />
-              {u.username}&nbsp;
-              <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
-              <button
-                className="tiny-button"
-                onClick={() => handleAccept(u.id)}
-              >
-                Accept
-              </button>
-              <button
-                className="tiny-button"
-                onClick={() => handleDecline(u.id)}
-              >
-                Decline
-              </button>
-            </li>
-          ))}
-        </ul>
+                <button
+                  className="tiny-button"
+                  onClick={() => navigate(`/messages/${u.chatThreadId}`)}
+                >
+                  Message
+                </button>
 
-        <h2>Outgoing Requests ({outgoing.length})</h2>
-        <ul>
-          {outgoing.map(u => (
-            <li key={u.id}>
-              <img
-                src={u.avatar || defaultAvatar}
-                alt={`${u.username}'s avatar`}
-                className="tiny-avatar"
-              />
-              {u.username}&nbsp;
-              <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
-              <button
-                className="tiny-button"
-                onClick={() => handleCancelOutgoing(u.id)}
-              >
-                Cancel
-              </button>
-            </li>
-          ))}
-        </ul>
+                {confirmRemoveId === u.id ? (
+                  <>
+                    {/* Confirmation message */}
+                    <span style={{ margin: '0 8px', color: '#c00' }}>
+                      Are you sure you want to remove {u.username}?
+                    </span>
+                    <button
+                      className="tiny-button"
+                      onClick={() => confirmRemove(u.id)}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      className="tiny-button"
+                      onClick={cancelRemove}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className="tiny-button"
+                    onClick={() => promptRemove(u.id)}
+                  >
+                    Remove
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <h2>Incoming Requests ({incoming.length})</h2>
+          <ul>
+            {incoming.map(u => (
+              <li key={u.id}>
+                <img
+                  src={u.avatar || defaultAvatar}
+                  alt={`${u.username}'s avatar`}
+                  className="tiny-avatar"
+                />
+                {u.username}&nbsp;
+                <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+                <button
+                  className="tiny-button"
+                  onClick={() => handleAccept(u.id)}
+                >
+                  Accept
+                </button>
+                <button
+                  className="tiny-button"
+                  onClick={() => handleDecline(u.id)}
+                >
+                  Decline
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <h2>Outgoing Requests ({outgoing.length})</h2>
+          <ul>
+            {outgoing.map(u => (
+              <li key={u.id}>
+                <img
+                  src={u.avatar || defaultAvatar}
+                  alt={`${u.username}'s avatar`}
+                  className="tiny-avatar"
+                />
+                {u.username}&nbsp;
+                <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+                <button
+                  className="tiny-button"
+                  onClick={() => handleCancelOutgoing(u.id)}
+                >
+                  Cancel
+                </button>
+              </li>
+            ))}
+          </ul>
       </section>
     </div>
   );
