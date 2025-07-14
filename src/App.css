@@ -990,6 +990,40 @@ input[type="email"] {
 
 
 
+/* Confirmation prompt text */
+.friend-lists .confirm-text {
+  flex-grow: 1;                /* push buttons to the right */
+  color: #c00;                 /* red for warning */
+  font-size: 1.2rem;           /* slightly smaller than the list text */
+  margin: 0 8px;               /* space around the text */
+}
+
+/* Confirm & Cancel buttons */
+.tiny-button.confirm,
+.tiny-button.cancel {
+  font-size: 1rem;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tiny-button.confirm {
+  background-color: #c00;
+  color: #fff;
+}
+
+.tiny-button.cancel {
+  background-color: #999;
+  color: #fff;
+}
+
+/* Add a tiny bit of spacing so the Message button and confirmation text don’t collide */
+.friend-lists li .tiny-button + .confirm-text {
+  margin-left: 8px;
+}
+
+
 
 
 
