@@ -533,7 +533,8 @@ export const getFriends = async () => {
 };
 
 
-// in Api.js, under your other exports…
+
+
 
 /** Fetch pending incoming requests _to_ a user */
 export const getUserIncomingRequests = async (userId) => {
@@ -553,17 +554,19 @@ export const getUserFriends = async (userId) => {
   return res.data; // [{ id, username, avatar, friendedAt }, …]
 };
 
-
+/** Fetch User thread messages */
 export async function getUserThreads() {
   const res = await apiClient.get('/api/threads');
   return res.data;
 }
 
+/** Fetch thread messages from friend */
 export async function getThreadMessages(threadId) {
   const res = await apiClient.get(`/api/threads/${threadId}/messages`);
   return res.data;
 }
 
+/** Send message to thread */
 export async function sendMessageToThread(threadId, text) {
   const res = await apiClient.post(
     `/api/threads/${threadId}/messages`,
