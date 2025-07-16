@@ -68,12 +68,9 @@ const App = () => {
             {/* Friend & messaging routes: */}
             <Route path="/users" element={<UserSearch />} />
             <Route path="/users/:id" element={<UserProfile />} />
-            <Route path="/messages/inbox" element={<MessageThread />} />
-            <Route path="/messages/friends" element={<MessageThread />} />
-            <Route path="/messages/:thread" element={<MessageThread />} />
 
-            <Route path="/messages" element={<ChatList />} />
-            <Route path="/messages/:threadId" element={<ChatLog />} />
+            <Route path="/messages/:userId" element={<MessageThread />} />
+            <Route path="/messages" element={<MessageThread />} />
 
 
 

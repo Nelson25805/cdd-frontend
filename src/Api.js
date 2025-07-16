@@ -499,7 +499,7 @@ export const getUserWishlist = async (userId) => {
 
 /** Fetch messages in a given thread */
 export const getMessages = async (threadId) => {
-  const res = await apiClient.get(`/api/messages/${threadId}`);
+  const res = await apiClient.get(`/api/threads/${threadId}/messages`);
   return res.data;  // [{ id, senderId, senderName, text, timestamp }, …]
 };
 
@@ -508,7 +508,10 @@ export const getMessages = async (threadId) => {
  * Returns the new message object.
  */
 export const sendMessage = async (threadId, text) => {
-  const res = await apiClient.post(`/api/messages/${threadId}`, { text });
+  const res = await apiClient.post(
+    `/api/threads/${threadId}/messages`,
+    { text }
+  );
   return res.data;
 };
 

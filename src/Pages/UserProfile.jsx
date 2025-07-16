@@ -154,7 +154,7 @@ export default function UserProfile() {
 
               <button
                 className="tiny-button"
-                onClick={() => navigate(`/messages/${u.chatThreadId}`)}
+                onClick={() => navigate(`/messages/${u.id}`)}
               >
                 Message
               </button>
