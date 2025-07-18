@@ -294,6 +294,7 @@ export const fetchGameInfo = async (gameId) => {
   }
 };
 
+// adds game details to inserted game
 export const addGameDetails = async (userId, gameId, details) => {
   try {
     const response = await apiClient.post(
@@ -345,7 +346,7 @@ export const editGameDetails = async (userId, game, details) => {
   }
 };
 
-
+// checks for valid username
 export const checkUsername = async (username) => {
   try {
     const response = await apiClient.get(`/api/check-username/${username}`);
@@ -356,6 +357,7 @@ export const checkUsername = async (username) => {
   }
 };
 
+// updates username requested by user
 export const updateUsername = async (userId, newUsername) => {
   try {
     const response = await apiClient.put(`/api/update-username/${userId}`, {
@@ -368,6 +370,7 @@ export const updateUsername = async (userId, newUsername) => {
   }
 };
 
+// updates password requested by user
 export const updatePassword = async (userId, newPassword) => {
   try {
     const response = await apiClient.put(`/api/update-password/${userId}`, {
@@ -380,6 +383,7 @@ export const updatePassword = async (userId, newPassword) => {
   }
 };
 
+// checks email
 export const checkEmail = async (email) => {
   try {
     const response = await apiClient.get(`/api/check-email/${email}`);
@@ -390,6 +394,7 @@ export const checkEmail = async (email) => {
   }
 };
 
+// updates email address for the user
 export const updateEmail = async (userId, newEmail) => {
   try {
     const response = await apiClient.put(`/api/update-email/${userId}`, {
@@ -415,7 +420,7 @@ export const removeAvatar = async () => {
 };
 
 
-
+// fetches report data for user that is requested
 export const fetchReportData = async (reportType) => {
   try {
     const response = await apiClient.get(`${API_BASE_URL}/api/reports/${reportType}`);
