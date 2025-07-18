@@ -21,7 +21,9 @@ import WishlistDetails from './Pages/WishlistDetails.jsx';
 import EditWishlistDetails from './Pages/EditWishlistDetails.jsx';
 import UserSearch from './Pages/UserSearch';
 import UserProfile from './Pages/UserProfile';
-import MessageThread from './Pages/MessageThread';
+
+import ChatPage from './Pages/ChatPage.jsx';
+
 
 import ChatList from './Pages/ChatList.jsx';
 import ChatLog from './Pages/ChatLog.jsx';
@@ -69,8 +71,8 @@ const App = () => {
             <Route path="/users" element={<UserSearch />} />
             <Route path="/users/:id" element={<UserProfile />} />
 
-            <Route path="/messages/:userId" element={<MessageThread />} />
-            <Route path="/messages" element={<MessageThread />} />
+            <Route path="/messages/:userId" element={<ChatPage />} />
+            {/* <Route path="/messages" element={<MessageThread />} /> */}
 
 
 
