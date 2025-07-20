@@ -21,12 +21,8 @@ import WishlistDetails from './Pages/WishlistDetails.jsx';
 import EditWishlistDetails from './Pages/EditWishlistDetails.jsx';
 import UserSearch from './Pages/UserSearch';
 import UserProfile from './Pages/UserProfile';
-
 import ChatPage from './Pages/ChatPage.jsx';
 
-
-import ChatList from './Pages/ChatList.jsx';
-import ChatLog from './Pages/ChatLog.jsx';
 
 const SortFilterLayout = () => (
   <SortFilterProvider>
@@ -72,10 +68,6 @@ const App = () => {
             <Route path="/users/:id" element={<UserProfile />} />
 
             <Route path="/messages/:userId" element={<ChatPage />} />
-            {/* <Route path="/messages" element={<MessageThread />} /> */}
-
-
-
 
             {/* Admin-only route nested within PrivateRoute */}
             <Route element={<AdminRoute />}>
