@@ -1,4 +1,3 @@
-// src/Pages/ChatLog.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';

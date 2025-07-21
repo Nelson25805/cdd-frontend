@@ -1,4 +1,3 @@
-// src/Pages/ChatList.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserThreads } from '../Api'; // you’ll need to implement this

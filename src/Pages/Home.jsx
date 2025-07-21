@@ -1,4 +1,3 @@
-// Importing necessary dependencies from React and other modules
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 

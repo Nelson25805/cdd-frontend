@@ -1,4 +1,3 @@
-// src/Pages/Register.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../Api';

@@ -1,4 +1,3 @@
-// src/Pages/UserSearch.jsx
 import { useState } from 'react';
 import {
   searchUsers,

@@ -1,4 +1,3 @@
-// src/Pages/AddGameToDatabase.jsx
 import { useState, useEffect, useRef } from 'react';
 import '../App.css';
 import { useUser } from '../Context/useUser';

@@ -1,4 +1,3 @@
-// App.jsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './Context/UserContext';
 import Home from './Pages/Home';
@@ -53,6 +52,7 @@ const App = () => {
               <Route path="/MyCollection" element={<MyCollection />} />
               <Route path="/MyWishlist" element={<MyWishlist />} />
               <Route path="/Search" element={<Search />} />
+
               {/* Viewing someone else's collection/wishlist */}
               <Route path="/users/:userId/collection" element={<MyCollection />} />
               <Route path="/users/:userId/wishlist" element={<MyWishlist />} />
@@ -66,7 +66,6 @@ const App = () => {
             {/* Friend & messaging routes: */}
             <Route path="/users" element={<UserSearch />} />
             <Route path="/users/:id" element={<UserProfile />} />
-
             <Route path="/messages/:userId" element={<ChatPage />} />
 
             {/* Admin-only route nested within PrivateRoute */}
