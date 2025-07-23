@@ -146,7 +146,10 @@ export default function ChatPage() {
                     display: 'inline-block',
                     padding: '0.5em 1em',
                     borderRadius: '8px',
-                    background: isMe ? '#DCF8C6' : '#EEE'
+                    background: isMe ? '#DCF8C6' : '#EEE',
+                    whiteSpace: 'pre-wrap',    // allow line breaks & wrapping
+                    wordBreak: 'break-word',  // break long words/URLs
+                    maxWidth: '70%'          // ensure bubble never grows past 70%
                   }}
                 >
                   {m.text}
