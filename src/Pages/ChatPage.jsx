@@ -7,6 +7,7 @@ import {
   getThreadMessages,
   sendMessageToThread
 } from '../Api';
+import defaultAvatar from '../assets/default-avatar.jpg';
 
 export default function ChatPage() {
   const { user } = useUser();
@@ -14,8 +15,8 @@ export default function ChatPage() {
   const navigate = useNavigate();
 
   const [threadId, setThreadId] = useState(null);
-  const [messages,  setMessages] = useState([]);
-  const [draft,     setDraft]    = useState('');
+  const [messages, setMessages] = useState([]);
+  const [draft, setDraft] = useState('');
   const bottomRef = useRef();
 
   // 1) If no userId, go back
@@ -47,9 +48,9 @@ export default function ChatPage() {
       try {
         const msgs = await getThreadMessages(threadId);
         setMessages(msgs.map(m => ({
-          id:        m.messageid,
-          text:      m.content,
-          fromMe:    m.senderid === user.userid,
+          id: m.messageid,
+          text: m.content,
+          fromMe: m.senderid === user.userid,
           timestamp: new Date(m.dateadded)
         })));
       } catch (err) {
@@ -77,9 +78,9 @@ export default function ChatPage() {
       setMessages(ms => [
         ...ms,
         {
-          id:        sent.messageid,
-          text:      sent.content,
-          fromMe:    sent.senderid === user.userid,
+          id: sent.messageid,
+          text: sent.content,
+          fromMe: sent.senderid === user.userid,
           timestamp: new Date(sent.dateadded)
         }
       ]);
@@ -88,36 +89,76 @@ export default function ChatPage() {
     }
   };
 
+  // ─── New: partner’s profile ───────────────────────────────────
+  const [partner, setPartner] = useState({ username: '', avatar: '' });
+  useEffect(() => {
+    if (!userId) return;
+    (async () => {
+      try {
+        const p = await getUserProfile(userId);
+        setPartner({
+          username: p.username,
+          avatar: p.avatar || ''
+        });
+      } catch (err) {
+        console.error('Failed to load partner profile:', err);
+      }
+    })();
+  }, [userId]);
+
   return (
     <div className="App chat-page">
       <TopLinks />
-      <h1>Chat with {userId}</h1>
+      {/* Header with partner’s avatar + username */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1em', padding: '1em 0' }}>
+        <img
+          src={partner.avatar || defaultAvatar}
+          alt={partner.username}
+          style={{ width: 40, height: 40, borderRadius: '50%' }}
+        />
+        <h1 style={{ margin: 0 }}>Chat with {partner.username}</h1>
+      </div>
 
       <div className="chat-log" style={{ maxHeight: '60vh', overflowY: 'auto', padding: '1em' }}>
-        {messages.map(m => (
-          <div
-            key={m.id}
-            style={{
-              textAlign: m.fromMe ? 'right' : 'left',
-              margin: '0.5em 0'
-            }}
-          >
-            <span
+        {messages.map(m => {
+          const isMe = m.fromMe;
+          const name = isMe ? user.username : partner.username;
+          const avatar = isMe ? user.avatar : partner.avatar;
+
+          return (
+            <div
+              key={m.id}
               style={{
-                display: 'inline-block',
-                padding: '0.5em 1em',
-                borderRadius: '16px',
-                background: m.fromMe ? '#DCF8C6' : '#EEE',
-                maxWidth: '60%'
+                display: 'flex',
+                flexDirection: isMe ? 'row-reverse' : 'row',
+                alignItems: 'flex-start',
+                margin: '0.5em 0'
               }}
             >
-              {m.text}
-            </span>
-            <div style={{ fontSize: '0.75em', color: '#666' }}>
-              {m.timestamp.toLocaleTimeString()}
+              <img
+                src={avatar || defaultAvatar}
+                alt={name}
+                style={{ width: 32, height: 32, borderRadius: '50%', margin: '0 0.5em' }}
+              />
+              <div style={{ maxWidth: '70%' }}>
+                <div
+                  style={{
+                    display: 'inline-block',
+                    padding: '0.5em 1em',
+                    borderRadius: '8px',
+                    background: isMe ? '#DCF8C6' : '#EEE'
+                  }}
+                >
+                  {m.text}
+                </div>
+                <div style={{ fontSize: '0.75em', color: '#666', marginTop: '0.25em' }}>
+                  <div>{name}</div>
+                  <div>{m.timestamp.toLocaleTimeString()}</div>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
