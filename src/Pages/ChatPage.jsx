@@ -1,3 +1,5 @@
+// src/Pages/ChatPage.jsx
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
@@ -10,33 +12,55 @@ import {
 } from '../Api';
 
 export default function ChatPage() {
-  const { user }   = useUser();
+  const { user } = useUser();
   const { userId } = useParams();
-  const navigate   = useNavigate();
+  const navigate = useNavigate();
 
-  const [threadId,   setThreadId]   = useState(null);
-  const [messages,   setMessages]   = useState([]);
-  const [draft,      setDraft]      = useState('');
+  // ─── existing state ───────────────────────────────────────
+  const [threadId, setThreadId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [draft,    setDraft]    = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
   const [showJump,   setShowJump]   = useState(false);
 
-  const chatRef   = useRef();
-  const bottomRef = useRef();
-  // suppressScroll lets us ignore one onScroll after we scroll programmatically
+  const chatRef       = useRef();
+  const bottomRef     = useRef();
   const suppressScroll = useRef(false);
 
-  // Partner’s profile + threadId
+  // ─── NEW: track “me” profile ───────────────────────────────
+  const [meProfile, setMeProfile] = useState({
+    username: user.username,
+    avatar:   user.avatar || ''
+  });
+
+  // ─── existing partner state ───────────────────────────────
   const [partner, setPartner] = useState({ username: '', avatar: '' });
+
+  // 1) redirect if no userId
   useEffect(() => {
-    if (!userId) return navigate(-1);
-    (async () => {
-      const p = await getUserProfile(userId);
-      setPartner({ username: p.username, avatar: p.avatar || '' });
-      setThreadId(p.chatThreadId);
-    })();
+    if (!userId) navigate(-1);
   }, [userId, navigate]);
 
-  // Poll messages
+  // 2) load both profiles + threadId
+  useEffect(() => {
+    if (!userId) return;
+    (async () => {
+      try {
+        // Partner’s profile (as before)
+        const p = await getUserProfile(userId);
+        setPartner({ username: p.username, avatar: p.avatar || '' });
+        setThreadId(p.chatThreadId);
+
+        // **Your** profile
+        const me = await getUserProfile(user.userid);
+        setMeProfile({ username: me.username, avatar: me.avatar || '' });
+      } catch (err) {
+        console.error('Profile fetch error:', err);
+      }
+    })();
+  }, [userId, user.userid]);
+
+  // 3) poll messages … (unchanged)
   useEffect(() => {
     if (!threadId) return;
     let stop = false;
@@ -60,21 +84,19 @@ export default function ChatPage() {
     return () => { stop = true; };
   }, [threadId, user.userid]);
 
-  // When messages update and autoScroll=true, jump to bottom silently
+  // 4) auto-scroll only when autoScroll=true
   useEffect(() => {
     if (!autoScroll) return;
     const el = chatRef.current;
     if (!el) return;
     suppressScroll.current = true;
     el.scrollTop = el.scrollHeight;
-    // hide the jump button
     setShowJump(false);
   }, [messages, autoScroll]);
 
-  // Handle user scrolls
+  // 5) onScroll handler ignores programmatic scrolls
   const onScroll = () => {
     if (suppressScroll.current) {
-      // this was our own scroll; ignore it
       suppressScroll.current = false;
       return;
     }
@@ -85,22 +107,26 @@ export default function ChatPage() {
     setShowJump(!atBottom);
   };
 
-  // Send
+  // 6) send message (unchanged)
   const handleSend = async e => {
     e.preventDefault();
     if (!draft.trim() || !threadId) return;
-    const sent = await sendMessageToThread(threadId, draft);
-    setDraft('');
-    setMessages(ms => [
-      ...ms,
-      {
-        id:        sent.messageid,
-        text:      sent.content,
-        fromMe:    sent.senderid === user.userid,
-        timestamp: new Date(sent.dateadded),
-        senderid:  sent.senderid
-      }
-    ]);
+    try {
+      const sent = await sendMessageToThread(threadId, draft);
+      setDraft('');
+      setMessages(ms => [
+        ...ms,
+        {
+          id:        sent.messageid,
+          text:      sent.content,
+          fromMe:    sent.senderid === user.userid,
+          timestamp: new Date(sent.dateadded),
+          senderid:  sent.senderid
+        }
+      ]);
+    } catch (err) {
+      console.error('Send failed:', err);
+    }
   };
 
   return (
@@ -121,17 +147,12 @@ export default function ChatPage() {
       <div
         ref={chatRef}
         onScroll={onScroll}
-        style={{
-          maxHeight: '60vh',
-          overflowY: 'auto',
-          padding: '1em',
-          position: 'relative'
-        }}
+        style={{ maxHeight:'60vh', overflowY:'auto', padding:'1em', position:'relative' }}
       >
         {messages.map(m => {
           const isMe = m.fromMe;
-          const name = isMe ? user.username : partner.username;
-          const avatar = isMe ? user.avatar : partner.avatar;
+          const name = isMe ? meProfile.username : partner.username;
+          const avatar = isMe ? meProfile.avatar : partner.avatar;
 
           return (
             <div
@@ -144,7 +165,7 @@ export default function ChatPage() {
               }}
             >
               <img
-                src={avatar||defaultAvatar}
+                src={avatar || defaultAvatar}
                 alt={name}
                 style={{ width:32, height:32, borderRadius:'50%', margin:'0 0.5em' }}
               />
@@ -156,8 +177,7 @@ export default function ChatPage() {
                     borderRadius: '8px',
                     background: isMe ? '#DCF8C6' : '#EEE',
                     whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    maxWidth: '100%'
+                    wordBreak:  'break-word'
                   }}
                 >
                   {m.text}
@@ -171,10 +191,8 @@ export default function ChatPage() {
           );
         })}
 
-        {/* sentinel */}
         <div ref={bottomRef} />
 
-        {/* Jump button */}
         {showJump && (
           <button
             onClick={() => {
@@ -186,10 +204,10 @@ export default function ChatPage() {
               setShowJump(false);
             }}
             style={{
-              position: 'sticky',
-              bottom: '0.5em',
-              left: '50%',
-              transform: 'translateX(-50%)',
+              position:'sticky',
+              bottom:'0.5em',
+              left:'50%',
+              transform:'translateX(-50%)',
               background:'#06c',
               color:'white',
               border:'none',
