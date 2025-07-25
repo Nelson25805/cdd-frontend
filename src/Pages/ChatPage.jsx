@@ -8,7 +8,8 @@ import defaultAvatar from '../assets/default-avatar.jpg';
 import {
   getUserProfile,
   getThreadMessages,
-  sendMessageToThread
+  sendMessageToThread,
+  markMessagesSeen
 } from '../Api';
 
 export default function ChatPage() {
@@ -19,18 +20,18 @@ export default function ChatPage() {
   // ─── existing state ───────────────────────────────────────
   const [threadId, setThreadId] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [draft,    setDraft]    = useState('');
+  const [draft, setDraft] = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
-  const [showJump,   setShowJump]   = useState(false);
+  const [showJump, setShowJump] = useState(false);
 
-  const chatRef       = useRef();
-  const bottomRef     = useRef();
+  const chatRef = useRef();
+  const bottomRef = useRef();
   const suppressScroll = useRef(false);
 
   // ─── NEW: track “me” profile ───────────────────────────────
   const [meProfile, setMeProfile] = useState({
     username: user.username,
-    avatar:   user.avatar || ''
+    avatar: user.avatar || ''
   });
 
   // ─── existing partner state ───────────────────────────────
@@ -51,6 +52,9 @@ export default function ChatPage() {
         setPartner({ username: p.username, avatar: p.avatar || '' });
         setThreadId(p.chatThreadId);
 
+        // ❗❗❗ Mark everything in this thread as seen by me
+        await markMessagesSeen(p.chatThreadId);
+
         // **Your** profile
         const me = await getUserProfile(user.userid);
         setMeProfile({ username: me.username, avatar: me.avatar || '' });
@@ -69,11 +73,11 @@ export default function ChatPage() {
       try {
         const msgs = await getThreadMessages(threadId);
         setMessages(msgs.map(m => ({
-          id:        m.messageid,
-          text:      m.content,
-          fromMe:    m.senderid === user.userid,
+          id: m.messageid,
+          text: m.content,
+          fromMe: m.senderid === user.userid,
           timestamp: new Date(m.dateadded),
-          senderid:  m.senderid
+          senderid: m.senderid
         })));
       } catch (err) {
         console.error(err);
@@ -117,11 +121,11 @@ export default function ChatPage() {
       setMessages(ms => [
         ...ms,
         {
-          id:        sent.messageid,
-          text:      sent.content,
-          fromMe:    sent.senderid === user.userid,
+          id: sent.messageid,
+          text: sent.content,
+          fromMe: sent.senderid === user.userid,
           timestamp: new Date(sent.dateadded),
-          senderid:  sent.senderid
+          senderid: sent.senderid
         }
       ]);
     } catch (err) {
@@ -134,20 +138,20 @@ export default function ChatPage() {
       <TopLinks />
 
       {/* Header */}
-      <div style={{ display:'flex', alignItems:'center', gap:'1em', padding:'1em 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1em', padding: '1em 0' }}>
         <img
           src={partner.avatar || defaultAvatar}
           alt={partner.username}
-          style={{ width:40, height:40, borderRadius:'50%' }}
+          style={{ width: 40, height: 40, borderRadius: '50%' }}
         />
-        <h1 style={{ margin:0 }}>Chat with {partner.username}</h1>
+        <h1 style={{ margin: 0 }}>Chat with {partner.username}</h1>
       </div>
 
       {/* Chat log */}
       <div
         ref={chatRef}
         onScroll={onScroll}
-        style={{ maxHeight:'60vh', overflowY:'auto', padding:'1em', position:'relative' }}
+        style={{ maxHeight: '60vh', overflowY: 'auto', padding: '1em', position: 'relative' }}
       >
         {messages.map(m => {
           const isMe = m.fromMe;
@@ -167,9 +171,9 @@ export default function ChatPage() {
               <img
                 src={avatar || defaultAvatar}
                 alt={name}
-                style={{ width:32, height:32, borderRadius:'50%', margin:'0 0.5em' }}
+                style={{ width: 32, height: 32, borderRadius: '50%', margin: '0 0.5em' }}
               />
-              <div style={{ maxWidth:'70%' }}>
+              <div style={{ maxWidth: '70%' }}>
                 <div
                   style={{
                     display: 'inline-block',
@@ -177,12 +181,12 @@ export default function ChatPage() {
                     borderRadius: '8px',
                     background: isMe ? '#DCF8C6' : '#EEE',
                     whiteSpace: 'pre-wrap',
-                    wordBreak:  'break-word'
+                    wordBreak: 'break-word'
                   }}
                 >
                   {m.text}
                 </div>
-                <div style={{ fontSize:'0.75em', color:'#666', marginTop:'0.25em' }}>
+                <div style={{ fontSize: '0.75em', color: '#666', marginTop: '0.25em' }}>
                   <div>{name}</div>
                   <div>{m.timestamp.toLocaleTimeString()}</div>
                 </div>
@@ -204,16 +208,16 @@ export default function ChatPage() {
               setShowJump(false);
             }}
             style={{
-              position:'sticky',
-              bottom:'0.5em',
-              left:'50%',
-              transform:'translateX(-50%)',
-              background:'#06c',
-              color:'white',
-              border:'none',
-              borderRadius:'16px',
-              padding:'0.5em 1em',
-              cursor:'pointer'
+              position: 'sticky',
+              bottom: '0.5em',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#06c',
+              color: 'white',
+              border: 'none',
+              borderRadius: '16px',
+              padding: '0.5em 1em',
+              cursor: 'pointer'
             }}
           >
             Jump to latest
@@ -222,15 +226,15 @@ export default function ChatPage() {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} style={{ display:'flex', padding:'1em' }}>
+      <form onSubmit={handleSend} style={{ display: 'flex', padding: '1em' }}>
         <input
           type="text"
           value={draft}
-          onChange={e=>setDraft(e.target.value)}
+          onChange={e => setDraft(e.target.value)}
           placeholder="Type a message…"
-          style={{ flex:1, padding:'0.5em' }}
+          style={{ flex: 1, padding: '0.5em' }}
         />
-        <button type="submit" style={{ marginLeft:'0.5em', padding:'0.5em 1em' }}>
+        <button type="submit" style={{ marginLeft: '0.5em', padding: '0.5em 1em' }}>
           Send
         </button>
       </form>

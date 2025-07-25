@@ -583,3 +583,8 @@ export async function sendMessageToThread(threadId, text) {
   return res.data;
 }
 
+// at the bottom of your Api.js
+export const markMessagesSeen = async (threadId) => {
+  const res = await apiClient.post(`/api/threads/${threadId}/mark-seen`);
+  return res.data;
+};
