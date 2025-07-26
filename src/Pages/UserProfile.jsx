@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useUser } from '../Context/useUser';          // ← pull in your hook
 import {
   getUserProfile,
   getUserCollection,
@@ -19,19 +20,19 @@ import TopLinks from '../Context/TopLinks';
 
 export default function UserProfile() {
   const { id } = useParams();
+  const { user } = useUser();                         // ← current user
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
   const [collection, setCollection] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [requestSent, setRequestSent] = useState(false);
-
   const [incoming, setIncoming] = useState([]);
   const [outgoing, setOutgoing] = useState([]);
   const [friends, setFriends] = useState([]);
-
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
+  // Fetch everything
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -40,7 +41,6 @@ export default function UserProfile() {
       setRequestSent(!!p.requestSent);
       setCollection(await getUserCollection(id));
       setWishlist(await getUserWishlist(id));
-
       setIncoming(await getUserIncomingRequests(id));
       setOutgoing(await getUserOutgoingRequests(id));
       setFriends(await getUserFriends(id));
@@ -49,7 +49,10 @@ export default function UserProfile() {
 
   if (!profile) return <div>Loading profile…</div>;
 
-  // send / cancel outgoing to this profile user
+  // Are we looking at *our own* profile?
+  const isOwnProfile = Number(id) === user.userid;
+
+  // Friend / message handlers
   const handleAddFriend = async () => {
     await sendFriendRequest(id);
     setRequestSent(true);
@@ -58,44 +61,25 @@ export default function UserProfile() {
     await cancelFriendRequest(id);
     setRequestSent(false);
   };
-
-  // incoming requests
-  const handleAccept = async (requesterId) => {
-    await acceptFriendRequest(requesterId);
-    const accepted = incoming.find(u => u.id === requesterId);
-    setIncoming(prev => prev.filter(u => u.id !== requesterId));
-    if (accepted) {
-      setFriends(prev => [
-        ...prev,
-        { ...accepted, friendedAt: new Date().toISOString() }
-      ]);
-    }
+  const handleAccept = async rId => {
+    await acceptFriendRequest(rId);
+    setIncoming(i => i.filter(u => u.id !== rId));
+    const accepted = incoming.find(u => u.id === rId);
+    if (accepted) setFriends(f => [...f, { ...accepted, friendedAt: new Date().toISOString() }]);
   };
-  const handleDecline = async (requesterId) => {
-    await declineFriendRequest(requesterId);
-    setIncoming(prev => prev.filter(u => u.id !== requesterId));
+  const handleDecline = async rId => {
+    await declineFriendRequest(rId);
+    setIncoming(i => i.filter(u => u.id !== rId));
   };
-
-  // outgoing requests
-  const handleCancelOutgoing = async (targetId) => {
-    await cancelFriendRequest(targetId);
-    setOutgoing(prev => prev.filter(u => u.id !== targetId));
+  const handleCancelOutgoing = async tId => {
+    await cancelFriendRequest(tId);
+    setOutgoing(o => o.filter(u => u.id !== tId));
   };
-
-  // When “Remove” clicked, show inline confirm buttons
-  const promptRemove = friendId => {
-    setConfirmRemoveId(friendId);
-  };
-
-  // User clicks “Cancel”
-  const cancelRemove = () => {
-    setConfirmRemoveId(null);
-  };
-
-  // User clicks “Confirm”
-  const confirmRemove = async friendId => {
-    await unfriend(friendId);
-    setFriends(f => f.filter(u => u.id !== friendId));
+  const promptRemove = fid => setConfirmRemoveId(fid);
+  const cancelRemove = () => setConfirmRemoveId(null);
+  const confirmRemove = async fid => {
+    await unfriend(fid);
+    setFriends(f => f.filter(u => u.id !== fid));
     setConfirmRemoveId(null);
   };
 
@@ -122,21 +106,26 @@ export default function UserProfile() {
         </Link>
       </div>
 
-      {profile.isFriend ? (
-        <button
-          className="small-button"
-          onClick={() => navigate(`/messages/${profile.chatThreadId}`)}
-        >
-          Message
-        </button>
-      ) : requestSent ? (
-        <button className="small-button" onClick={handleCancelRequest}>
-          Cancel Request
-        </button>
-      ) : (
-        <button className="small-button" onClick={handleAddFriend}>
-          Add Friend
-        </button>
+      {/*
+        If *not* our own profile, show the Message / Cancel / Add Friend buttons
+      */}
+      {!isOwnProfile && (
+        profile.isFriend ? (
+          <button
+            className="small-button"
+            onClick={() => navigate(`/messages/${profile.chatThreadId}`)}
+          >
+            Message
+          </button>
+        ) : requestSent ? (
+          <button className="small-button" onClick={handleCancelRequest}>
+            Cancel Request
+          </button>
+        ) : (
+          <button className="small-button" onClick={handleAddFriend}>
+            Add Friend
+          </button>
+        )
       )}
 
       <section className="friend-lists">
@@ -150,14 +139,12 @@ export default function UserProfile() {
                 className="tiny-avatar"
               />
               <span style={{ flexGrow: 1 }}>{u.username}</span>
-
               <button
                 className="tiny-button"
                 onClick={() => navigate(`/messages/${u.id}`)}
               >
                 Message
               </button>
-
               {confirmRemoveId === u.id ? (
                 <>
                   <span className="confirm-text">
@@ -184,34 +171,6 @@ export default function UserProfile() {
                   Remove
                 </button>
               )}
-
-            </li>
-          ))}
-        </ul>
-
-        <h2>Incoming Requests ({incoming.length})</h2>
-        <ul>
-          {incoming.map(u => (
-            <li key={u.id}>
-              <img
-                src={u.avatar || defaultAvatar}
-                alt={`${u.username}'s avatar`}
-                className="tiny-avatar"
-              />
-              {u.username}&nbsp;
-              <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
-              <button
-                className="tiny-button"
-                onClick={() => handleAccept(u.id)}
-              >
-                Accept
-              </button>
-              <button
-                className="tiny-button"
-                onClick={() => handleDecline(u.id)}
-              >
-                Decline
-              </button>
             </li>
           ))}
         </ul>
