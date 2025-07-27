@@ -42,7 +42,6 @@ const App = () => {
             <Route path="/Register" element={<Register />} />
           </Route>
 
-
           {/* Protected routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/GameDetails" element={<GameDetails />} />

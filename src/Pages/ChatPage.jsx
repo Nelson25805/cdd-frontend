@@ -1,5 +1,3 @@
-// src/Pages/ChatPage.jsx
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
