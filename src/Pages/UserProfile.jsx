@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useUser } from '../Context/useUser';          // ← pull in your hook
+import { useUser } from '../Context/useUser';
 import {
   getUserProfile,
   getUserCollection,
@@ -20,19 +20,18 @@ import TopLinks from '../Context/TopLinks';
 
 export default function UserProfile() {
   const { id } = useParams();
-  const { user } = useUser();                         // ← current user
+  const { user } = useUser();
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile]     = useState(null);
   const [collection, setCollection] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist]   = useState([]);
   const [requestSent, setRequestSent] = useState(false);
-  const [incoming, setIncoming] = useState([]);
-  const [outgoing, setOutgoing] = useState([]);
-  const [friends, setFriends] = useState([]);
+  const [incoming, setIncoming]   = useState([]);
+  const [outgoing, setOutgoing]   = useState([]);
+  const [friends, setFriends]     = useState([]);
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
 
-  // Fetch everything
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -49,39 +48,21 @@ export default function UserProfile() {
 
   if (!profile) return <div>Loading profile…</div>;
 
-  // Are we looking at *our own* profile?
   const isOwnProfile = Number(id) === user.userid;
 
-  // Friend / message handlers
-  const handleAddFriend = async () => {
-    await sendFriendRequest(id);
-    setRequestSent(true);
-  };
-  const handleCancelRequest = async () => {
-    await cancelFriendRequest(id);
-    setRequestSent(false);
-  };
-  const handleAccept = async rId => {
+  const handleAddFriend       = async () => { await sendFriendRequest(id); setRequestSent(true); };
+  const handleCancelRequest   = async () => { await cancelFriendRequest(id); setRequestSent(false); };
+  const handleAccept          = async rId => {
     await acceptFriendRequest(rId);
     setIncoming(i => i.filter(u => u.id !== rId));
     const accepted = incoming.find(u => u.id === rId);
     if (accepted) setFriends(f => [...f, { ...accepted, friendedAt: new Date().toISOString() }]);
   };
-  const handleDecline = async rId => {
-    await declineFriendRequest(rId);
-    setIncoming(i => i.filter(u => u.id !== rId));
-  };
-  const handleCancelOutgoing = async tId => {
-    await cancelFriendRequest(tId);
-    setOutgoing(o => o.filter(u => u.id !== tId));
-  };
-  const promptRemove = fid => setConfirmRemoveId(fid);
-  const cancelRemove = () => setConfirmRemoveId(null);
-  const confirmRemove = async fid => {
-    await unfriend(fid);
-    setFriends(f => f.filter(u => u.id !== fid));
-    setConfirmRemoveId(null);
-  };
+  const handleDecline         = async rId => { await declineFriendRequest(rId); setIncoming(i => i.filter(u => u.id !== rId)); };
+  const handleCancelOutgoing  = async tId => { await cancelFriendRequest(tId); setOutgoing(o => o.filter(u => u.id !== tId)); };
+  const promptRemove          = fid => setConfirmRemoveId(fid);
+  const cancelRemove          = () => setConfirmRemoveId(null);
+  const confirmRemove         = async fid => { await unfriend(fid); setFriends(f => f.filter(u => u.id !== fid)); setConfirmRemoveId(null); };
 
   return (
     <div className="App">
@@ -106,9 +87,7 @@ export default function UserProfile() {
         </Link>
       </div>
 
-      {/*
-        If *not* our own profile, show the Message / Cancel / Add Friend buttons
-      */}
+      {/* only show friend / message buttons if not viewing your own profile */}
       {!isOwnProfile && (
         profile.isFriend ? (
           <button
@@ -132,42 +111,30 @@ export default function UserProfile() {
         <h2>Friends ({friends.length})</h2>
         <ul>
           {friends.map(u => (
-            <li key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <li key={u.id} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
               <img
-                src={u.avatar || defaultAvatar}
+                src={u.avatar||defaultAvatar}
                 alt={`${u.username}'s avatar`}
                 className="tiny-avatar"
               />
-              <span style={{ flexGrow: 1 }}>{u.username}</span>
-              <button
-                className="tiny-button"
-                onClick={() => navigate(`/messages/${u.id}`)}
-              >
+              <span style={{ flexGrow:1 }}>{u.username}</span>
+              <button className="tiny-button" onClick={()=>navigate(`/messages/${u.id}`)}>
                 Message
               </button>
-              {confirmRemoveId === u.id ? (
+              {confirmRemoveId===u.id ? (
                 <>
                   <span className="confirm-text">
                     Are you sure you want to remove {u.username}?
                   </span>
-                  <button
-                    className="tiny-button confirm"
-                    onClick={() => confirmRemove(u.id)}
-                  >
+                  <button className="tiny-button confirm" onClick={()=>confirmRemove(u.id)}>
                     Confirm
                   </button>
-                  <button
-                    className="tiny-button cancel"
-                    onClick={cancelRemove}
-                  >
+                  <button className="tiny-button cancel" onClick={cancelRemove}>
                     Cancel
                   </button>
                 </>
               ) : (
-                <button
-                  className="tiny-button"
-                  onClick={() => promptRemove(u.id)}
-                >
+                <button className="tiny-button" onClick={()=>promptRemove(u.id)}>
                   Remove
                 </button>
               )}
@@ -175,21 +142,43 @@ export default function UserProfile() {
           ))}
         </ul>
 
-        <h2>Outgoing Requests ({outgoing.length})</h2>
+        <h2>Incoming Requests ({incoming.length})</h2>
         <ul>
-          {outgoing.map(u => (
-            <li key={u.id}>
+          {incoming.map(u => (
+            <li key={u.id} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
               <img
-                src={u.avatar || defaultAvatar}
+                src={u.avatar||defaultAvatar}
                 alt={`${u.username}'s avatar`}
                 className="tiny-avatar"
               />
-              {u.username}&nbsp;
-              <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
-              <button
-                className="tiny-button"
-                onClick={() => handleCancelOutgoing(u.id)}
-              >
+              <span style={{ flexGrow:1 }}>
+                {u.username}&nbsp;
+                <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+              </span>
+              <button className="tiny-button" onClick={()=>handleAccept(u.id)}>
+                Accept
+              </button>
+              <button className="tiny-button" onClick={()=>handleDecline(u.id)}>
+                Decline
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <h2>Outgoing Requests ({outgoing.length})</h2>
+        <ul>
+          {outgoing.map(u => (
+            <li key={u.id} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+              <img
+                src={u.avatar||defaultAvatar}
+                alt={`${u.username}'s avatar`}
+                className="tiny-avatar"
+              />
+              <span style={{ flexGrow:1 }}>
+                {u.username}&nbsp;
+                <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
+              </span>
+              <button className="tiny-button" onClick={()=>handleCancelOutgoing(u.id)}>
                 Cancel
               </button>
             </li>
