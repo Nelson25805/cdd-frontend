@@ -8,183 +8,160 @@ import {
   getUserIncomingRequests,
   getUserOutgoingRequests,
   getUserFriends,
-  sendFriendRequest,
-  cancelFriendRequest,
-  acceptFriendRequest,
-  declineFriendRequest,
-  unfriend
+  getUserThreads,
 } from '../Api';
 import CoverImage from '../Context/CoverImage';
 import defaultAvatar from '../assets/default-avatar.jpg';
 import TopLinks from '../Context/TopLinks';
 
 export default function UserProfile() {
-  const { id } = useParams();
-  const { user } = useUser();
-  const navigate = useNavigate();
+  const { id }     = useParams();
+  const { user }   = useUser();
+  const navigate   = useNavigate();
 
-  const [profile, setProfile]     = useState(null);
-  const [collection, setCollection] = useState([]);
-  const [wishlist, setWishlist]   = useState([]);
-  const [requestSent, setRequestSent] = useState(false);
-  const [incoming, setIncoming]   = useState([]);
-  const [outgoing, setOutgoing]   = useState([]);
-  const [friends, setFriends]     = useState([]);
-  const [confirmRemoveId, setConfirmRemoveId] = useState(null);
+  const [profile,      setProfile]      = useState(null);
+  const [collection,   setCollection]   = useState([]);
+  const [wishlist,     setWishlist]     = useState([]);
+  const [incoming,     setIncoming]     = useState([]);
+  const [outgoing,     setOutgoing]     = useState([]);
+  const [friends,      setFriends]      = useState([]);
+  const [threads,      setThreads]      = useState([]);
+
+  // tab state
+  const sections = ['Stats','Friends','Inbox'];
+  const [selectedSection, setSelectedSection] = useState(sections[0]);
 
   useEffect(() => {
     if (!id) return;
     (async () => {
       const p = await getUserProfile(id);
       setProfile(p);
-      setRequestSent(!!p.requestSent);
       setCollection(await getUserCollection(id));
       setWishlist(await getUserWishlist(id));
       setIncoming(await getUserIncomingRequests(id));
       setOutgoing(await getUserOutgoingRequests(id));
       setFriends(await getUserFriends(id));
+      setThreads(await getUserThreads());           // fetch all your threads
     })().catch(console.error);
   }, [id]);
 
-  if (!profile) return <div>Loading profile…</div>;
+  if (!profile) return <div>Loading…</div>;
 
-  const isOwnProfile = Number(id) === user.userid;
-
-  const handleAddFriend       = async () => { await sendFriendRequest(id); setRequestSent(true); };
-  const handleCancelRequest   = async () => { await cancelFriendRequest(id); setRequestSent(false); };
-  const handleAccept          = async rId => {
-    await acceptFriendRequest(rId);
-    setIncoming(i => i.filter(u => u.id !== rId));
-    const accepted = incoming.find(u => u.id === rId);
-    if (accepted) setFriends(f => [...f, { ...accepted, friendedAt: new Date().toISOString() }]);
-  };
-  const handleDecline         = async rId => { await declineFriendRequest(rId); setIncoming(i => i.filter(u => u.id !== rId)); };
-  const handleCancelOutgoing  = async tId => { await cancelFriendRequest(tId); setOutgoing(o => o.filter(u => u.id !== tId)); };
-  const promptRemove          = fid => setConfirmRemoveId(fid);
-  const cancelRemove          = () => setConfirmRemoveId(null);
-  const confirmRemove         = async fid => { await unfriend(fid); setFriends(f => f.filter(u => u.id !== fid)); setConfirmRemoveId(null); };
+  const isOwn = Number(id) === user.userid;
 
   return (
     <div className="App">
       <TopLinks />
+
       <h1>{profile.username}’s Profile</h1>
+      <CoverImage cover={profile.avatar||defaultAvatar}
+                  alt={profile.username}
+                  className="profile-avatar" />
 
-      <CoverImage
-        cover={profile.avatar || defaultAvatar}
-        alt={profile.username}
-        className="profile-avatar"
-      />
-
-      <h2>Game Stats</h2>
-      <div className="profile-stats">
-        <Link to={`/users/${id}/collection`} className="stat-card">
-          <h3>Collection</h3>
-          <p>{collection.length} {collection.length === 1 ? 'game' : 'games'}</p>
-        </Link>
-        <Link to={`/users/${id}/wishlist`} className="stat-card">
-          <h3>Wishlist</h3>
-          <p>{wishlist.length} {wishlist.length === 1 ? 'game' : 'games'}</p>
-        </Link>
+      {/* section tabs */}
+      <div className="section-selector">
+        {sections.map(sec => (
+          <div
+            key={sec}
+            className={`section-option ${sec===selectedSection?'active':''}`}
+            onClick={()=>setSelectedSection(sec)}
+          >
+            {sec}
+          </div>
+        ))}
       </div>
 
-      {/* only show friend / message buttons if not viewing your own profile */}
-      {!isOwnProfile && (
-        profile.isFriend ? (
-          <button
-            className="small-button"
-            onClick={() => navigate(`/messages/${profile.chatThreadId}`)}
-          >
-            Message
-          </button>
-        ) : requestSent ? (
-          <button className="small-button" onClick={handleCancelRequest}>
-            Cancel Request
-          </button>
-        ) : (
-          <button className="small-button" onClick={handleAddFriend}>
-            Add Friend
-          </button>
-        )
-      )}
+      <div className="profile-sections">
+        {/* —–– Stats Tab —–– */}
+        {selectedSection==='Stats' && (
+          <div className="stats-section">
+            <h2>Game Stats</h2>
+            <div className="profile-stats">
+              <Link to={`/users/${id}/collection`} className="stat-card">
+                <h3>Collection</h3>
+                <p>{collection.length} {collection.length===1?'game':'games'}</p>
+              </Link>
+              <Link to={`/users/${id}/wishlist`}  className="stat-card">
+                <h3>Wishlist</h3>
+                <p>{wishlist.length} {wishlist.length===1?'game':'games'}</p>
+              </Link>
+            </div>
+          </div>
+        )}
 
-      <section className="friend-lists">
-        <h2>Friends ({friends.length})</h2>
-        <ul>
-          {friends.map(u => (
-            <li key={u.id} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-              <img
-                src={u.avatar||defaultAvatar}
-                alt={`${u.username}'s avatar`}
-                className="tiny-avatar"
-              />
-              <span style={{ flexGrow:1 }}>{u.username}</span>
-              <button className="tiny-button" onClick={()=>navigate(`/messages/${u.id}`)}>
-                Message
-              </button>
-              {confirmRemoveId===u.id ? (
-                <>
-                  <span className="confirm-text">
-                    Are you sure you want to remove {u.username}?
-                  </span>
-                  <button className="tiny-button confirm" onClick={()=>confirmRemove(u.id)}>
-                    Confirm
+        {/* —–– Friends Tab —–– */}
+        {selectedSection==='Friends' && (
+          <section className="friend-lists">
+            <h2>Friends ({friends.length})</h2>
+            <ul>
+              {friends.map(u=>(
+                <li key={u.id} className="friend-item">
+                  <img src={u.avatar||defaultAvatar}
+                       className="tiny-avatar" alt="" />
+                  {u.username}
+                  <button onClick={()=>navigate(`/messages/${u.id}`)}
+                          className="tiny-button">
+                    Message
                   </button>
-                  <button className="tiny-button cancel" onClick={cancelRemove}>
-                    Cancel
+                  <button onClick={()=>{/* remove logic */}}
+                          className="tiny-button">
+                    Remove
                   </button>
-                </>
-              ) : (
-                <button className="tiny-button" onClick={()=>promptRemove(u.id)}>
-                  Remove
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
+                </li>
+              ))}
+            </ul>
 
-        <h2>Incoming Requests ({incoming.length})</h2>
-        <ul>
-          {incoming.map(u => (
-            <li key={u.id} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-              <img
-                src={u.avatar||defaultAvatar}
-                alt={`${u.username}'s avatar`}
-                className="tiny-avatar"
-              />
-              <span style={{ flexGrow:1 }}>
-                {u.username}&nbsp;
-                <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
-              </span>
-              <button className="tiny-button" onClick={()=>handleAccept(u.id)}>
-                Accept
-              </button>
-              <button className="tiny-button" onClick={()=>handleDecline(u.id)}>
-                Decline
-              </button>
-            </li>
-          ))}
-        </ul>
+            <h2>Incoming ({incoming.length})</h2>
+            <ul>
+              {incoming.map(u=>(
+                <li key={u.id} className="friend-item">
+                  <img src={u.avatar||defaultAvatar}
+                       className="tiny-avatar" alt="" />
+                  {u.username}
+                  <button onClick={()=>{/* accept */}}
+                          className="tiny-button">Accept</button>
+                  <button onClick={()=>{/* decline */}}
+                          className="tiny-button">Decline</button>
+                </li>
+              ))}
+            </ul>
 
-        <h2>Outgoing Requests ({outgoing.length})</h2>
-        <ul>
-          {outgoing.map(u => (
-            <li key={u.id} style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-              <img
-                src={u.avatar||defaultAvatar}
-                alt={`${u.username}'s avatar`}
-                className="tiny-avatar"
-              />
-              <span style={{ flexGrow:1 }}>
-                {u.username}&nbsp;
-                <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small>
-              </span>
-              <button className="tiny-button" onClick={()=>handleCancelOutgoing(u.id)}>
-                Cancel
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
+            <h2>Outgoing ({outgoing.length})</h2>
+            <ul>
+              {outgoing.map(u=>(
+                <li key={u.id} className="friend-item">
+                  <img src={u.avatar||defaultAvatar}
+                       className="tiny-avatar" alt="" />
+                  {u.username}
+                  <button onClick={()=>{/* cancel */}}
+                          className="tiny-button">Cancel</button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* —–– Inbox Tab —–– */}
+        {selectedSection==='Inbox' && (
+          <section className="inbox-list">
+            <h2>Your Conversations</h2>
+            {threads.length===0
+              ? <p>No conversations yet.</p>
+              : <ul>
+                  {threads.map(t=>(
+                    <li key={t.id} className="thread-item">
+                      <span>Thread {t.id} with {t.otherUsername}</span>
+                      <button onClick={()=>navigate(`/messages/${t.id}`)}
+                              className="small-button">
+                        Open
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+            }
+          </section>
+        )}
+      </div>
     </div>
   );
 }
