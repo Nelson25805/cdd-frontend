@@ -1024,6 +1024,12 @@ input[type="email"] {
 }
 
 
+.thread-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.25em 0;
+}
 
 
 
