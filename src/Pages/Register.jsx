@@ -4,6 +4,7 @@ import { registerUser } from '../Api';
 import { useUser } from '../Context/useUser';
 import TokenManager from '../Context/TokenManager';
 import '../App.css';
+import TopLinks from '../Context/TopLinks';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -47,9 +48,9 @@ const Register = () => {
     // Build FormData payload with file
     const payload = new FormData();
     payload.append('username', formData.username);
-    payload.append('email',    formData.email);
+    payload.append('email', formData.email);
     payload.append('password', formData.password);
-    payload.append('admin',    formData.admin);
+    payload.append('admin', formData.admin);
     if (avatarFile) payload.append('avatar', avatarFile);
 
     try {
@@ -66,6 +67,7 @@ const Register = () => {
 
   return (
     <div className="register-page">
+      <TopLinks />
       <h2>Register</h2>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="input-container">

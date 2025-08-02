@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../Api';
 import { useUser } from '../Context/useUser';
 import '../App.css';
+import TopLinks from '../Context/TopLinks';
 
 function Login() {
   const navigate = useNavigate();
-  const { setUser, setToken } = useUser(); 
+  const { setUser, setToken } = useUser();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -49,6 +50,7 @@ function Login() {
 
   return (
     <div className="login-container">
+      <TopLinks />
       <h1>Login</h1>
       <form onSubmit={handleSubmit}>
         <div className="input-container">
@@ -73,12 +75,13 @@ function Login() {
             onChange={handleChange}
           />
         </div>
-        <div className="button-container">
-          <button className="big-button" type="submit">
-            Login
-          </button>
-        </div>
+        <button className="big-button" type="submit">
+          Login
+        </button>
       </form>
+      <button className="big-button" onClick={() => navigate('/register')}>
+        Don`t have an account? Register
+      </button>
     </div>
   );
 }
