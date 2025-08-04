@@ -475,7 +475,6 @@ export const declineFriendRequest = async (requesterId) => {
   return res.data;
 };
 
-
 //
 // ───────────── USER PROFILE & COLLECTION/WISHLIST ─────────────
 //
@@ -532,17 +531,11 @@ export const acceptFriendRequest = async (requesterId) => {
   return res.data;
 };
 
-
-
 /** Get your current friends + thread IDs */
 export const getFriends = async () => {
   const res = await apiClient.get('/api/friends');
   return res.data; // [{ id, username, avatar, threadId }, …]
 };
-
-
-
-
 
 /** Fetch pending incoming requests _to_ a user */
 export const getUserIncomingRequests = async (userId) => {
@@ -583,7 +576,7 @@ export async function sendMessageToThread(threadId, text) {
   return res.data;
 }
 
-// at the bottom of your Api.js
+/** Mark message as seen for user */
 export const markMessagesSeen = async (threadId) => {
   const res = await apiClient.post(`/api/threads/${threadId}/mark-seen`);
   return res.data;
