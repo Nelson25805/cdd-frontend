@@ -15,7 +15,6 @@ export default function ChatPage() {
   const { userId } = useParams();
   const navigate = useNavigate();
 
-  // ─── existing state ───────────────────────────────────────
   const [threadId, setThreadId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState('');
@@ -26,13 +25,11 @@ export default function ChatPage() {
   const bottomRef = useRef();
   const suppressScroll = useRef(false);
 
-  // ─── NEW: track “me” profile ───────────────────────────────
   const [meProfile, setMeProfile] = useState({
     username: user.username,
     avatar: user.avatar || ''
   });
 
-  // ─── existing partner state ───────────────────────────────
   const [partner, setPartner] = useState({ username: '', avatar: '' });
 
   // 1) redirect if no userId
