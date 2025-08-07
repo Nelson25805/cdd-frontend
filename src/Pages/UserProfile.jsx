@@ -8,6 +8,11 @@ import {
   getUserIncomingRequests,
   getUserOutgoingRequests,
   getUserFriends,
+  acceptFriendRequest,
+  declineFriendRequest,
+  sendFriendRequest,
+  cancelFriendRequest,
+  unfriend,
   getUserThreads,
 } from '../Api';
 import CoverImage from '../Context/CoverImage';
@@ -19,18 +24,18 @@ export default function UserProfile() {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const [profile, setProfile] = useState(null);
+  const [profile,    setProfile]    = useState(null);
   const [collection, setCollection] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
-  const [incoming, setIncoming] = useState([]);
-  const [outgoing, setOutgoing] = useState([]);
-  const [friends, setFriends] = useState([]);
-  const [threads, setThreads] = useState([]);
+  const [wishlist,   setWishlist]   = useState([]);
+  const [incoming,   setIncoming]   = useState([]);
+  const [outgoing,   setOutgoing]   = useState([]);
+  const [friends,    setFriends]    = useState([]);
+  const [threads,    setThreads]    = useState([]);
 
-  // tab state
   const sections = ['Stats', 'Friends', 'Inbox'];
   const [selectedSection, setSelectedSection] = useState(sections[0]);
 
+  // — Load everything once —
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -41,7 +46,7 @@ export default function UserProfile() {
       setIncoming(await getUserIncomingRequests(id));
       setOutgoing(await getUserOutgoingRequests(id));
       setFriends(await getUserFriends(id));
-      setThreads(await getUserThreads());           // fetch all your threads
+      setThreads(await getUserThreads());
     })().catch(console.error);
   }, [id]);
 
@@ -49,16 +54,72 @@ export default function UserProfile() {
 
   const isOwn = Number(id) === user.userid;
 
+  // ─── Friend-request handlers ─────────────────────────────
+
+  const handleAccept = async targetId => {
+    try {
+      await acceptFriendRequest(targetId);
+      setIncoming(i => i.filter(u => u.id !== targetId));
+      const accepted = incoming.find(u => u.id === targetId);
+      if (accepted) {
+        setFriends(f => [...f, { ...accepted, friendedAt: new Date().toISOString() }]);
+      }
+    } catch (err) {
+      console.error('Accept failed', err);
+    }
+  };
+
+  const handleDecline = async targetId => {
+    try {
+      await declineFriendRequest(targetId);
+      setIncoming(i => i.filter(u => u.id !== targetId));
+    } catch (err) {
+      console.error('Decline failed', err);
+    }
+  };
+
+  const handleCancelOutgoing = async targetId => {
+    try {
+      await cancelFriendRequest(targetId);
+      setOutgoing(o => o.filter(u => u.id !== targetId));
+    } catch (err) {
+      console.error('Cancel request failed', err);
+    }
+  };
+
+  const handleRemoveFriend = async friendId => {
+    try {
+      await unfriend(friendId);
+      setFriends(f => f.filter(u => u.id !== friendId));
+    } catch (err) {
+      console.error('Unfriend failed', err);
+    }
+  };
+
+  // ─── Add Friend / Cancel Request on someone else's profile ─────────────────────────────
+  const handleAddFriend = async () => {
+    try {
+      await sendFriendRequest(id);
+      // you might want to refetch outgoing or flip a flag
+    } catch (err) {
+      console.error('Send request failed', err);
+    }
+  };
+
+  // —──────────────────────────────────────────────────────────
+
   return (
     <div className="App">
       <TopLinks />
 
       <h1>{profile.username}’s Profile</h1>
-      <CoverImage cover={profile.avatar || defaultAvatar}
+      <CoverImage
+        cover={profile.avatar || defaultAvatar}
         alt={profile.username}
-        className="profile-avatar" />
+        className="profile-avatar"
+      />
 
-      {/* section tabs */}
+      {/* Section Tabs */}
       <div className="section-selector">
         {sections.map(sec => (
           <div
@@ -72,6 +133,7 @@ export default function UserProfile() {
       </div>
 
       <div className="profile-sections">
+
         {/* —–– Stats Tab —–– */}
         {selectedSection === 'Stats' && (
           <div className="stats-section">
@@ -92,19 +154,23 @@ export default function UserProfile() {
         {/* —–– Friends Tab —–– */}
         {selectedSection === 'Friends' && (
           <section className="friend-lists">
+
             <h2>Friends ({friends.length})</h2>
             <ul>
               {friends.map(u => (
                 <li key={u.id} className="friend-item">
-                  <img src={u.avatar || defaultAvatar}
-                    className="tiny-avatar" alt="" />
+                  <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
                   {u.username}
-                  <button onClick={() => navigate(`/messages/${u.id}`)}
-                    className="tiny-button">
+                  <button
+                    className="tiny-button"
+                    onClick={() => navigate(`/messages/${u.id}`)}
+                  >
                     Message
                   </button>
-                  <button onClick={() => {/* remove logic */ }}
-                    className="tiny-button">
+                  <button
+                    className="tiny-button"
+                    onClick={() => handleRemoveFriend(u.id)}
+                  >
                     Remove
                   </button>
                 </li>
@@ -115,13 +181,20 @@ export default function UserProfile() {
             <ul>
               {incoming.map(u => (
                 <li key={u.id} className="friend-item">
-                  <img src={u.avatar || defaultAvatar}
-                    className="tiny-avatar" alt="" />
+                  <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
                   {u.username}
-                  <button onClick={() => {/* accept */ }}
-                    className="tiny-button">Accept</button>
-                  <button onClick={() => {/* decline */ }}
-                    className="tiny-button">Decline</button>
+                  <button
+                    className="tiny-button"
+                    onClick={() => handleAccept(u.id)}
+                  >
+                    Accept
+                  </button>
+                  <button
+                    className="tiny-button"
+                    onClick={() => handleDecline(u.id)}
+                  >
+                    Decline
+                  </button>
                 </li>
               ))}
             </ul>
@@ -130,11 +203,14 @@ export default function UserProfile() {
             <ul>
               {outgoing.map(u => (
                 <li key={u.id} className="friend-item">
-                  <img src={u.avatar || defaultAvatar}
-                    className="tiny-avatar" alt="" />
+                  <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
                   {u.username}
-                  <button onClick={() => {/* cancel */ }}
-                    className="tiny-button">Cancel</button>
+                  <button
+                    className="tiny-button"
+                    onClick={() => handleCancelOutgoing(u.id)}
+                  >
+                    Cancel
+                  </button>
                 </li>
               ))}
             </ul>
@@ -150,16 +226,13 @@ export default function UserProfile() {
             ) : (
               <ul>
                 {threads.map(t => (
-                  <li
-                    key={t.id}
-                    className="thread-item"
-                  >
+                  <li key={t.id} className="thread-item">
                     <img
                       src={t.otherAvatar || defaultAvatar}
                       alt={t.otherUsername}
                       className="tiny-avatar"
                     />
-                      Messages from: <strong>{t.otherUsername}</strong>
+                    Messages from: <strong>{t.otherUsername}</strong>
                     <button
                       onClick={() => navigate(`/messages/${t.id}`)}
                       className="small-button"
@@ -172,6 +245,7 @@ export default function UserProfile() {
             )}
           </section>
         )}
+
       </div>
     </div>
   );
