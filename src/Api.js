@@ -67,8 +67,8 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 
-// API functions below
 
+/** Login user */
 export const loginUser = async (username, password) => {
   try {
     const response = await apiClient.post('/login', { username, password });
@@ -82,6 +82,7 @@ export const loginUser = async (username, password) => {
   }
 };
 
+/** Register user */
 export const registerUser = async (username, email, password, admin) => {
   try {
     const response = await apiClient.post('/register', { username, email, password, admin });
@@ -97,6 +98,7 @@ export const registerUser = async (username, email, password, admin) => {
   }
 };
 
+/** Adds a game to cdd game database */
 export const addGameToDatabase = async (formData) => {
   try {
     const response = await apiClient.post('/add-game-to-database', formData, {
@@ -110,7 +112,7 @@ export const addGameToDatabase = async (formData) => {
 };
 
 
-// New function to search games based on a query// src/Api.js
+/** Search games from cdd game database */
 export const searchGames = async (query) => {
   const response = await apiClient.get('/api/search', { params: { q: query } });
   // if the server wrapped it, pull out .results; otherwise assume it's already an array
@@ -119,7 +121,7 @@ export const searchGames = async (query) => {
     : response.data.results || [];
 };
 
-// Function to check if a game is in the user's wishlist
+/** Checks wishlist games */
 export const checkWishlist = async (userId, gameId) => {
   try {
     const response = await apiClient.get(
@@ -133,7 +135,7 @@ export const checkWishlist = async (userId, gameId) => {
   }
 };
 
-// Function to add a game to the user's wishlist
+/** Adds game to user wishlist */
 export const addToWishlist = async (userId, gameId, consoleIds) => {
   const response = await apiClient.post(
     `/api/add-game-wishlist/${userId}/${gameId}`,
@@ -143,7 +145,7 @@ export const addToWishlist = async (userId, gameId, consoleIds) => {
 };
 
 
-// Function to retrieve a user's wishlist
+/** Retrieves a users wishlist */
 export const getWishlist = async (userId) => {
   try {
     const response = await apiClient.get(`/api/mywishlist/${userId}`, {
@@ -159,7 +161,7 @@ export const getWishlist = async (userId) => {
 };
 
 
-// Function to remove a game from the user's wishlist
+/** Removes game from user game wishlist */
 export const removeFromWishlist = async (userId, gameId) => {
   try {
     const response = await apiClient.delete(`/api/removewishlist/${userId}/${gameId}`, {
@@ -174,7 +176,7 @@ export const removeFromWishlist = async (userId, gameId) => {
   }
 };
 
-// fetch the consoles currently on the wishlist entry
+/** Grabs wishlist game details user games for game */
 export const fetchWishlistDetails = async (userId, gameId) => {
   try {
     const response = await apiClient.get(
@@ -188,7 +190,7 @@ export const fetchWishlistDetails = async (userId, gameId) => {
   }
 };
 
-// update only the consoles on the wishlist entry
+/** Edits wishlist details for user game in wishlist */
 export const editWishlistDetails = async (userId, gameId, { consoleIds }) => {
   const res = await apiClient.put(
     `/api/edit-wishlist/${userId}/${gameId}`,
@@ -199,7 +201,7 @@ export const editWishlistDetails = async (userId, gameId, { consoleIds }) => {
 };
 
 
-// Function to check if a user has game details
+/** Checks for game details in a users game details section */
 export const checkGameDetails = async (userId, gameId) => {
   try {
     const response = await apiClient.get(`/api/check-gamedetails/${userId}/${gameId}`, {
