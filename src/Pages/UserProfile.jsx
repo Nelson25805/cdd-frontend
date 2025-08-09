@@ -24,13 +24,13 @@ export default function UserProfile() {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const [profile,    setProfile]    = useState(null);
+  const [profile, setProfile] = useState(null);
   const [collection, setCollection] = useState([]);
-  const [wishlist,   setWishlist]   = useState([]);
-  const [incoming,   setIncoming]   = useState([]);
-  const [outgoing,   setOutgoing]   = useState([]);
-  const [friends,    setFriends]    = useState([]);
-  const [threads,    setThreads]    = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [incoming, setIncoming] = useState([]);
+  const [outgoing, setOutgoing] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [threads, setThreads] = useState([]);
 
   const sections = ['Stats', 'Friends', 'Inbox'];
   const [selectedSection, setSelectedSection] = useState(sections[0]);
@@ -146,30 +146,6 @@ export default function UserProfile() {
   // === New: total unseen count for the header badge ===
   const totalUnseen = threads.reduce((acc, t) => acc + (t.unseen ? 1 : 0), 0);
 
-  // small badge styles (inline for convenience)
-  const headerBadge = {
-    display: 'inline-block',
-    minWidth: 18,
-    padding: '2px 6px',
-    borderRadius: 12,
-    background: '#e53935',
-    color: 'white',
-    fontSize: '0.75rem',
-    marginLeft: 8,
-    textAlign: 'center'
-  };
-
-  const dotStyle = {
-    position: 'absolute',
-    top: -3,
-    right: -3,
-    width: 10,
-    height: 10,
-    borderRadius: '50%',
-    background: '#e53935',
-    boxShadow: '0 0 0 2px white'
-  };
-
   return (
     <div className="App">
       <TopLinks />
@@ -182,19 +158,18 @@ export default function UserProfile() {
       />
 
       {/* Section Tabs */}
-      <div className="section-selector" style={{ display: 'flex', gap: 8 }}>
+      <div className="section-selector">
         {sections.map(sec => (
           <div
             key={sec}
             className={`section-option ${sec === selectedSection ? 'active' : ''}`}
             onClick={() => setSelectedSection(sec)}
-            style={{ cursor: 'pointer', position: 'relative', padding: '6px 10px' }}
           >
             {sec}
             {sec === 'Inbox' && totalUnseen > 0 && (
-              // header-level badge next to the "Inbox" tab label
-              <span style={headerBadge}>{totalUnseen}</span>
+              <span className="inbox-badge">{totalUnseen}</span>
             )}
+
           </div>
         ))}
       </div>
@@ -224,9 +199,9 @@ export default function UserProfile() {
             <h2>Friends ({friends.length})</h2>
             <ul>
               {friends.map(u => (
-                <li key={u.id} className="friend-item" style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                <li key={u.id} className="friend-item">
                   <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
-                  <span style={{ flex:1 }}>{u.username}</span>
+                  <span style={{ flex: 1 }}>{u.username}</span>
                   <button className="tiny-button" onClick={() => navigate(`/messages/${u.id}`)}>Message</button>
                   <button className="tiny-button" onClick={() => handleRemoveFriend(u.id)}>Remove</button>
                 </li>
@@ -236,9 +211,9 @@ export default function UserProfile() {
             <h2>Incoming ({incoming.length})</h2>
             <ul>
               {incoming.map(u => (
-                <li key={u.id} className="friend-item" style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                <li key={u.id} className="friend-item">
                   <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
-                  <span style={{ flex:1 }}>{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
+                  <span style={{ flex: 1 }}>{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
                   <button className="tiny-button" onClick={() => handleAccept(u.id)}>Accept</button>
                   <button className="tiny-button" onClick={() => handleDecline(u.id)}>Decline</button>
                 </li>
@@ -248,9 +223,9 @@ export default function UserProfile() {
             <h2>Outgoing ({outgoing.length})</h2>
             <ul>
               {outgoing.map(u => (
-                <li key={u.id} className="friend-item" style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                <li key={u.id} className="friend-item">
                   <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
-                  <span style={{ flex:1 }}>{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
+                  <span style={{ flex: 1 }}>{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
                   <button className="tiny-button" onClick={() => handleCancelOutgoing(u.id)}>Cancel</button>
                 </li>
               ))}
@@ -261,51 +236,49 @@ export default function UserProfile() {
         {/* —–– Inbox Tab —–– */}
         {selectedSection === 'Inbox' && (
           <section className="inbox-list">
-            <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h2>
               Your Conversations
               {/* inbox-level badge also shown here for clarity */}
-              {totalUnseen > 0 && <span style={headerBadge}>{totalUnseen}</span>}
+              {totalUnseen > 0 && <span className="inbox-badge">{totalUnseen}</span>}
             </h2>
 
             {threads.length === 0 ? (
               <p>No conversations yet.</p>
             ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <ul>
                 {threads.map(t => (
-                  <li key={t.id}
-                      className="thread-item"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '8px 0',
-                        borderBottom: '1px solid #eee'
-                      }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                      <div style={{ position: 'relative' }}>
-                        <img src={t.otherAvatar || defaultAvatar}
-                             alt={t.otherUsername}
-                             className="tiny-avatar"
-                             style={{ width:32, height:32, borderRadius: '50%' }} />
-                        {t.unseen && <span style={dotStyle} aria-hidden />}
+                  <li key={t.id} className="thread-item">
+                    <div className="thread-avatar-container">
+                      {/* avatar wrapper: image + absolute dot */}
+                      <div className="avatar-wrapper">
+                        <img
+                          src={t.otherAvatar || defaultAvatar}
+                          alt={t.otherUsername}
+                          className="thread-avatar"
+                        />
+                        {t.unseen && <span className="thread-unseen-dot" aria-hidden />}
                       </div>
 
-                      <div style={{ display:'flex', flexDirection:'column' }}>
-                        <div style={{ fontSize: '0.95rem' }}>Messages from: <strong>{t.otherUsername}</strong></div>
-                        {t.unseen ? <div style={{ fontSize:'0.8rem', color:'#e53935' }}>New message</div> : null}
+                      {/* meta text */}
+                      <div className="thread-meta">
+                        <div style={{ fontSize: '0.95rem' }}>
+                          Messages from: <strong>{t.otherUsername}</strong>
+                        </div>
+                        {t.unseen && <div className="thread-new-text">New message</div>}
                       </div>
                     </div>
 
                     <div>
                       <button
                         onClick={() => openConversation(t)}
-                        className="small-button"
-                        style={{ marginRight: 8 }}
+                        className="small-button thread-open-button"
                       >
                         Open
                       </button>
                     </div>
                   </li>
+
+
                 ))}
               </ul>
             )}
