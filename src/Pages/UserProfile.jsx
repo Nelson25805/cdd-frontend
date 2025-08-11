@@ -36,7 +36,6 @@ export default function UserProfile() {
   const [selectedSection, setSelectedSection] = useState(sections[0]);
 
   // Normalize whatever your API returns into a predictable shape:
-  // { id, otherId, otherUsername, otherAvatar, unseen }
   const normalizeThreads = raw =>
     (raw || []).map(t => ({
       id: t.id ?? t.threadId ?? t.thread_id,
@@ -91,7 +90,7 @@ export default function UserProfile() {
 
   const isOwn = Number(id) === user.userid;
 
-  // ─── Friend-request handlers (unchanged) ─────────────────
+  // ─── Friend-request handlers ─────────────────
   const handleAccept = async targetId => {
     try {
       await acceptFriendRequest(targetId);
@@ -143,7 +142,7 @@ export default function UserProfile() {
     navigate(`/messages/${target}`);
   };
 
-  // === New: total unseen count for the header badge ===
+  // === total unseen count for the header badge ===
   const totalUnseen = threads.reduce((acc, t) => acc + (t.unseen ? 1 : 0), 0);
 
   return (
