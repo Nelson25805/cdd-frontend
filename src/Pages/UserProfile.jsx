@@ -125,13 +125,6 @@ export default function UserProfile() {
       console.error('Unfriend failed', err);
     }
   };
-  const handleAddFriend = async () => {
-    try {
-      await sendFriendRequest(id);
-    } catch (err) {
-      console.error('Send request failed', err);
-    }
-  };
 
   // Open conversation: behave exactly like "Message" button in Friends section
   const openConversation = thread => {
