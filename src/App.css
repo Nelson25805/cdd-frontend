@@ -1072,14 +1072,6 @@ input[type="email"] {
   margin: 0;
 }
 
-.thread-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
-}
-
 /* Avatar + unseen dot container */
 .thread-avatar-container {
   display: flex;
@@ -1125,22 +1117,6 @@ input[type="email"] {
   margin-left: 8px;
 }
 
-
-
-
-/* Inbox tab badge next to the "Inbox" label */
-.inbox-badge {
-  display: inline-block;
-  min-width: 18px;
-  padding: 2px 6px;
-  border-radius: 12px;
-  background: #e53935;
-  color: white;
-  font-size: 0.75rem;
-  margin-left: 8px;
-  text-align: center;
-}
-
 /* Thread list */
 .inbox-list ul {
   list-style: none;
@@ -1148,21 +1124,6 @@ input[type="email"] {
   margin: 0;
 }
 
-.thread-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
-}
-
-/* left side container for avatar + meta */
-.thread-avatar-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
 
 /* wrapper around avatar so the dot can be absolutely positioned */
 .avatar-wrapper {
@@ -1181,34 +1142,69 @@ input[type="email"] {
   display: block;
 }
 
-/* little red "unseen" dot that sits on top of the avatar */
-.thread-unseen-dot {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #e53935;
-  box-shadow: 0 0 0 2px white;
-}
-
-/* meta text next to avatar */
-.thread-meta {
-  display: flex;
-  flex-direction: column;
-  margin-left: 8px;
-}
-
-/* small "new message" label */
-.thread-new-text {
-  font-size: 0.8rem;
-  color: #e53935;
-}
-
 /* spacing for open button */
 .thread-open-button {
   margin-left: 8px;
 }
 
+
+
+
+/* ---------- Friend confirm UI ---------- */
+.confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px; /* indent slightly under the user row */
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.confirm-text {
+  color: #333;
+  font-size: 0.9rem;
+  margin-right: 8px;
+}
+
+.confirm-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* make confirm button stand out and cancel subtle */
+.tiny-button.confirm {
+  background: #e53935;
+  color: white;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.tiny-button.cancel {
+  background: gray;
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.thread-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* friend list small layout helpers */
+.friend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.friend-name {
+  flex: 1;
+  font-weight: 500;
+}
 

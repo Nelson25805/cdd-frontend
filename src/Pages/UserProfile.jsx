@@ -32,6 +32,11 @@ export default function UserProfile() {
   const [friends, setFriends] = useState([]);
   const [threads, setThreads] = useState([]);
 
+  // confirm states for destructive actions
+  const [confirmRemoveId, setConfirmRemoveId] = useState(null);
+  const [confirmDeclineId, setConfirmDeclineId] = useState(null);
+  const [confirmCancelId, setConfirmCancelId] = useState(null);
+
   const sections = ['Stats', 'Friends', 'Inbox'];
   const [selectedSection, setSelectedSection] = useState(sections[0]);
 
@@ -101,37 +106,63 @@ export default function UserProfile() {
       console.error('Accept failed', err);
     }
   };
-  const handleDecline = async targetId => {
+
+  // Decline with confirm: prompt first, confirmDecline executes
+  const promptDecline = targetId => setConfirmDeclineId(targetId);
+  const cancelPromptDecline = () => setConfirmDeclineId(null);
+  const confirmDecline = async targetId => {
     try {
       await declineFriendRequest(targetId);
       setIncoming(i => i.filter(u => u.id !== targetId));
     } catch (err) {
       console.error('Decline failed', err);
+    } finally {
+      setConfirmDeclineId(null);
     }
   };
-  const handleCancelOutgoing = async targetId => {
+
+  // Cancel outgoing request with confirm
+  const promptCancelOutgoing = targetId => setConfirmCancelId(targetId);
+  const cancelPromptCancelOutgoing = () => setConfirmCancelId(null);
+  const confirmCancelOutgoing = async targetId => {
     try {
       await cancelFriendRequest(targetId);
       setOutgoing(o => o.filter(u => u.id !== targetId));
     } catch (err) {
       console.error('Cancel request failed', err);
+    } finally {
+      setConfirmCancelId(null);
     }
   };
-  const handleRemoveFriend = async friendId => {
+
+  // Remove friend with confirm
+  const promptRemoveFriend = friendId => setConfirmRemoveId(friendId);
+  const cancelPromptRemove = () => setConfirmRemoveId(null);
+  const confirmRemoveFriend = async friendId => {
     try {
       await unfriend(friendId);
       setFriends(f => f.filter(u => u.id !== friendId));
     } catch (err) {
       console.error('Unfriend failed', err);
+    } finally {
+      setConfirmRemoveId(null);
+    }
+  };
+
+  // Add friend (used on other user's profile)
+  const handleAddFriend = async () => {
+    try {
+      await sendFriendRequest(id);
+      // optional: refetch outgoing / show state; left minimal here
+    } catch (err) {
+      console.error('Send request failed', err);
     }
   };
 
   // Open conversation: behave exactly like "Message" button in Friends section
   const openConversation = thread => {
     const target = thread.otherId ?? thread.id;
-    if (!target) {
-      return navigate(`/messages/${thread.id}`);
-    }
+    if (!target) return navigate(`/messages/${thread.id}`);
     navigate(`/messages/${target}`);
   };
 
@@ -161,7 +192,6 @@ export default function UserProfile() {
             {sec === 'Inbox' && totalUnseen > 0 && (
               <span className="inbox-badge">{totalUnseen}</span>
             )}
-
           </div>
         ))}
       </div>
@@ -193,9 +223,21 @@ export default function UserProfile() {
               {friends.map(u => (
                 <li key={u.id} className="friend-item">
                   <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
-                  <span style={{ flex: 1 }}>{u.username}</span>
+                  <span className="friend-name">{u.username}</span>
+
                   <button className="tiny-button" onClick={() => navigate(`/messages/${u.id}`)}>Message</button>
-                  <button className="tiny-button" onClick={() => handleRemoveFriend(u.id)}>Remove</button>
+
+                  {confirmRemoveId === u.id ? (
+                    <div className="confirm-row">
+                      <span className="confirm-text">Are you sure you want to remove {u.username}?</span>
+                      <div className="confirm-buttons">
+                        <button className="tiny-button confirm" onClick={() => confirmRemoveFriend(u.id)}>Confirm</button>
+                        <button className="tiny-button cancel" onClick={cancelPromptRemove}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button className="tiny-button" onClick={() => promptRemoveFriend(u.id)}>Remove</button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -205,9 +247,21 @@ export default function UserProfile() {
               {incoming.map(u => (
                 <li key={u.id} className="friend-item">
                   <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
-                  <span style={{ flex: 1 }}>{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
+                  <span className="friend-name">{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
+
                   <button className="tiny-button" onClick={() => handleAccept(u.id)}>Accept</button>
-                  <button className="tiny-button" onClick={() => handleDecline(u.id)}>Decline</button>
+
+                  {confirmDeclineId === u.id ? (
+                    <div className="confirm-row">
+                      <span className="confirm-text">Decline request from {u.username}?</span>
+                      <div className="confirm-buttons">
+                        <button className="tiny-button confirm" onClick={() => confirmDecline(u.id)}>Confirm</button>
+                        <button className="tiny-button cancel" onClick={cancelPromptDecline}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button className="tiny-button" onClick={() => promptDecline(u.id)}>Decline</button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -217,8 +271,19 @@ export default function UserProfile() {
               {outgoing.map(u => (
                 <li key={u.id} className="friend-item">
                   <img src={u.avatar || defaultAvatar} className="tiny-avatar" alt="" />
-                  <span style={{ flex: 1 }}>{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
-                  <button className="tiny-button" onClick={() => handleCancelOutgoing(u.id)}>Cancel</button>
+                  <span className="friend-name">{u.username} <small>sent at {new Date(u.sentAt).toLocaleDateString()}</small></span>
+
+                  {confirmCancelId === u.id ? (
+                    <div className="confirm-row">
+                      <span className="confirm-text">Cancel request to {u.username}?</span>
+                      <div className="confirm-buttons">
+                        <button className="tiny-button confirm" onClick={() => confirmCancelOutgoing(u.id)}>Confirm</button>
+                        <button className="tiny-button cancel" onClick={cancelPromptCancelOutgoing}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button className="tiny-button" onClick={() => promptCancelOutgoing(u.id)}>Cancel</button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -230,7 +295,6 @@ export default function UserProfile() {
           <section className="inbox-list">
             <h2>
               Your Conversations
-              {/* inbox-level badge also shown here for clarity */}
               {totalUnseen > 0 && <span className="inbox-badge">{totalUnseen}</span>}
             </h2>
 
@@ -241,36 +305,19 @@ export default function UserProfile() {
                 {threads.map(t => (
                   <li key={t.id} className="thread-item">
                     <div className="thread-avatar-container">
-                      {/* avatar wrapper: image + absolute dot */}
                       <div className="avatar-wrapper">
-                        <img
-                          src={t.otherAvatar || defaultAvatar}
-                          alt={t.otherUsername}
-                          className="thread-avatar"
-                        />
+                        <img src={t.otherAvatar || defaultAvatar} alt={t.otherUsername} className="thread-avatar" />
                         {t.unseen && <span className="thread-unseen-dot" aria-hidden />}
                       </div>
-
-                      {/* meta text */}
                       <div className="thread-meta">
-                        <div style={{ fontSize: '0.95rem' }}>
-                          Messages from: <strong>{t.otherUsername}</strong>
-                        </div>
+                        <div>Messages from: <strong>{t.otherUsername}</strong></div>
                         {t.unseen && <div className="thread-new-text">New message</div>}
                       </div>
                     </div>
-
                     <div>
-                      <button
-                        onClick={() => openConversation(t)}
-                        className="small-button thread-open-button"
-                      >
-                        Open
-                      </button>
+                      <button onClick={() => openConversation(t)} className="small-button thread-open-button">Open</button>
                     </div>
                   </li>
-
-
                 ))}
               </ul>
             )}
