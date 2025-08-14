@@ -39,7 +39,6 @@ const TopLinks = () => {
                   <Link to="/accountsettings" className="dropdown-link">Account Settings</Link>
                   <Link to={`/users/${user.userid}`} className="dropdown-link">My Profile</Link>
                   <Link to="/users" className="dropdown-link">Find Users</Link>
-                  <Link to="/messages/inbox" className="dropdown-link">Inbox</Link>
                   {user.admin && (
                     <Link to="/reportsmenu" className="dropdown-link">Reports Menu</Link>
                   )}
