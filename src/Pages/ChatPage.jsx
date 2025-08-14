@@ -128,6 +128,28 @@ export default function ChatPage() {
     }
   };
 
+  // human-friendly date + time for messages
+  const formatTimestamp = dt => {
+    if (!dt) return '';
+    const date = (dt instanceof Date) ? dt : new Date(dt);
+    // detect same calendar day (local time)
+    const now = new Date();
+    const sameDay = date.getFullYear() === now.getFullYear()
+      && date.getMonth() === now.getMonth()
+      && date.getDate() === now.getDate();
+
+    const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    if (sameDay) return `Today, ${time}`;
+
+    return date.toLocaleString([], {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <div className="App chat-page">
       <TopLinks />
@@ -181,10 +203,11 @@ export default function ChatPage() {
                 >
                   {m.text}
                 </div>
-                <div style={{ fontSize: '0.75em', color: '#666', marginTop: '0.25em' }}>
-                  <div>{name}</div>
-                  <div>{m.timestamp.toLocaleTimeString()}</div>
+                <div className="message-meta">
+                  <div className="message-sender">{name}</div>
+                  <div className="message-time">{formatTimestamp(m.timestamp)}</div>
                 </div>
+
               </div>
             </div>
           );
