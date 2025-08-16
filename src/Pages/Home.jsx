@@ -9,6 +9,7 @@ import search from '../Images/search.png';
 
 // Importing custom components and hooks
 import TopLinks from '../Context/TopLinks';
+import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
 
 // Functional component for the HomePage
@@ -71,6 +72,7 @@ function HomePage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
