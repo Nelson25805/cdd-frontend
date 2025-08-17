@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
+import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
 import '../App.css';
 import { searchGames, checkGameDetails, checkWishlist } from '../Api';
@@ -192,6 +193,7 @@ const Search = () => {
             )}
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );
