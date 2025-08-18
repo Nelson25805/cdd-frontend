@@ -193,8 +193,8 @@ const Search = () => {
             )}
           </div>
         </main>
-        <Footer />
       </div>
+      <Footer />
     </div>
   );
 };
