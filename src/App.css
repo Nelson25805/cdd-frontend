@@ -220,7 +220,6 @@ input[type="email"] {
 
 
 /*Register styling */
-
 .register-container {
   text-align: center;
   margin: 0 auto;
@@ -254,7 +253,6 @@ input[type="email"] {
   width: 250px;
 }
 
-
 .platform-chips::-webkit-scrollbar {
   height: 6px;
 }
@@ -263,7 +261,6 @@ input[type="email"] {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
-
 
 .chip-remove {
   background: none;
@@ -274,8 +271,8 @@ input[type="email"] {
 }
 
 .platform-input-wrapper {
-  position: relative;    /* makes the UL absolutely position itself here */
-  width: 250px;          /* match your input width */
+  position: relative;    
+  width: 250px;       
 }
 
 .platform-input-wrapper .console-suggestions {
@@ -292,7 +289,7 @@ input[type="email"] {
 
 .game-item-photo {
   width:   160px;
-  height:  210px;        /*  80 × (374/264) ≈ 113px, round as needed */
+  height:  210px;    
   margin-right: 1rem;
   flex-shrink: 0;
   overflow: hidden;
@@ -306,18 +303,6 @@ input[type="email"] {
   background: #f0f0f0;
   border-radius: 4px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* Container for the two lists side by side */
 .dual-list-container {
@@ -368,11 +353,11 @@ input[type="email"] {
 /* make the “×” button fully transparent & black text */
 .dual-list-container .list.selected .list-body button,
 .platform-chip .chip-remove {
-  background: none;     /* kill the gray fill */
-  border: none;         /* no border */
-  color: #000;          /* black “×” */
-  outline: none;        /* no focus ring */
-  padding: 0;           /* don’t add extra padding */
+  background: none;   
+  border: none;      
+  color: #000;     
+  outline: none;      
+  padding: 0;         
 }
 
 /* if any hover/focus style still shows a box, kill it too */
@@ -382,15 +367,14 @@ input[type="email"] {
 .platform-chip .chip-remove:focus {
   background: none;
   outline: none;
-  opacity: 0.8;         /* still give a hint on hover */
+  opacity: 0.8;    
 }
-
 
 /* optional: on hover, keep it black or darken */
 .dual-list-container .list.selected .list-body button:hover,
 .platform-chip .chip-remove:hover {
-  color: #000;          /* stays black */
-  opacity: 0.8;         /* slight feedback */
+  color: #000;      
+  opacity: 0.8;        
 }
 
 /* Chips style (if you still use them elsewhere) */
@@ -418,14 +402,6 @@ input[type="email"] {
   font-size: 1rem;
   line-height: 1;
 }
-
-
-
-
-
-
-
-
 
 .game-information {
   display: flex;
@@ -594,15 +570,10 @@ input[type="email"] {
 
 .sort-filter-section>.sort-by-options {
   display: flex;
-  /* ensure it’s a flex container */
   flex-direction: row;
-  /* put <p> and <label>s side-by-side */
   align-items: center;
-  /* vertically center the radio + its text */
   gap: 1rem;
-  /* space between “Ascending” and “Descending” */
   margin-bottom: 8px;
-  /* (optional) spacing under this group */
 }
 
 .sort-filter-section>div {
@@ -616,20 +587,16 @@ input[type="email"] {
   font-weight: 500;
 }
 
-
 .filter-console-wrapper {
   position: relative;
   width: 250px;
-  /* match the old inline width */
   margin-top: 8px;
-  /* spacing if you like */
 }
 
 .console-search-input {
-  width: 100%;   /* will now be 250px because .platform-selector is 250px */
+  width: 100%;
   box-sizing: border-box;
 }
-
 
 .console-suggestions {
   position: absolute;
@@ -664,21 +631,12 @@ input[type="email"] {
   font-size: 0.9rem;
 }
 
-
-
-
-
 .sort-by-options {
   display: flex;
-  /* put children in a row */
   flex-direction: row;
-  /* this is the default, but be explicit */
   align-items: center;
-  /* vertically center the radios + text */
   gap: 1rem;
-  /* space between “Ascending” and “Descending” */
   margin-bottom: 8px;
-  /* optional spacing under the radio group */
 }
 
 .sort-by-options p {
@@ -688,13 +646,9 @@ input[type="email"] {
 
 .sort-by-option {
   display: flex;
-  /* put input + text side-by-side */
   align-items: center;
-  /* vertically center the circle and its text */
   gap: 4px;
-  /* small gap between circle and label text */
   cursor: pointer;
-  /* nice hover cursor */
 }
 
 .sort-by-option input[type="radio"] {
@@ -704,11 +658,8 @@ input[type="email"] {
 
 .sort-by-options>label {
   display: flex;
-  /* each label is its own flex row */
   align-items: center;
-  /* center the circle and text vertically */
   gap: 4px;
-  /* small gap between the radio circle and text */
   cursor: pointer;
 }
 
@@ -716,9 +667,6 @@ input[type="email"] {
   width: 1rem;
   height: 1rem;
 }
-
-
-
 
 .game-section {
   margin-left: 20px;
@@ -791,11 +739,10 @@ input[type="email"] {
 .game-item-name-console {
   display: flex;
   flex-direction: row;
-  align-items: center;   /* ← center vertically instead of top */
+  align-items: center;
   flex: 1;
   gap: 20px;
 }
-
 
 .name-cell {
   flex: 1;
@@ -834,12 +781,10 @@ input[type="email"] {
 /* After every console-item except the last, inject a comma */
 .console-item:not(:last-child)::after {
   content: ",";
-  margin-right: 0.5rem;  /* small gap after the comma */
+  margin-right: 0.5rem;
 }
 
-
 /* ReportsMenu page styling */
-
 .report-header {
   background-color: #f0f0f0;
   padding: 20px;
@@ -883,10 +828,10 @@ input[type="email"] {
 }
 
 .profile-avatar {
-  width: 150px;        /* larger container */
-  height: 150px;       /* keep it square if you want a round mask */
-  border-radius: 50%;  /* still round */
-  object-fit: contain; /* show full image, letter‑boxed */
+  width: 150px;       
+  height: 150px;       
+  border-radius: 50%;  
+  object-fit: contain; 
   background-color: rgba(221,221,221,255);
 }
 
@@ -895,7 +840,7 @@ input[type="email"] {
 .profile-stats {
   display: flex;
   gap: 1rem;
-  justify-content: center;   /* center horizontally */
+  justify-content: center; 
   margin: 1.5rem 0;
 }
 
@@ -904,14 +849,14 @@ input[type="email"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-decoration: none;     /* remove link underline */
+  text-decoration: none;     
   background-color: #f8f8f8;
   border: 2px solid #ddd;
   border-radius: 8px;
   padding: 1rem 1.5rem;
-  width: 150px;              /* fixed width for consistency */
+  width: 150px;              
   transition: transform 0.2s, box-shadow 0.2s;
-  color: inherit;            /* use default text color */
+  color: inherit;            
 }
 
 /* Title inside the card (e.g. “Collection”) */
@@ -934,12 +879,6 @@ input[type="email"] {
   transform: translateY(-4px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-
-
-
-
-
-
 
 .friend-lists ul {
   list-style: none;
@@ -966,8 +905,6 @@ input[type="email"] {
   padding: 2px 6px;
 }
 
-
-
 .avatar-section {
   margin-bottom: 2em;
 }
@@ -985,10 +922,6 @@ input[type="email"] {
 .avatar-section .small-button {
   margin-left: 0.5em;
 }
-
-
-
-
 
 /* Confirmation prompt text */
 .friend-lists .confirm-text {
@@ -1023,16 +956,12 @@ input[type="email"] {
   margin-left: 8px;
 }
 
-
 .thread-item {
   display: flex;
   align-items: center;
   gap: 0.5em;
   padding: 0.25em 0;
 }
-
-
-
 
 /* ===== Section tabs ===== */
 .section-selector {
@@ -1147,9 +1076,6 @@ input[type="email"] {
   margin-left: 8px;
 }
 
-
-
-
 /* ---------- Friend confirm UI ---------- */
 .confirm-row {
   display: flex;
@@ -1208,11 +1134,6 @@ input[type="email"] {
   font-weight: 500;
 }
 
-
-
-
-
-
 /* Footer styles */
 .App-footer {
   display: flex;
@@ -1221,7 +1142,7 @@ input[type="email"] {
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-top: 1px solid #e6e6e6;
-  background: #fff; /* or match site background */
+  background: #d9d9d9;
   color: #444;
   font-size: 0.9rem;
   box-shadow: 0 -1px 0 rgba(0,0,0,0.02);
