@@ -11,7 +11,7 @@ export default function Footer() {
         <Link to="/" className="footer-logo-link" aria-label="Home">
           <img src={logo} alt="Logo" className="footer-logo" />
         </Link>
-        <div className="footer-copy">© {year} Your Company</div>
+        <div className="footer-copy">© {year} Nelson McFadyen</div>
       </div>
 
       <div className="footer-right">
