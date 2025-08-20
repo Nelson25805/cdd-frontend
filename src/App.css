@@ -1180,8 +1180,8 @@ input[type="email"] {
 }
 
 .footer-link {
-  color: #06c;
-  text-decoration: none;
+  color: #333;
+  font-weight: bold;
   padding: 0.25rem 0.5rem;
 }
 
