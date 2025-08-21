@@ -807,11 +807,6 @@ input[type="email"] {
   justify-content: space-between;
 }
 
-.column {
-  flex: 1;
-  padding: 10px;
-}
-
 .centered-rectangle {
   display: flex;
   justify-content: center;
@@ -895,7 +890,7 @@ input[type="email"] {
   height: 80px;
   border-radius: 50%;
   margin-right: 8px;
-  object-fit: contain; /* show full image, letter‑boxed */
+  object-fit: contain;
   background-color: rgba(221,221,221,255);
 }
 
@@ -925,10 +920,10 @@ input[type="email"] {
 
 /* Confirmation prompt text */
 .friend-lists .confirm-text {
-  flex-grow: 1;                /* push buttons to the right */
-  color: #c00;                 /* red for warning */
-  font-size: 1.2rem;           /* slightly smaller than the list text */
-  margin: 0 8px;               /* space around the text */
+  flex-grow: 1;              
+  color: #c00;                
+  font-size: 1.2rem;          
+  margin: 0 8px;               
 }
 
 /* Confirm & Cancel buttons */
@@ -936,7 +931,7 @@ input[type="email"] {
 .tiny-button.cancel {
   font-size: 1rem;
   padding: 4px 8px;
-  border: none;
+  border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -947,7 +942,7 @@ input[type="email"] {
 }
 
 .tiny-button.cancel {
-  background-color: #999;
+  background-color: gray;
   color: #fff;
 }
 
@@ -969,17 +964,6 @@ input[type="email"] {
   gap: 8px;
 }
 
-.section-option {
-  cursor: pointer;
-  position: relative;
-  padding: 6px 10px;
-  border-radius: 6px;
-  user-select: none;
-}
-
-.section-option.active {
-  font-weight: 700;
-}
 
 /* ===== Inbox header badge (number) ===== */
 .inbox-badge {
@@ -1009,13 +993,6 @@ input[type="email"] {
   flex: 1;
 }
 
-/* small avatar */
-.thread-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
 
 /* red unseen dot in avatar corner */
 .thread-unseen-dot {
@@ -1046,34 +1023,12 @@ input[type="email"] {
   margin-left: 8px;
 }
 
-/* Thread list */
-.inbox-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-
 /* wrapper around avatar so the dot can be absolutely positioned */
 .avatar-wrapper {
   position: relative;     
   display: inline-block;
   width: 32px;
   height: 32px;
-}
-
-/* avatar image */
-.thread-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-/* spacing for open button */
-.thread-open-button {
-  margin-left: 8px;
 }
 
 /* ---------- Friend confirm UI ---------- */
@@ -1097,28 +1052,12 @@ input[type="email"] {
   gap: 8px;
 }
 
-/* make confirm button stand out and cancel subtle */
-.tiny-button.confirm {
-  background: #e53935;
-  color: white;
-  border: none;
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.tiny-button.cancel {
-  background: gray;
-  border: 1px solid #ddd;
-  padding: 6px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
 .thread-avatar {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
+  display: block;
 }
 
 /* friend list small layout helpers */
