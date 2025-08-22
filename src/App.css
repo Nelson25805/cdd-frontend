@@ -1036,7 +1036,7 @@ input[type="email"] {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 12px; /* indent slightly under the user row */
+  margin-left: 12px;
   margin-top: 6px;
   flex-wrap: wrap;
 }
