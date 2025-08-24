@@ -19,7 +19,7 @@ export default function EditWishlistDetails() {
   const [available, setAvailable] = useState([]);
   const [selected,  setSelected]  = useState([]);
   const [title,     setTitle]     = useState('…');
-  const [cover,     setCover]     = useState(null);   // raw cover token
+  const [cover,     setCover]     = useState(null);  
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState('');
 

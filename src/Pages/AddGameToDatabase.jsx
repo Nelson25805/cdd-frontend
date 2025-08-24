@@ -4,7 +4,6 @@ import { useUser } from '../Context/useUser';
 import TopLinks from '../Context/TopLinks';
 import { addGameToDatabase } from '../Api';
 import { useNavigate } from 'react-router-dom';
-// Now each option is an object: { consoleid, name }
 import { CONSOLE_OPTIONS } from '../Context/consoleOptions';
 
 const AddGameToDatabase = () => {

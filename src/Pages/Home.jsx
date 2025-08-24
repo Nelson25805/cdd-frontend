@@ -1,13 +1,11 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// Importing styles and images
 import '../App.css';
 import discuss from '../Images/discuss.png';
 import folder from '../Images/folder.png';
 import search from '../Images/search.png';
 
-// Importing custom components and hooks
 import TopLinks from '../Context/TopLinks';
 import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
