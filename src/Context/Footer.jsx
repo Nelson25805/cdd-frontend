@@ -1,7 +1,5 @@
-// src/Context/Footer.jsx
-import React from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../Images/logo.png'; // same logo used in TopLinks
+import logo from '../Images/logo.png';
 
 export default function Footer() {
   const year = new Date().getFullYear();
