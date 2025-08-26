@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
+import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
 import {
   fetchCollectionItems,
@@ -171,6 +172,7 @@ export default function MyCollection() {
           </div>
         </main>
       </div>
+       <Footer />
     </div>
   );
 }

@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import TopLinks from '../Context/TopLinks';
+import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
 import { getWishlist, removeFromWishlist } from '../Api';
 import '../App.css';
 import { useNavigate } from 'react-router-dom';
 
-// 1️⃣ shared context + controls
 import { useSortFilter } from '../Context/useSortFilter';
 import SortFilterControls from '../Context/SortFilterControls';
 import CoverImage from '../Context/CoverImage';
@@ -171,6 +171,7 @@ function MyWishlist() {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   );
 }
