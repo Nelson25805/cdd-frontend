@@ -7,6 +7,7 @@ import {
 } from '../Api';
 import { Link } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
+import Footer from '../Context/Footer';
 
 export default function UserSearch() {
   const [q, setQ] = useState('');
@@ -80,6 +81,7 @@ export default function UserSearch() {
 
         ))}
       </ul>
+        <Footer />
     </div>
   );
 }
