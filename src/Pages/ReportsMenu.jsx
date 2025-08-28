@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import '../App.css';
 import TopLinks from '../Context/TopLinks';
+import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
 import { fetchReportData } from '../Api';
 
@@ -210,6 +211,7 @@ function ReportsMenu() {
                     </div>
                 </div>
             </main>
+            <Footer />
         </div>
     );
 }
