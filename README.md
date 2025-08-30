@@ -72,11 +72,15 @@
 
 ![Project Name Screen Shot][project-screenshot]
 
-IGDB Game Searcher is a desktop application that allows you to search for games using the IGDB API. You have two primary search modes:
-- **Filtered Search Page:** Look up games by title and filter by genre.
-- **Random Search Page:** Fetch a random game from the IGDB database.
+`cdd-frontend` is the React single-page application that provides the user interface for the CDD project:
 
-The project is built using Python and PyQt5, with a polished dark theme (via qdarkstyle) and a custom external stylesheet for UI sizing and spacing.
+- Search and view game details
+- Add games to your collection or wishlist
+- View other users' profiles and collections
+- Friend system and simple messaging/threads interface
+- Account settings, admin/reporting hooks (UI only where applicable)
+
+This README covers **frontend** setup and usage. Backend (API, database, auth, IGDB integration) is documented separately.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
