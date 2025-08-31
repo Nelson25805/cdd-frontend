@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+// src/Pages/MyCollection.jsx
+import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
 import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
 import {
   fetchCollectionItems,
-  removeGameFromCollection
+  removeGameFromCollection,
+  getUserProfile,
 } from '../Api';
 import { useSortFilter } from '../Context/useSortFilter';
 import SortFilterControls from '../Context/SortFilterControls';
@@ -24,18 +26,56 @@ export default function MyCollection() {
   const { user } = useUser();
   const ownUserId = user?.userid;
 
-  // If route has a userId param, we're viewing someone else's collection
+  // route user id (if viewing someone else's collection)
   const { userId: routeUserId } = useParams();
-  // Determine which ID to fetch
+
+  // The ID we actually fetch
   const displayedUserId = routeUserId || ownUserId;
 
   const { sortDirection, filterConsole } = useSortFilter();
 
-  const handlePrevPage = () => setCurrentPage(p => Math.max(p - 1, 1));
+  // displayed username for heading (only populated for other users)
+  const [displayedUsername, setDisplayedUsername] = useState(null);
+
+  // Synchronous "are we viewing our own collection?" state to avoid flicker
+  const [isViewingOwnCollection, setIsViewingOwnCollection] = useState(
+    // conservative default: if routeUserId is missing we treat as own; if present, false until we compute
+    !routeUserId
+  );
+
+  // Heading ready flag: don't show heading for other's page until we have username
+  const [headingReady, setHeadingReady] = useState(!routeUserId);
+
+  // === Reset synchronously before paint to prevent old content flicker ===
+  useLayoutEffect(() => {
+    // Clear previous items immediately
+    setCollectionItems([]);
+    setCurrentPage(1);
+    setIsLoadingItems(true);
+
+    // Synchronously determine whether this looks like our own collection
+    const own = !routeUserId || (ownUserId !== undefined && Number(routeUserId) === Number(ownUserId));
+    setIsViewingOwnCollection(own);
+
+    // If it's our collection, heading is ready immediately; otherwise wait for async username fetch
+    setHeadingReady(own);
+    if (own) {
+      // set username from context immediately for heading
+      setDisplayedUsername(user?.username ?? null);
+    } else {
+      // reset previously visible username to avoid showing previous user's name
+      setDisplayedUsername(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeUserId, ownUserId, user?.username]);
 
   // Fetch collection for either the route user or yourself
   const fetchItems = useCallback(async () => {
-    if (!displayedUserId) return;
+    if (!displayedUserId) {
+      setCollectionItems([]);
+      setIsLoadingItems(false);
+      return;
+    }
     setIsLoadingItems(true);
     try {
       const items = await fetchCollectionItems(displayedUserId);
@@ -43,6 +83,7 @@ export default function MyCollection() {
       setItemsLoaded(true);
     } catch (err) {
       console.error('Error fetching collection:', err);
+      setCollectionItems([]);
     } finally {
       setIsLoadingItems(false);
     }
@@ -52,6 +93,34 @@ export default function MyCollection() {
     fetchItems();
   }, [fetchItems]);
 
+  // If viewing someone else's page, fetch that user's profile (username)
+  useEffect(() => {
+    let mounted = true;
+    if (!routeUserId) {
+      // own collection — heading already handled by useLayoutEffect above
+      setDisplayedUsername(user?.username ?? null);
+      setHeadingReady(true);
+      return;
+    }
+
+    // async load username — only set headingReady true once we have it
+    (async () => {
+      try {
+        const p = await getUserProfile(routeUserId);
+        if (!mounted) return;
+        setDisplayedUsername(p?.username ?? `User ${routeUserId}`);
+      } catch (err) {
+        if (!mounted) return;
+        setDisplayedUsername(`User ${routeUserId}`);
+      } finally {
+        if (!mounted) return;
+        setHeadingReady(true);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [routeUserId, user?.username]);
+
   // loading dots
   useEffect(() => {
     const id = setInterval(() => {
@@ -60,7 +129,11 @@ export default function MyCollection() {
     return () => clearInterval(id);
   }, []);
 
+  const handlePrevPage = () => setCurrentPage(p => Math.max(p - 1, 1));
+
   const handleRemoveGame = async (gameId) => {
+    // only allow removal if viewing own collection
+    if (!isViewingOwnCollection) return;
     try {
       await removeGameFromCollection(displayedUserId, gameId);
       alert('Removed from collection');
@@ -71,6 +144,7 @@ export default function MyCollection() {
   };
 
   const handleEditGameDetails = (game) => {
+    if (!isViewingOwnCollection) return;
     navigate(`/editgamedetails?q=${encodeURIComponent(game.GameId)}`);
   };
 
@@ -93,15 +167,16 @@ export default function MyCollection() {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
-  // Heading text
-  const heading = routeUserId
-    ? `User ${routeUserId}’s Collection`
-    : 'My Collection';
+  // Heading text - only show when headingReady
+  const heading = isViewingOwnCollection
+    ? 'My Collection'
+    : (displayedUsername ? `${displayedUsername}’s Collection` : '');
 
   return (
     <div className="App">
       <TopLinks />
-      <h2>{heading}</h2>
+      {/* Render nothing (or a small loading) until headingReady for other-user pages */}
+      {headingReady ? <h2>{heading}</h2> : <h2>Loading…</h2>}
 
       <div className="search-content">
         <main className="search-main-content">
@@ -118,7 +193,10 @@ export default function MyCollection() {
                       <p className="game-item-header-name">Name</p>
                       <p>Console</p>
                     </div>
-                    <div className="game-item-header-actions"><p>Actions</p></div>
+                    {/* only show Actions header when viewing own collection and headingReady */}
+                    {headingReady && isViewingOwnCollection && (
+                      <div className="game-item-header-actions"><p>Actions</p></div>
+                    )}
                   </div>
 
                   {pageResults.map(game => (
@@ -142,7 +220,9 @@ export default function MyCollection() {
                           </div>
                         </div>
                       </div>
-                      {!routeUserId && (
+
+                      {/* only show edit/remove when viewing own collection and headingReady */}
+                      {headingReady && isViewingOwnCollection && (
                         <div className="game-item-actions">
                           <button
                             className="link-button"
@@ -172,7 +252,7 @@ export default function MyCollection() {
           </div>
         </main>
       </div>
-       <Footer />
+      <Footer />
     </div>
   );
 }
