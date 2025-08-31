@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+// src/Pages/UserProfile.jsx
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../Context/useUser';
 import {
@@ -24,6 +25,7 @@ export default function UserProfile() {
   const { user } = useUser();
   const navigate = useNavigate();
 
+  // ─── Hooks (ALL declared unconditionally at top) ─────────────────
   const [profile, setProfile] = useState(null);
   const [collection, setCollection] = useState([]);
   const [wishlist, setWishlist] = useState([]);
@@ -32,15 +34,19 @@ export default function UserProfile() {
   const [friends, setFriends] = useState([]);
   const [threads, setThreads] = useState([]);
 
-  // confirm states for destructive actions
+  // confirm states for destructive actions (only used on your own profile)
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
   const [confirmDeclineId, setConfirmDeclineId] = useState(null);
   const [confirmCancelId, setConfirmCancelId] = useState(null);
 
-  const sections = ['Stats', 'Friends', 'Inbox'];
-  const [selectedSection, setSelectedSection] = useState(sections[0]);
+  // Tabs
+  const allSections = ['Stats', 'Friends', 'Inbox'];
+  const [selectedSection, setSelectedSection] = useState(allSections[0]);
 
-  // Normalize whatever your API returns into a predictable shape:
+  // compute isOwn early (not a hook)
+  const isOwn = Number(id) === user.userid;
+
+  // Normalize threads helper (pure; no hooks)
   const normalizeThreads = raw =>
     (raw || []).map(t => ({
       id: t.id ?? t.threadId ?? t.thread_id,
@@ -73,27 +79,57 @@ export default function UserProfile() {
               : (t.unseen_count ?? t.unread_count ?? 0) > 0
     }));
 
-  // — Load everything once —
+  // reset visible state synchronously when route :id changes to avoid flashing previous profile
+  useLayoutEffect(() => {
+    // clear the previous profile immediately (paint will happen with cleared state)
+    setProfile(null);
+    setCollection([]);
+    setWishlist([]);
+    setIncoming([]);
+    setOutgoing([]);
+    setFriends([]);
+    setThreads([]);
+
+    // clear any pending confirm prompts
+    setConfirmRemoveId(null);
+    setConfirmDeclineId(null);
+    setConfirmCancelId(null);
+
+    // reset tab to the first allowed section
+    setSelectedSection(allSections[0]);
+  }, [id]);
+
+
+  // — Load everything once whenever :id changes —
   useEffect(() => {
     if (!id) return;
     (async () => {
-      const p = await getUserProfile(id);
-      setProfile(p);
-      setCollection(await getUserCollection(id));
-      setWishlist(await getUserWishlist(id));
-      setIncoming(await getUserIncomingRequests(id));
-      setOutgoing(await getUserOutgoingRequests(id));
-      setFriends(await getUserFriends(id));
+      try {
+        const p = await getUserProfile(id);
+        setProfile(p);
 
-      // fetch threads for *logged-in* user (inbox)
-      const rawThreads = await getUserThreads();
-      setThreads(normalizeThreads(rawThreads));
-    })().catch(console.error);
+        setCollection(await getUserCollection(id));
+        setWishlist(await getUserWishlist(id));
+        setIncoming(await getUserIncomingRequests(id));
+        setOutgoing(await getUserOutgoingRequests(id));
+        setFriends(await getUserFriends(id));
+
+        const rawThreads = await getUserThreads();
+        setThreads(normalizeThreads(rawThreads));
+      } catch (err) {
+        console.error('Profile load error', err);
+      }
+    })();
   }, [id]);
 
-  if (!profile) return <div>Loading…</div>;
-
-  const isOwn = Number(id) === user.userid;
+  // Ensure selectedSection is valid when switching between own/other profile
+  useEffect(() => {
+    const allowedSections = isOwn ? allSections : ['Stats'];
+    if (!allowedSections.includes(selectedSection)) {
+      setSelectedSection(allowedSections[0]);
+    }
+    // we only depend on id/isOwn here; selectedSection is safe to update
+  }, [id, isOwn]); // no lint disable needed
 
   // ─── Friend-request handlers ─────────────────
   const handleAccept = async targetId => {
@@ -107,7 +143,6 @@ export default function UserProfile() {
     }
   };
 
-  // Decline with confirm: prompt first, confirmDecline executes
   const promptDecline = targetId => setConfirmDeclineId(targetId);
   const cancelPromptDecline = () => setConfirmDeclineId(null);
   const confirmDecline = async targetId => {
@@ -121,7 +156,6 @@ export default function UserProfile() {
     }
   };
 
-  // Cancel outgoing request with confirm
   const promptCancelOutgoing = targetId => setConfirmCancelId(targetId);
   const cancelPromptCancelOutgoing = () => setConfirmCancelId(null);
   const confirmCancelOutgoing = async targetId => {
@@ -135,7 +169,6 @@ export default function UserProfile() {
     }
   };
 
-  // Remove friend with confirm
   const promptRemoveFriend = friendId => setConfirmRemoveId(friendId);
   const cancelPromptRemove = () => setConfirmRemoveId(null);
   const confirmRemoveFriend = async friendId => {
@@ -149,25 +182,26 @@ export default function UserProfile() {
     }
   };
 
-  // Add friend (used on other user's profile)
   const handleAddFriend = async () => {
     try {
       await sendFriendRequest(id);
-      // optional: refetch outgoing / show state; left minimal here
     } catch (err) {
       console.error('Send request failed', err);
     }
   };
 
-  // Open conversation: behave exactly like "Message" button in Friends section
   const openConversation = thread => {
     const target = thread.otherId ?? thread.id;
     if (!target) return navigate(`/messages/${thread.id}`);
     navigate(`/messages/${target}`);
   };
 
-  // === total unseen count for the header badge ===
   const totalUnseen = threads.reduce((acc, t) => acc + (t.unseen ? 1 : 0), 0);
+
+  // ─── Rendering (after all hooks are declared) ─────────────────
+  if (!profile) return <div>Loading…</div>;
+
+  const allowedSections = isOwn ? allSections : ['Stats'];
 
   return (
     <div className="App">
@@ -180,9 +214,8 @@ export default function UserProfile() {
         className="profile-avatar"
       />
 
-      {/* Section Tabs */}
       <div className="section-selector">
-        {sections.map(sec => (
+        {allowedSections.map(sec => (
           <div
             key={sec}
             className={`section-option ${sec === selectedSection ? 'active' : ''}`}
@@ -197,8 +230,7 @@ export default function UserProfile() {
       </div>
 
       <div className="profile-sections">
-
-        {/* —–– Stats Tab —–– */}
+        {/* Stats */}
         {selectedSection === 'Stats' && (
           <div className="stats-section">
             <h2>Game Stats</h2>
@@ -212,11 +244,21 @@ export default function UserProfile() {
                 <p>{wishlist.length} {wishlist.length === 1 ? 'game' : 'games'}</p>
               </Link>
             </div>
+
+            {!isOwn && (
+              <div style={{ marginTop: 12 }}>
+                {profile.isFriend ? (
+                  <button className="small-button" onClick={() => navigate(`/messages/${profile.chatThreadId}`)}>Message</button>
+                ) : (
+                  <button className="small-button" onClick={handleAddFriend}>Add Friend</button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
-        {/* —–– Friends Tab —–– */}
-        {selectedSection === 'Friends' && (
+        {/* Friends (only on own profile) */}
+        {selectedSection === 'Friends' && isOwn && (
           <section className="friend-lists">
             <h2>Friends ({friends.length})</h2>
             <ul>
@@ -226,6 +268,7 @@ export default function UserProfile() {
                   <span className="friend-name">{u.username}</span>
 
                   <button className="tiny-button" onClick={() => navigate(`/messages/${u.id}`)}>Message</button>
+                  <button className="tiny-button" onClick={() => navigate(`/users/${u.id}`)}>View Profile</button>
 
                   {confirmRemoveId === u.id ? (
                     <div className="confirm-row">
@@ -290,8 +333,8 @@ export default function UserProfile() {
           </section>
         )}
 
-        {/* —–– Inbox Tab —–– */}
-        {selectedSection === 'Inbox' && (
+        {/* Inbox (only on own profile) */}
+        {selectedSection === 'Inbox' && isOwn && (
           <section className="inbox-list">
             <h2>
               Your Conversations
@@ -323,7 +366,6 @@ export default function UserProfile() {
             )}
           </section>
         )}
-
       </div>
     </div>
   );
