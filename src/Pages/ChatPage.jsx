@@ -29,37 +29,78 @@ export default function ChatPage() {
     username: user.username,
     avatar: user.avatar || ''
   });
-
   const [partner, setPartner] = useState({ username: '', avatar: '' });
 
-  // 1) redirect if no userId
+  // 1) redirect if no userId param at all
   useEffect(() => {
     if (!userId) navigate(-1);
   }, [userId, navigate]);
 
-  // 2) load both profiles + threadId
+  // 2) load both profiles + threadId. Be tolerant: param may be other user's id or may already be a thread id.
   useEffect(() => {
     if (!userId) return;
     (async () => {
       try {
-        // Partner’s profile (as before)
-        const p = await getUserProfile(userId);
-        setPartner({ username: p.username, avatar: p.avatar || '' });
-        setThreadId(p.chatThreadId);
+        // Attempt 1: treat param as other user's id and fetch their profile
+        let numericParam = Number(userId);
+        let p = null;
+        try {
+          p = await getUserProfile(userId); // if userId is actually a thread id this may fail or return no chatThreadId
+        } catch (err) {
+          // ignore — we'll try treating param as thread id
+          p = null;
+        }
 
-        // ❗❗❗ Mark everything in this thread as seen by me
-        await markMessagesSeen(p.chatThreadId);
+        if (p && p.chatThreadId) {
+          // Common case: param is other user's id and profile contains chatThreadId
+          setPartner({ username: p.username, avatar: p.avatar || '' });
+          setThreadId(p.chatThreadId);
 
-        // **Your** profile
-        const me = await getUserProfile(user.userid);
-        setMeProfile({ username: me.username, avatar: me.avatar || '' });
+          // mark seen only when we have a real numeric thread id
+          if (!Number.isNaN(Number(p.chatThreadId))) {
+            await markMessagesSeen(Number(p.chatThreadId));
+          }
+        } else {
+          // Fallback: treat param as a thread id
+          const tId = Number(userId);
+          setThreadId(tId);
+
+          // fetch messages to determine partner (find sender with id !== me)
+          const msgs = await getThreadMessages(tId);
+          // infer partner name/avatar from messages (senderName exists from your GET)
+          let other = null;
+          for (const m of msgs) {
+            if (m.senderid !== user.userid) {
+              other = { username: m.senderName || '', avatar: '' };
+              break;
+            }
+          }
+          // If we didn't find partner from messages, try to at least set a blank partner
+          setPartner(prev => ({ username: other?.username || prev.username || '', avatar: other?.avatar || prev.avatar || '' }));
+
+          // Now mark messages seen for that threadId (but only if it's a valid integer)
+          if (!Number.isNaN(tId)) {
+            await markMessagesSeen(tId);
+          } else {
+            console.warn('ChatPage: param cannot be interpreted as a thread id:', userId);
+          }
+        }
+
+        // Set my own profile (useful for avatar/username)
+        try {
+          const me = await getUserProfile(user.userid);
+          setMeProfile({ username: me.username, avatar: me.avatar || '' });
+        } catch (err) {
+          // ignore - we already set meProfile from context as fallback
+        }
       } catch (err) {
         console.error('Profile fetch error:', err);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, user.userid]);
 
-  // 3) poll messages … (unchanged)
+  // 3) poll messages … (unchanged, but uses threadId reliably)
   useEffect(() => {
     if (!threadId) return;
     let stop = false;
@@ -161,7 +202,7 @@ export default function ChatPage() {
           alt={partner.username}
           style={{ width: 40, height: 40, borderRadius: '50%' }}
         />
-        <h1 style={{ margin: 0 }}>Chat with {partner.username}</h1>
+        <h1 style={{ margin: 0 }}>{}Chat with {partner.username || '(loading...)'}</h1>
       </div>
 
       {/* Chat log */}
@@ -203,11 +244,11 @@ export default function ChatPage() {
                 >
                   {m.text}
                 </div>
+
                 <div className="message-meta">
                   <div className="message-sender">{name}</div>
                   <div className="message-time">{formatTimestamp(m.timestamp)}</div>
                 </div>
-
               </div>
             </div>
           );
