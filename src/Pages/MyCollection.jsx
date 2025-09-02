@@ -1,4 +1,3 @@
-// src/Pages/MyCollection.jsx
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
@@ -26,56 +25,43 @@ export default function MyCollection() {
   const { user } = useUser();
   const ownUserId = user?.userid;
 
-  // route user id (if viewing someone else's collection)
+  // If route has a userId param, we're viewing someone else's collection
   const { userId: routeUserId } = useParams();
-
-  // The ID we actually fetch
+  // Determine which ID to fetch
   const displayedUserId = routeUserId || ownUserId;
 
   const { sortDirection, filterConsole } = useSortFilter();
 
-  // displayed username for heading (only populated for other users)
-  const [displayedUsername, setDisplayedUsername] = useState(null);
+  // Track the username for heading when viewing someone else
+  // NOTE: start with empty string so we never render the numeric id.
+  const [displayedUsername, setDisplayedUsername] = useState('');
 
-  // Synchronous "are we viewing our own collection?" state to avoid flicker
-  const [isViewingOwnCollection, setIsViewingOwnCollection] = useState(
-    // conservative default: if routeUserId is missing we treat as own; if present, false until we compute
-    !routeUserId
-  );
+  // Are we viewing our own collection?
+  const isViewingOwnCollection = !routeUserId || Number(routeUserId) === Number(ownUserId);
 
-  // Heading ready flag: don't show heading for other's page until we have username
-  const [headingReady, setHeadingReady] = useState(!routeUserId);
+  const handlePrevPage = () => setCurrentPage(p => Math.max(p - 1, 1));
 
-  // === Reset synchronously before paint to prevent old content flicker ===
+  // === IMPORTANT: reset state synchronously on route change to avoid flash ===
   useLayoutEffect(() => {
-    // Clear previous items immediately
+    // Clear previous items immediately before paint
     setCollectionItems([]);
     setCurrentPage(1);
-    setIsLoadingItems(true);
+    setIsLoadingItems(true); // show loading UI immediately instead of old content
 
-    // Synchronously determine whether this looks like our own collection
-    const own = !routeUserId || (ownUserId !== undefined && Number(routeUserId) === Number(ownUserId));
-    setIsViewingOwnCollection(own);
-
-    // If it's our collection, heading is ready immediately; otherwise wait for async username fetch
-    setHeadingReady(own);
-    if (own) {
-      // set username from context immediately for heading
-      setDisplayedUsername(user?.username ?? null);
+    // Set a safe, neutral immediate heading:
+    // - If viewing own collection, show the logged-in username (if present)
+    // - If viewing someone else, leave blank so heading will be neutral "Collection"
+    if (!routeUserId) {
+      setDisplayedUsername(user?.username ?? '');
     } else {
-      // reset previously visible username to avoid showing previous user's name
-      setDisplayedUsername(null);
+      setDisplayedUsername(''); // do NOT show routeUserId
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeUserId, ownUserId, user?.username]);
+  }, [routeUserId, user?.username]);
 
   // Fetch collection for either the route user or yourself
   const fetchItems = useCallback(async () => {
-    if (!displayedUserId) {
-      setCollectionItems([]);
-      setIsLoadingItems(false);
-      return;
-    }
+    if (!displayedUserId) return;
     setIsLoadingItems(true);
     try {
       const items = await fetchCollectionItems(displayedUserId);
@@ -83,7 +69,6 @@ export default function MyCollection() {
       setItemsLoaded(true);
     } catch (err) {
       console.error('Error fetching collection:', err);
-      setCollectionItems([]);
     } finally {
       setIsLoadingItems(false);
     }
@@ -93,31 +78,23 @@ export default function MyCollection() {
     fetchItems();
   }, [fetchItems]);
 
-  // If viewing someone else's page, fetch that user's profile (username)
+  // Also fetch nice username for heading (async, but we don't show the numeric id)
   useEffect(() => {
     let mounted = true;
     if (!routeUserId) {
-      // own collection — heading already handled by useLayoutEffect above
-      setDisplayedUsername(user?.username ?? null);
-      setHeadingReady(true);
-      return;
+      setDisplayedUsername(user?.username ?? '');
+      return () => { mounted = false; };
     }
-
-    // async load username — only set headingReady true once we have it
     (async () => {
       try {
         const p = await getUserProfile(routeUserId);
         if (!mounted) return;
-        setDisplayedUsername(p?.username ?? `User ${routeUserId}`);
+        setDisplayedUsername(p?.username ?? ''); // keep empty if unknown
       } catch (err) {
         if (!mounted) return;
-        setDisplayedUsername(`User ${routeUserId}`);
-      } finally {
-        if (!mounted) return;
-        setHeadingReady(true);
+        setDisplayedUsername(''); // never set numeric id
       }
     })();
-
     return () => { mounted = false; };
   }, [routeUserId, user?.username]);
 
@@ -129,10 +106,8 @@ export default function MyCollection() {
     return () => clearInterval(id);
   }, []);
 
-  const handlePrevPage = () => setCurrentPage(p => Math.max(p - 1, 1));
-
   const handleRemoveGame = async (gameId) => {
-    // only allow removal if viewing own collection
+    // extra safety: only allow removal if viewing own collection
     if (!isViewingOwnCollection) return;
     try {
       await removeGameFromCollection(displayedUserId, gameId);
@@ -167,16 +142,15 @@ export default function MyCollection() {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
-  // Heading text - only show when headingReady
+  // Heading text
   const heading = isViewingOwnCollection
     ? 'My Collection'
-    : (displayedUsername ? `${displayedUsername}’s Collection` : '');
+    : (displayedUsername ? `${displayedUsername}’s Collection` : 'Collection');
 
   return (
     <div className="App">
       <TopLinks />
-      {/* Render nothing (or a small loading) until headingReady for other-user pages */}
-      {headingReady ? <h2>{heading}</h2> : <h2>Loading…</h2>}
+      <h2>{heading}</h2>
 
       <div className="search-content">
         <main className="search-main-content">
@@ -187,17 +161,21 @@ export default function MyCollection() {
               ? <p>Loading{loadingDots}</p>
               : (
                 <>
+                  {/* header row */}
                   <div className="game-item-header">
                     <div className="game-item-header-photo"><p>Photo</p></div>
+
                     <div className="game-item-header-name-console">
                       <p className="game-item-header-name">Name</p>
                       <p>Console</p>
                     </div>
-                    {/* only show Actions header when viewing own collection and headingReady */}
-                    {headingReady && isViewingOwnCollection && (
+
+                    {/* Only show the Actions header when viewing your own collection */}
+                    {isViewingOwnCollection && (
                       <div className="game-item-header-actions"><p>Actions</p></div>
                     )}
                   </div>
+
 
                   {pageResults.map(game => (
                     <div key={game.GameId} className="game-item">
@@ -220,9 +198,7 @@ export default function MyCollection() {
                           </div>
                         </div>
                       </div>
-
-                      {/* only show edit/remove when viewing own collection and headingReady */}
-                      {headingReady && isViewingOwnCollection && (
+                      {isViewingOwnCollection && (
                         <div className="game-item-actions">
                           <button
                             className="link-button"
@@ -235,6 +211,7 @@ export default function MyCollection() {
                           >Remove</button>
                         </div>
                       )}
+
                     </div>
                   ))}
 
