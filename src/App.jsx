@@ -64,7 +64,9 @@ const App = () => {
 
             {/* Friend & messaging routes: */}
             <Route path="/users" element={<UserSearch />} />
-            <Route path="/users/:id" element={<UserProfile />} />
+            
+            <Route path="/users/:identifier" element={<UserProfile />} />
+
             <Route path="/messages/:userId" element={<ChatPage />} />
 
             {/* Admin-only route nested within PrivateRoute */}
