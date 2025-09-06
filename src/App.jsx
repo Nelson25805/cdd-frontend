@@ -48,13 +48,11 @@ const App = () => {
             <Route path="/AddGameToDatabase" element={<AddGameToDatabase />} />
 
             <Route element={<SortFilterLayout />}>
-              <Route path="/MyCollection" element={<MyCollection />} />
-              <Route path="/MyWishlist" element={<MyWishlist />} />
               <Route path="/Search" element={<Search />} />
 
-              {/* Viewing someone else's collection/wishlist */}
-              <Route path="/users/:userId/collection" element={<MyCollection />} />
-              <Route path="/users/:userId/wishlist" element={<MyWishlist />} />
+              {/* Viewing someone's collection/wishlist */}
+              <Route path="/users/:username/collection" element={<MyCollection />} />
+              <Route path="/users/:username/wishlist" element={<MyWishlist />} />
             </Route>
 
             <Route path="/AccountSettings" element={<AccountSettings />} />
@@ -64,7 +62,7 @@ const App = () => {
 
             {/* Friend & messaging routes: */}
             <Route path="/users" element={<UserSearch />} />
-            
+
             <Route path="/users/:identifier" element={<UserProfile />} />
 
             <Route path="/messages/:userId" element={<ChatPage />} />
