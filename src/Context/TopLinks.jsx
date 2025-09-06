@@ -34,8 +34,8 @@ const TopLinks = () => {
               </span>
               {isDropdownOpen && (
                 <div className="dropdown-content">
-                  <Link to="/mycollection" className="dropdown-link">My Collection</Link>
-                  <Link to="/mywishlist" className="dropdown-link">My Wishlist</Link>
+                  <Link to={`/users/${user.username}/collection`} className="dropdown-link">My Collection</Link>
+                  <Link to={`/users/${user.username}/wishlist`} className="dropdown-link">My Wishlist</Link>
                   <Link to="/accountsettings" className="dropdown-link">Account Settings</Link>
                   <Link to={`/users/${user.username}`} className="dropdown-link">My Profile</Link>
                   
