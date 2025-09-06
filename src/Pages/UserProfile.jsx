@@ -21,7 +21,7 @@ import defaultAvatar from '../assets/default-avatar.jpg';
 import TopLinks from '../Context/TopLinks';
 
 export default function UserProfile() {
-  const { id } = useParams();
+  const { identifier } = useParams(); // username OR numeric id
   const { user } = useUser();
   const navigate = useNavigate();
 
@@ -33,6 +33,7 @@ export default function UserProfile() {
   const [outgoing, setOutgoing] = useState([]);
   const [friends, setFriends] = useState([]);
   const [threads, setThreads] = useState([]);
+  const [accessError, setAccessError] = useState(null); // friendly error (403 / 404)
 
   // confirm states for destructive actions (only used on your own profile)
   const [confirmRemoveId, setConfirmRemoveId] = useState(null);
@@ -42,9 +43,6 @@ export default function UserProfile() {
   // Tabs
   const allSections = ['Stats', 'Friends', 'Inbox'];
   const [selectedSection, setSelectedSection] = useState(allSections[0]);
-
-  // compute isOwn early (not a hook)
-  const isOwn = Number(id) === user.userid;
 
   // Normalize threads helper (pure; no hooks)
   const normalizeThreads = raw =>
@@ -79,9 +77,8 @@ export default function UserProfile() {
               : (t.unseen_count ?? t.unread_count ?? 0) > 0
     }));
 
-  // reset visible state synchronously when route :id changes to avoid flashing previous profile
+  // reset visible state synchronously when route identifier changes to avoid flashing previous profile
   useLayoutEffect(() => {
-    // clear the previous profile immediately (paint will happen with cleared state)
     setProfile(null);
     setCollection([]);
     setWishlist([]);
@@ -89,38 +86,51 @@ export default function UserProfile() {
     setOutgoing([]);
     setFriends([]);
     setThreads([]);
-
-    // clear any pending confirm prompts
     setConfirmRemoveId(null);
     setConfirmDeclineId(null);
     setConfirmCancelId(null);
-
-    // reset tab to the first allowed section
     setSelectedSection(allSections[0]);
-  }, [id]);
+    setAccessError(null);
+  }, [identifier]);
 
-
-  // — Load everything once whenever :id changes —
+  // — Load everything once whenever :identifier changes —
   useEffect(() => {
-    if (!id) return;
+    if (!identifier) return;
+
     (async () => {
       try {
-        const p = await getUserProfile(id);
+        const p = await getUserProfile(identifier);
         setProfile(p);
 
-        setCollection(await getUserCollection(id));
-        setWishlist(await getUserWishlist(id));
-        setIncoming(await getUserIncomingRequests(id));
-        setOutgoing(await getUserOutgoingRequests(id));
-        setFriends(await getUserFriends(id));
+        // Use the username for subsequent endpoints because the server resolves username -> userid
+        // (falls back to numeric id if username is missing)
+        const apiIdentifier = p.username || p.id;
+
+        setCollection(await getUserCollection(encodeURIComponent(apiIdentifier)));
+        setWishlist(await getUserWishlist(encodeURIComponent(apiIdentifier)));
+        setIncoming(await getUserIncomingRequests(encodeURIComponent(apiIdentifier)));
+        setOutgoing(await getUserOutgoingRequests(encodeURIComponent(apiIdentifier)));
+        setFriends(await getUserFriends(encodeURIComponent(apiIdentifier)));
 
         const rawThreads = await getUserThreads();
         setThreads(normalizeThreads(rawThreads));
       } catch (err) {
-        console.error('Profile load error', err);
+        const status = err?.response?.status;
+        if (status === 403) {
+          setAccessError('You are not allowed to view that profile (must be friends).');
+        } else if (status === 404) {
+          setAccessError('User not found.');
+        } else {
+          console.error('Profile load error', err);
+          setAccessError('An error occurred loading the profile.');
+        }
       }
     })();
-  }, [id]);
+  }, [identifier]);
+
+
+  // derive isOwn from the loaded profile (so we don't flash wrong UI while loading)
+  const isOwn = profile ? profile.id === user.userid : false;
 
   // Ensure selectedSection is valid when switching between own/other profile
   useEffect(() => {
@@ -128,8 +138,7 @@ export default function UserProfile() {
     if (!allowedSections.includes(selectedSection)) {
       setSelectedSection(allowedSections[0]);
     }
-    // we only depend on id/isOwn here; selectedSection is safe to update
-  }, [id, isOwn]); // no lint disable needed
+  }, [profile, isOwn]); // depends on profile/isOwn now
 
   // ─── Friend-request handlers ─────────────────
   const handleAccept = async targetId => {
@@ -183,8 +192,10 @@ export default function UserProfile() {
   };
 
   const handleAddFriend = async () => {
+    if (!profile) return;
     try {
-      await sendFriendRequest(id);
+      await sendFriendRequest(profile.id); // numeric id expected by API
+      // optional: refetch outgoing or update state
     } catch (err) {
       console.error('Send request failed', err);
     }
@@ -198,7 +209,20 @@ export default function UserProfile() {
 
   const totalUnseen = threads.reduce((acc, t) => acc + (t.unseen ? 1 : 0), 0);
 
-  // ─── Rendering (after all hooks are declared) ─────────────────
+  // Rendering
+  if (accessError) {
+    return (
+      <div className="App">
+        <TopLinks />
+        <div style={{ padding: 20 }}>
+          <h2>Profile unavailable</h2>
+          <p>{accessError}</p>
+          <button onClick={() => navigate(-1)} className="small-button">Go back</button>
+        </div>
+      </div>
+    );
+  }
+
   if (!profile) return <div>Loading…</div>;
 
   const allowedSections = isOwn ? allSections : ['Stats'];
@@ -235,11 +259,11 @@ export default function UserProfile() {
           <div className="stats-section">
             <h2>Game Stats</h2>
             <div className="profile-stats">
-              <Link to={`/users/${id}/collection`} className="stat-card">
+              <Link to={`/users/${encodeURIComponent(profile.username)}/collection`} className="stat-card">
                 <h3>Collection</h3>
                 <p>{collection.length} {collection.length === 1 ? 'game' : 'games'}</p>
               </Link>
-              <Link to={`/users/${id}/wishlist`} className="stat-card">
+              <Link to={`/users/${encodeURIComponent(profile.username)}/wishlist`} className="stat-card">
                 <h3>Wishlist</h3>
                 <p>{wishlist.length} {wishlist.length === 1 ? 'game' : 'games'}</p>
               </Link>
@@ -248,7 +272,8 @@ export default function UserProfile() {
             {!isOwn && (
               <div style={{ marginTop: 12 }}>
                 {profile.isFriend ? (
-                  <button className="small-button" onClick={() => navigate(`/messages/${profile.chatThreadId}`)}>Message</button>
+                  // if chat route accepts thread id use profile.chatThreadId else use profile.id
+                  <button className="small-button" onClick={() => navigate(`/messages/${profile.chatThreadId ?? profile.id}`)}>Message</button>
                 ) : (
                   <button className="small-button" onClick={handleAddFriend}>Add Friend</button>
                 )}
@@ -268,7 +293,7 @@ export default function UserProfile() {
                   <span className="friend-name">{u.username}</span>
 
                   <button className="tiny-button" onClick={() => navigate(`/messages/${u.id}`)}>Message</button>
-                  <button className="tiny-button" onClick={() => navigate(`/users/${u.id}`)}>View Profile</button>
+                  <button className="tiny-button" onClick={() => navigate(`/users/${encodeURIComponent(u.username)}`)}>View Profile</button>
 
                   {confirmRemoveId === u.id ? (
                     <div className="confirm-row">

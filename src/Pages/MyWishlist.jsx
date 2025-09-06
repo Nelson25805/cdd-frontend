@@ -1,8 +1,9 @@
+// src/Pages/MyWishlist.jsx
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import TopLinks from '../Context/TopLinks';
 import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
-import { getWishlist, removeFromWishlist, getUserProfile } from '../Api';
+import { getUserWishlist, removeFromWishlist, getUserProfile } from '../Api';
 import '../App.css';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -22,14 +23,25 @@ function MyWishlist() {
   const { user, loading: userLoading } = useUser();
   const ownUserId = user?.userid;
 
-  // route param (optional)
-  const { userId: routeUserId } = useParams();
-  const displayedUserId = routeUserId || ownUserId;
+  // Support both :username and :userId route params
+  const { username: routeUsername, userId: routeUserId } = useParams();
+  const routeIdentifier = routeUsername ?? routeUserId ?? null;
 
-  // Do NOT initialize with the numeric id — start empty so we never show an id.
+  // Displayed identifier (string) used for fetching via the username-based route.
+  // If no route param, prefer the logged-in user's username (so we call /api/users/<username>/wishlist).
+  const displayedIdentifier = routeIdentifier ?? (user?.username ?? null);
+
+  // Numeric user id used for deletion and any numeric-only server endpoints.
+  // If the route used userId param, that may be numeric; otherwise fall back to logged-in numeric id.
+  const displayedUserId = routeUserId ?? ownUserId ?? null;
+
+  // Do NOT initialize with a numeric id in UI headers — start empty so we never show an id.
   const [displayedUsername, setDisplayedUsername] = useState('');
 
-  const isViewingOwnWishlist = !routeUserId || Number(routeUserId) === Number(ownUserId);
+  // Are we viewing our own wishlist?
+  const isViewingOwnWishlist = !routeIdentifier
+    || routeIdentifier === String(ownUserId)
+    || routeIdentifier === user?.username;
 
   // sorting/filter controls
   const { sortDirection, filterConsole } = useSortFilter();
@@ -42,30 +54,30 @@ function MyWishlist() {
     setCurrentPage(1);
     setIsLoading(true);
     // immediate safe heading: own username if viewing own, otherwise keep blank
-    if (!routeUserId) {
+    if (!routeIdentifier) {
       setDisplayedUsername(user?.username ?? '');
     } else {
       setDisplayedUsername('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeUserId, user?.username]);
+  }, [routeIdentifier, user?.username]);
 
-  // Fetch wishlist items
+  // Fetch wishlist items (always use username-based public route)
   const fetchWishlistItems = useCallback(async () => {
-    if (!displayedUserId) return;
+    if (!displayedIdentifier) return;
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const { results } = await getWishlist(displayedUserId, token);
-      setWishlistItems(results || []);
+      // Use getUserWishlist for both "other" and "own" cases (we pass displayedIdentifier which is a username)
+      const items = await getUserWishlist(displayedIdentifier);
+      setWishlistItems(items || []);
       setItemsLoaded(true);
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching wishlist items:', err);
       setWishlistItems([]);
     } finally {
       setIsLoading(false);
     }
-  }, [displayedUserId]);
+  }, [displayedIdentifier]);
 
   useEffect(() => {
     if (!userLoading) fetchWishlistItems();
@@ -74,14 +86,14 @@ function MyWishlist() {
   // fetch nicer username async (but never set numeric id)
   useEffect(() => {
     let mounted = true;
-    if (!routeUserId) {
+    if (!routeIdentifier) {
       setDisplayedUsername(user?.username ?? '');
       return () => { mounted = false; };
     }
 
     (async () => {
       try {
-        const prof = await getUserProfile(routeUserId);
+        const prof = await getUserProfile(routeIdentifier);
         if (!mounted) return;
         setDisplayedUsername(prof?.username ?? '');
       } catch (err) {
@@ -91,7 +103,7 @@ function MyWishlist() {
     })();
 
     return () => { mounted = false; };
-  }, [routeUserId, user?.username]);
+  }, [routeIdentifier, user?.username]);
 
   // loading dots
   useEffect(() => {
@@ -104,12 +116,13 @@ function MyWishlist() {
   const handleRemove = async (gameId) => {
     if (!isViewingOwnWishlist) return;
     try {
-      const token = localStorage.getItem('token');
-      await removeFromWishlist(displayedUserId, gameId, token);
+      // Use the numeric displayedUserId for removal (server expects user id for removals)
+      // displayedUserId should be your own numeric id when removing from your wishlist
+      await removeFromWishlist(displayedUserId, gameId);
       setWishlistItems(items => items.filter(g => g.GameId !== gameId));
       alert('Removed from wishlist');
     } catch (err) {
-      console.error(err);
+      console.error('Error removing from wishlist:', err);
     }
   };
 

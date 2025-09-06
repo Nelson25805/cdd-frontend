@@ -1,10 +1,12 @@
+// src/Pages/MyCollection.jsx
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';
 import Footer from '../Context/Footer';
 import { useUser } from '../Context/useUser';
 import {
-  fetchCollectionItems,
+  getUserCollection,
+  getMyCollection,
   removeGameFromCollection,
   getUserProfile,
 } from '../Api';
@@ -25,10 +27,13 @@ export default function MyCollection() {
   const { user } = useUser();
   const ownUserId = user?.userid;
 
-  // If route has a userId param, we're viewing someone else's collection
-  const { userId: routeUserId } = useParams();
-  // Determine which ID to fetch
-  const displayedUserId = routeUserId || ownUserId;
+  // --------- ROUTE PARAMS: support both :username and :userId ----------
+  const { username: routeUsername, userId: routeUserId } = useParams();
+  // routeIdentifier is the raw param from the URL (username preferred)
+  const routeIdentifier = routeUsername ?? routeUserId ?? null;
+  // displayedIdentifier is what we pass to the API: routeIdentifier when present,
+  // otherwise fall back to the logged-in user's id (string).
+  const displayedIdentifier = routeIdentifier ?? (ownUserId ? String(ownUserId) : null);
 
   const { sortDirection, filterConsole } = useSortFilter();
 
@@ -37,7 +42,9 @@ export default function MyCollection() {
   const [displayedUsername, setDisplayedUsername] = useState('');
 
   // Are we viewing our own collection?
-  const isViewingOwnCollection = !routeUserId || Number(routeUserId) === Number(ownUserId);
+  const isViewingOwnCollection = !routeIdentifier
+    || routeIdentifier === String(ownUserId)
+    || routeIdentifier === user?.username;
 
   const handlePrevPage = () => setCurrentPage(p => Math.max(p - 1, 1));
 
@@ -51,20 +58,27 @@ export default function MyCollection() {
     // Set a safe, neutral immediate heading:
     // - If viewing own collection, show the logged-in username (if present)
     // - If viewing someone else, leave blank so heading will be neutral "Collection"
-    if (!routeUserId) {
+    if (!routeIdentifier) {
       setDisplayedUsername(user?.username ?? '');
     } else {
-      setDisplayedUsername(''); // do NOT show routeUserId
+      setDisplayedUsername(''); // do NOT show routeIdentifier (could be numeric)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routeUserId, user?.username]);
+  }, [routeIdentifier, user?.username]);
 
   // Fetch collection for either the route user or yourself
   const fetchItems = useCallback(async () => {
-    if (!displayedUserId) return;
+    if (!displayedIdentifier) return;
     setIsLoadingItems(true);
     try {
-      const items = await fetchCollectionItems(displayedUserId);
+      let items;
+      if (!routeIdentifier) {
+        // no route param -> own collection
+        items = await getMyCollection();
+      } else {
+        // routeIdentifier present -> other user's collection
+        items = await getUserCollection(displayedIdentifier);
+      }
       setCollectionItems(items || []);
       setItemsLoaded(true);
     } catch (err) {
@@ -72,7 +86,8 @@ export default function MyCollection() {
     } finally {
       setIsLoadingItems(false);
     }
-  }, [displayedUserId]);
+  }, [displayedIdentifier, routeIdentifier]);
+
 
   useEffect(() => {
     fetchItems();
@@ -81,13 +96,14 @@ export default function MyCollection() {
   // Also fetch nice username for heading (async, but we don't show the numeric id)
   useEffect(() => {
     let mounted = true;
-    if (!routeUserId) {
+    if (!routeIdentifier) {
       setDisplayedUsername(user?.username ?? '');
       return () => { mounted = false; };
     }
     (async () => {
       try {
-        const p = await getUserProfile(routeUserId);
+        // Use the routeIdentifier (which may be username or numeric id)
+        const p = await getUserProfile(routeIdentifier);
         if (!mounted) return;
         setDisplayedUsername(p?.username ?? ''); // keep empty if unknown
       } catch (err) {
@@ -96,7 +112,7 @@ export default function MyCollection() {
       }
     })();
     return () => { mounted = false; };
-  }, [routeUserId, user?.username]);
+  }, [routeIdentifier, user?.username]);
 
   // loading dots
   useEffect(() => {
@@ -110,13 +126,15 @@ export default function MyCollection() {
     // extra safety: only allow removal if viewing own collection
     if (!isViewingOwnCollection) return;
     try {
-      await removeGameFromCollection(displayedUserId, gameId);
+      // removal only allowed on your own collection -> call the 'my' endpoint helper
+      await removeGameFromCollection(gameId);
       alert('Removed from collection');
       fetchItems();
     } catch (err) {
       console.error(err);
     }
   };
+
 
   const handleEditGameDetails = (game) => {
     if (!isViewingOwnCollection) return;
