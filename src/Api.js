@@ -111,7 +111,6 @@ export const addGameToDatabase = async (formData) => {
   }
 };
 
-
 /** Search games from cdd game database */
 export const searchGames = async (query) => {
   const response = await apiClient.get('/api/search', { params: { q: query } });
@@ -219,7 +218,6 @@ export const addToCollection = async (userId, gameId, consoleIds) => {
   }
 };
 
-
 export const fetchGameInfo = async (gameId) => {
   try {
     const { data, status } = await apiClient.get(`/api/game-info/${gameId}`);
@@ -263,8 +261,6 @@ export const addGameDetails = async (userId, gameId, details) => {
   }
 };
 
-
-
 // Fetch detailed game information
 export const fetchGameDetails = async (userId, gameId) => {
   try {
@@ -275,8 +271,6 @@ export const fetchGameDetails = async (userId, gameId) => {
     throw error;
   }
 };
-
-
 
 // Edit game details
 export const editGameDetails = async (userId, game, details) => {
@@ -432,6 +426,79 @@ export const getUserProfile = async (userId) => {
   return res.data;
 };
 
+// Fetch the *current logged-in user's* collection
+export const getMyCollection = async () => {
+  try {
+    const res = await apiClient.get('/api/mycollection'); // server uses req.user.userid
+    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
+  } catch (err) {
+    console.error('Error fetching my collection:', err);
+    throw err;
+  }
+};
+
+/** Get another user’s collection of games */
+export const getUserCollection = async (identifier) => {
+  if (!identifier) throw new Error('getUserCollection requires an identifier');
+  try {
+    const res = await apiClient.get(`/api/users/${encodeURIComponent(identifier)}/collection`);
+    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
+  } catch (err) {
+    console.error('Error fetching user collection:', err);
+    throw err;
+  }
+};
+
+// Remove a game from the collection
+export const removeGameFromCollection = async (userId, gameId) => {
+  try {
+    const response = await apiClient.delete(`/api/removecollection/${userId}/${gameId}`);
+    console.log('This is the response: ', response);
+    return response;
+  } catch (error) {
+    console.error('Error removing game:', error);
+    throw error;
+  }
+};
+
+// Fetch the *current logged-in user's* wishlist
+export const getMyWishlist = async () => {
+  try {
+    const res = await apiClient.get('/api/mywishlist');
+    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
+  } catch (err) {
+    console.error('Error fetching my wishlist:', err);
+    throw err;
+  }
+};
+
+// Fetch another user's wishlist by identifier
+export const getUserWishlist = async (identifier) => {
+  if (!identifier) throw new Error('getUserWishlist requires an identifier');
+  try {
+    const res = await apiClient.get(`/api/users/${encodeURIComponent(identifier)}/wishlist`);
+    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
+  } catch (err) {
+    console.error('Error fetching user wishlist:', err);
+    throw err;
+  }
+};
+
+/** Removes game from user game wishlist */
+export const removeFromWishlist = async (userId, gameId) => {
+  try {
+    const response = await apiClient.delete(`/api/removewishlist/${userId}/${gameId}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error removing from wishlist:', error);
+    throw error;
+  }
+};
+
 
 //
 // ───────────── MESSAGING ─────────────
@@ -516,89 +583,4 @@ export async function sendMessageToThread(threadId, text) {
 export const markMessagesSeen = async (threadId) => {
   const res = await apiClient.post(`/api/threads/${threadId}/mark-seen`);
   return res.data;
-};
-
-
-
-
-
-
-
-
-
-//I WANT TO KEEP
-
-// Fetch the *current logged-in user's* collection
-export const getMyCollection = async () => {
-  try {
-    const res = await apiClient.get('/api/mycollection'); // server uses req.user.userid
-    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
-  } catch (err) {
-    console.error('Error fetching my collection:', err);
-    throw err;
-  }
-};
-
-/** Get another user’s collection of games */
-export const getUserCollection = async (identifier) => {
-  if (!identifier) throw new Error('getUserCollection requires an identifier');
-  try {
-    const res = await apiClient.get(`/api/users/${encodeURIComponent(identifier)}/collection`);
-    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
-  } catch (err) {
-    console.error('Error fetching user collection:', err);
-    throw err;
-  }
-};
-
-// Remove a game from the collection
-export const removeGameFromCollection = async (userId, gameId) => {
-  try {
-    const response = await apiClient.delete(`/api/removecollection/${userId}/${gameId}`);
-    console.log('This is the response: ', response);
-    return response;
-  } catch (error) {
-    console.error('Error removing game:', error);
-    throw error;
-  }
-};
-
-
-
-// Fetch the *current logged-in user's* wishlist
-export const getMyWishlist = async () => {
-  try {
-    const res = await apiClient.get('/api/mywishlist');
-    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
-  } catch (err) {
-    console.error('Error fetching my wishlist:', err);
-    throw err;
-  }
-};
-
-// Fetch another user's wishlist by identifier
-export const getUserWishlist = async (identifier) => {
-  if (!identifier) throw new Error('getUserWishlist requires an identifier');
-  try {
-    const res = await apiClient.get(`/api/users/${encodeURIComponent(identifier)}/wishlist`);
-    return Array.isArray(res.data) ? res.data : (res.data.results ?? []);
-  } catch (err) {
-    console.error('Error fetching user wishlist:', err);
-    throw err;
-  }
-};
-
-/** Removes game from user game wishlist */
-export const removeFromWishlist = async (userId, gameId) => {
-  try {
-    const response = await apiClient.delete(`/api/removewishlist/${userId}/${gameId}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error removing from wishlist:', error);
-    throw error;
-  }
 };
