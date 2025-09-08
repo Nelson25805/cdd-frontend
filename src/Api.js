@@ -421,10 +421,12 @@ export const declineFriendRequest = async (requesterId) => {
 //
 
 /** Get a user’s public profile (avatar, bio, isFriend, chatThreadId) */
-export const getUserProfile = async (userId) => {
-  const res = await apiClient.get(`/api/users/${userId}/profile`);
+export const getUserProfile = async (identifier) => {
+  if (!identifier) throw new Error('getUserProfile requires an identifier');
+  const res = await apiClient.get(`/api/users/${encodeURIComponent(identifier)}/profile`);
   return res.data;
 };
+
 
 // Fetch the *current logged-in user's* collection
 export const getMyCollection = async () => {

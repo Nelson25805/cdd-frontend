@@ -40,14 +40,20 @@ function AccountSettings() {
   useEffect(() => {
     if (!user) return;
 
-    // 1) Fetch only avatar_url from profile endpoint
+    // 1) Fetch avatar_url from profile endpoint using username (server expects username)
     (async () => {
       try {
-        const profile = await getUserProfile(user.userid, token);
-        setAvatarPreview(profile.avatar || '');
+        // use username — server resolves username -> userid
+        if (user.username) {
+          const profile = await getUserProfile(user.username);
+          setAvatarPreview(profile?.avatar ?? (user.avatar ?? ''));
+        } else {
+          // If username is not present for some reason, fall back to user.avatar from context
+          setAvatarPreview(user.avatar ?? '');
+        }
       } catch (err) {
         console.error('Failed to load avatar:', err);
-        setAvatarPreview('');
+        setAvatarPreview(user.avatar ?? '');
       }
     })();
 
@@ -57,7 +63,7 @@ function AccountSettings() {
       displayUsername: user.username || '',
       displayEmail: user.email || ''
     }));
-  }, [user, token]);
+  }, [user]);
 
 
   const handleAvatarChange = e => {
