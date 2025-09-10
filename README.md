@@ -72,13 +72,25 @@
 
 ![Project Name Screen Shot][project-screenshot]
 
-`cdd-frontend` is the React single-page application that provides the user interface for the CDD project:
+`cdd-frontend` is the React single-page application that provides the user interface for the CDD project. It focuses on an intuitive UI for collectors to find, organize, discuss, trade, and wish for video games.
 
-- Search and view game details
-- Add games to your collection or wishlist
-- View other users' profiles and collections
-- Friend system and simple messaging/threads interface
-- Account settings, admin/reporting hooks (UI only where applicable)
+### Key Features
+
+CDD stands for Collect, Discover, Discuss — the three primary actions this app enables for game collectors.
+
+Search games (IGDB + user-submitted entries) and view rich game details.
+
+Add games to your collection with metadata: estimated value, condition/status, completion state, console/platform, notes.
+
+Maintain a wishlist — select desired consoles for each wish item.
+
+Add other users as friends and privately message them.
+
+View other friends wishlist's and collections of games
+
+Admin UI elements (report hooks and dashboard views) to inspect site metrics such as total users, most-wished-for games, top collectors, etc. (backend required; UI elements shown where applicable).
+
+Supabase is used for authentication, real-time DB operations, and storage of user & collection data.
 
 This README covers **frontend** setup and usage. Backend (API, database, auth, IGDB integration) is documented separately.
 
