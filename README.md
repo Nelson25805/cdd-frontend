@@ -76,21 +76,21 @@
 
 ### Key Features
 
-CDD stands for Collect, Discover, Discuss — the three primary actions this app enables for game collectors.
+- CDD stands for Collect, Discover, Discuss — the three primary actions this app enables for game collectors.
 
-Search games (IGDB + user-submitted entries) and view rich game details.
+- Search games (IGDB + user-submitted entries) and view rich game details.
 
-Add games to your collection with metadata: estimated value, condition/status, completion state, console/platform, notes.
+- Add games to your collection with metadata: estimated value, condition/status, completion state, console/platform, notes.
 
-Maintain a wishlist — select desired consoles for each wish item.
+- Maintain a wishlist — select desired consoles for each wish item.
 
-Add other users as friends and privately message them.
+- Add other users as friends and privately message them.
 
-View other friends wishlist's and collections of games
+- View other friends wishlist's and collections of games
 
-Admin UI elements (report hooks and dashboard views) to inspect site metrics such as total users, most-wished-for games, top collectors, etc. (backend required; UI elements shown where applicable).
+- Admin UI elements (report hooks and dashboard views) to inspect site metrics such as total users, most-wished-for games, top collectors, etc. (backend required; UI elements shown where applicable).
 
-Supabase is used for authentication, real-time DB operations, and storage of user & collection data.
+- Supabase is used for authentication, real-time DB operations, and storage of user & collection data.
 
 This README covers **frontend** setup and usage. Backend (API, database, auth, IGDB integration) is documented separately.
 
@@ -101,11 +101,11 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 
 | Badge | Description |
 |:-----:|-------------|
-| [![Python](GithubImages/pythonShield.svg)][Python-url] | Core programming language. |
-| [![PyQt5](GithubImages/pyqt5Shield.svg)][PyQt5-url] | User interface built with PyQt5. |
-| [![qdarkstyle](GithubImages/qDarkStyleShield.svg)][qdarkstyle-url] | Polished dark theme support via qdarkstyle. |
-| [![IGDB API](GithubImages/igdbApiShield.svg)][igdb-api-url] | Retrieves game data from the IGDB API. |
-| [![Pandas](GithubImages/pandasShield.svg)][pandas-url] | Data analysis and manipulation with Pandas. |
+| [![React](GithubImages/pythonShield.svg)][Python-url] | UI library. |
+| [![Vite](GithubImages/pyqt5Shield.svg)][PyQt5-url] | dev server + bundler. |
+| [![Supabase](GithubImages/qDarkStyleShield.svg)][qdarkstyle-url] | Authentication, database (Postgres), and realtime features. |
+| [![cdd-backend](GithubImages/igdbApiShield.svg)][igdb-api-url] | server layer which handles IGDB integration, additional API logic, and server-only secrets. |
+| [![Plain CSS](GithubImages/pandasShield.svg)][pandas-url] | General styling solution |
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
