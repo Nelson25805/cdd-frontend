@@ -72,13 +72,25 @@
 
 ![Project Name Screen Shot][project-screenshot]
 
-`cdd-frontend` is the React single-page application that provides the user interface for the CDD project:
+`cdd-frontend` is the React single-page application that provides the user interface for the CDD project. It focuses on an intuitive UI for collectors to find, organize, discuss, trade, and wish for video games.
 
-- Search and view game details
-- Add games to your collection or wishlist
-- View other users' profiles and collections
-- Friend system and simple messaging/threads interface
-- Account settings, admin/reporting hooks (UI only where applicable)
+### Key Features
+
+- CDD stands for Collect, Discover, Discuss — the three primary actions this app enables for game collectors.
+
+- Search games (IGDB + user-submitted entries) and view rich game details.
+
+- Add games to your collection with metadata: estimated value, condition/status, completion state, console/platform, notes.
+
+- Maintain a wishlist — select desired consoles for each wish item.
+
+- Add other users as friends and privately message them.
+
+- View other friends wishlist's and collections of games
+
+- Admin UI elements (report hooks and dashboard views) to inspect site metrics such as total users, most-wished-for games, top collectors, etc. (backend required; UI elements shown where applicable).
+
+- Supabase is used for authentication, real-time DB operations, and storage of user & collection data.
 
 This README covers **frontend** setup and usage. Backend (API, database, auth, IGDB integration) is documented separately.
 
@@ -89,11 +101,11 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 
 | Badge | Description |
 |:-----:|-------------|
-| [![Python](GithubImages/pythonShield.svg)][Python-url] | Core programming language. |
-| [![PyQt5](GithubImages/pyqt5Shield.svg)][PyQt5-url] | User interface built with PyQt5. |
-| [![qdarkstyle](GithubImages/qDarkStyleShield.svg)][qdarkstyle-url] | Polished dark theme support via qdarkstyle. |
-| [![IGDB API](GithubImages/igdbApiShield.svg)][igdb-api-url] | Retrieves game data from the IGDB API. |
-| [![Pandas](GithubImages/pandasShield.svg)][pandas-url] | Data analysis and manipulation with Pandas. |
+| [![React](GithubImages/react_badge.svg)][Python-url] | UI library. |
+| [![Vite](GithubImages/pyqt5Shield.svg)][PyQt5-url] | dev server + bundler. |
+| [![Supabase](GithubImages/qDarkStyleShield.svg)][qdarkstyle-url] | Authentication, database (Postgres), and realtime features. |
+| [![cdd-backend](GithubImages/igdbApiShield.svg)][igdb-api-url] | server layer which handles IGDB integration, additional API logic, and server-only secrets. |
+| [![Plain CSS](GithubImages/pandasShield.svg)][pandas-url] | General styling solution |
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -141,6 +153,26 @@ To start, you have two options of using this software.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+
+This README documents general flows and UI expectations — the app is interactive and the best way to explore is to run it locally.
+
+Example user flows:
+
+- Sign up / Log in (Supabase auth)
+
+- Search for a game (results include IGDB-sourced entries and any user-submitted games)
+
+- Open a game detail page, add to collection: set value, status (e.g., Loose / Sealed), completion, console, notes
+
+- Add a game to wishlist and select which consoles you want it for
+
+- View other user profiles and add them as friends
+
+- Open or participate in message threads to discuss collections, trades, or sales
+
+- Admin users: access dashboard pages showing site stats (total users, top wished games, report queue)
+
+- Screenshots / GIFs are stored in GithubImages/ — replace or update them with current UI captures.
 
 ### Filtered Game Search:
 ![Project Name Screen Shot][project-screenshot2]
