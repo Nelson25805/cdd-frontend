@@ -154,6 +154,26 @@ To start, you have two options of using this software.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+This README documents general flows and UI expectations — the app is interactive and the best way to explore is to run it locally.
+
+Example user flows:
+
+- Sign up / Log in (Supabase auth)
+
+- Search for a game (results include IGDB-sourced entries and any user-submitted games)
+
+- Open a game detail page, add to collection: set value, status (e.g., Loose / Sealed), completion, console, notes
+
+- Add a game to wishlist and select which consoles you want it for
+
+- View other user profiles and add them as friends
+
+- Open or participate in message threads to discuss collections, trades, or sales
+
+- Admin users: access dashboard pages showing site stats (total users, top wished games, report queue)
+
+- Screenshots / GIFs are stored in GithubImages/ — replace or update them with current UI captures.
+
 ### Filtered Game Search:
 ![Project Name Screen Shot][project-screenshot2]
 
