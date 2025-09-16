@@ -103,7 +103,7 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 |:-----:|-------------|
 | [![React](GithubImages/react_badge.svg)][Python-url] | UI library. |
 | [![Vite](GithubImages/vite_badge.svg)][PyQt5-url] | dev server + bundler. |
-| [![Supabase](GithubImages/qDarkStyleShield.svg)][qdarkstyle-url] | Authentication, database (Postgres), and realtime features. |
+| [![Supabase](GithubImages/supabase_badge.svg)][qdarkstyle-url] | Authentication, database (Postgres), and realtime features. |
 | [![cdd-backend](GithubImages/igdbApiShield.svg)][igdb-api-url] | server layer which handles IGDB integration, additional API logic, and server-only secrets. |
 | [![Plain CSS](GithubImages/pandasShield.svg)][pandas-url] | General styling solution |
 
