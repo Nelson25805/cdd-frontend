@@ -101,11 +101,11 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 
 | Badge | Description |
 |:-----:|-------------|
-| [![React](GithubImages/react_badge.svg)][Python-url] | UI library. |
-| [![Vite](GithubImages/vite_badge.svg)][PyQt5-url] | dev server + bundler. |
-| [![Supabase](GithubImages/supabase_badge.svg)][qdarkstyle-url] | Authentication, database (Postgres), and realtime features. |
-| [![cdd-backend](GithubImages/cdd_backend_badge.svg)][igdb-api-url] | server layer which handles IGDB integration, additional API logic, and server-only secrets. |
-| [![Plain CSS](GithubImages/css_badge.svg)][pandas-url] | General styling solution |
+| [![React](GithubImages/react_badge.svg)][React-url] | UI library. |
+| [![Vite](GithubImages/vite_badge.svg)][Vite-url] | dev server + bundler. |
+| [![Supabase](GithubImages/supabase_badge.svg)][Supabase-url] | Authentication, database (Postgres), and realtime features. |
+| [![cdd-backend](GithubImages/cdd_backend_badge.svg)][cdd-backend-url] | server layer which handles IGDB integration, additional API logic, and server-only secrets. |
+| ![Plain CSS](GithubImages/css_badge.svg) | General styling solution |
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -272,18 +272,15 @@ Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/N
 [project-screenshot4]: GithubImages/excelExample.png
 [project-screenshot5]: GithubImages/envExample.png
 
-
-[Python-url]: https://www.python.org/downloads/
-[PyQt5-url]: https://pypi.org/project/PyQt5/
-[qdarkstyle-url]: https://pypi.org/project/QDarkStyle/
-[igdb-api-url]: https://api-docs.igdb.com/
-[pandas-url]: https://pandas.pydata.org/
+[React-url]: https://react.dev/
+[Vite-url]: https://vite.dev/
+[Supabase-url]: https://supabase.com/
+[cdd-backend-url]: https://github.com/Nelson25805/cdd-backend
 
 [Python]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Python-url]: https://www.python.org/downloads/
 [Tkinter]: https://img.shields.io/badge/Tkinter-8.6-green
 [Tkinter-url]: https://docs.python.org/3/library/tkinter.html
-
 
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
 [JQuery-url]: https://jquery.com 
