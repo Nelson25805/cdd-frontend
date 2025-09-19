@@ -102,9 +102,9 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 | Badge | Description |
 |:-----:|-------------|
 | [![React](GithubImages/react_badge.svg)][React-url] | UI library. |
-| [![Vite](GithubImages/vite_badge.svg)][Vite-url] | dev server + bundler. |
+| [![Vite](GithubImages/vite_badge.svg)][Vite-url] | Dev server + bundler. |
 | [![Supabase](GithubImages/supabase_badge.svg)][Supabase-url] | Authentication, database (Postgres), and realtime features. |
-| [![cdd-backend](GithubImages/cdd_backend_badge.svg)][cdd-backend-url] | server layer which handles IGDB integration, additional API logic, and server-only secrets. |
+| [![cdd-backend](GithubImages/cdd_backend_badge.svg)][cdd-backend-url] | Server layer which handles IGDB integration, additional API logic, and server-only secrets. |
 | ![Plain CSS](GithubImages/css_badge.svg) | General styling solution |
 
 
