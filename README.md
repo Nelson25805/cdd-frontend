@@ -121,33 +121,49 @@ To start, you have two options of using this software.
 ### Installation
 
 1. Clone the repo
-   ```sh
+```sh
    git clone https://github.com/Nelson25805/cdd-frontend.git
    ```
-   
-2. If using option 1, skip to step 5.
-   If using option 2, continue reading.
-   
-3. You must have python downloaded on your machine, or in your IDE of choice.
-   [Python Download](https://www.python.org/downloads/)
-
-4. Install the required packages:
-   ```sh
-   pip install -r requirements.txt
+```sh
+   cd cdd-frontend
    ```
-   
-5. Create account for IGDB Api requests following their steps:
-   [IGDB Api Getting Started](https://api-docs.igdb.com/#getting-started)
 
-7. Create a .env file with your unique CLIENT_ID, and CLIENT_SECRET as shown in this fake test example here:
-   ![Project Name Screen Shot][project-screenshot5]
-
-8. Depending on where you run the application, place .env file into same folder as .exe, and or the main project folder. 
-
-9. Either run the application from the .exe in the dlist folder, or by executing:
-    ```sh
-   python main.py
+2. Install dependencies
+```sh
+   npm install
    ```
+or
+```sh
+   yarn install
+   ```
+
+3. Create a .env file at the project root (see next section for variables). You can copy .env.example if present.
+
+4. Run the dev server
+
+npm run dev
+# or
+# yarn dev
+
+The app should be available at http://localhost:5173 (Vite default) unless your terminal shows a different URL.
+
+5. Add a .env file with values required by the frontend. Example variables used by this project:
+
+# If the frontend uses Supabase directly
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=public-anon-key
+
+
+# Backend API (optional) — recommended for IGDB calls and server-only logic
+VITE_API_BASE_URL=http://localhost:4000
+
+
+# If you need to hit IGDB directly from the frontend (NOT recommended for client_secret)
+# Prefer the backend to fetch IGDB tokens and proxy requests.
+VITE_IGDB_CLIENT_ID=your_client_id_if_needed
+# NEVER commit or expose IGDB_CLIENT_SECRET in a frontend repo.
+
+Security note: Do not place any private keys (like IGDB client secret) in the frontend. Use cdd-backend to manage server-only secrets and to proxy calls to IGDB.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
