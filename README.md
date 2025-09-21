@@ -114,13 +114,9 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To start, you have two options of using this software.
-1) Run the .exe file
-2) Run the python code script manually
-
 ### Installation
 
-1. Clone the repo
+1. Clone the repo:
 ```sh
    git clone https://github.com/Nelson25805/cdd-frontend.git
    ```
@@ -128,7 +124,7 @@ To start, you have two options of using this software.
    cd cdd-frontend
    ```
 
-2. Install dependencies
+2. Install dependencies:
 ```sh
    npm install
    ```
@@ -137,33 +133,16 @@ or
    yarn install
    ```
 
-3. Create a .env file at the project root (see next section for variables). You can copy .env.example if present.
+3. Go to my cdd-backend project, and begin installation there for backend installation/setup: <a href="https://github.com/Nelson25805/cdd-backend">cdd-backend</a>
 
-4. Run the dev server
-
-npm run dev
-# or
-# yarn dev
-
-The app should be available at http://localhost:5173 (Vite default) unless your terminal shows a different URL.
-
-5. Add a .env file with values required by the frontend. Example variables used by this project:
-
-# If the frontend uses Supabase directly
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=public-anon-key
-
-
-# Backend API (optional) — recommended for IGDB calls and server-only logic
-VITE_API_BASE_URL=http://localhost:4000
-
-
-# If you need to hit IGDB directly from the frontend (NOT recommended for client_secret)
-# Prefer the backend to fetch IGDB tokens and proxy requests.
-VITE_IGDB_CLIENT_ID=your_client_id_if_needed
-# NEVER commit or expose IGDB_CLIENT_SECRET in a frontend repo.
-
-Security note: Do not place any private keys (like IGDB client secret) in the frontend. Use cdd-backend to manage server-only secrets and to proxy calls to IGDB.
+5. Once completed, run frontend:
+```sh
+   npm run dev
+   ```
+or
+```sh
+   yarn run dev
+   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
