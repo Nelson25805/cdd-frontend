@@ -149,25 +149,23 @@ or
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-This README documents general flows and UI expectations — the app is interactive and the best way to explore is to run it locally.
+This README documents general flows and UI expectations — the app is interactive and the best way to explore is to run it locally, or go to the website to access all the features mentioned below.
 
 Example user flows:
 
-- Sign up / Log in (Supabase auth)
+- Sign up / Log in (Supabase auth).
 
-- Search for a game (results include IGDB-sourced entries and any user-submitted games)
+- Search for a game: results include IGDB-sourced entries and any user-submitted games.
 
-- Open a game detail page, add to collection: set value, status (e.g., Loose / Sealed), completion, console, notes
+- Open a game detail page, add to collection: set value, status (e.g., Loose / Sealed), completion, console, notes and more.
 
-- Add a game to wishlist and select which consoles you want it for
+- Add a game to wishlist and select which consoles you want it for.
 
-- View other user profiles and add them as friends
+- View other user profiles (collections, and wishlists), and add them as friends.
 
-- Open or participate in message threads to discuss collections, trades, or sales
+- Open or participate in message threads to discuss collections, trades, or sales.
 
-- Admin users: access dashboard pages showing site stats (total users, top wished games, report queue)
-
-- Screenshots / GIFs are stored in GithubImages/ — replace or update them with current UI captures.
+- Admin users: access dashboard pages showing site stats (total users, top wished games, report queue).
 
 ### Filtered Game Search:
 ![Project Name Screen Shot][project-screenshot2]
