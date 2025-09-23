@@ -270,11 +270,6 @@ Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/N
 [Supabase-url]: https://supabase.com/
 [cdd-backend-url]: https://github.com/Nelson25805/cdd-backend
 
-[Python]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
-[Python-url]: https://www.python.org/downloads/
-[Tkinter]: https://img.shields.io/badge/Tkinter-8.6-green
-[Tkinter-url]: https://docs.python.org/3/library/tkinter.html
-
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
 [JQuery-url]: https://jquery.com 
 
