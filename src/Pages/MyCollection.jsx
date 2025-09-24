@@ -1,4 +1,3 @@
-// src/Pages/MyCollection.jsx
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import TopLinks from '../Context/TopLinks';

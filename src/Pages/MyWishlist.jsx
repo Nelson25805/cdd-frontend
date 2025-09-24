@@ -1,4 +1,3 @@
-// src/Pages/MyWishlist.jsx
 import { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import TopLinks from '../Context/TopLinks';
 import Footer from '../Context/Footer';
