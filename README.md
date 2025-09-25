@@ -102,9 +102,9 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 | Badge | Description |
 |:-----:|-------------|
 | [![React](GithubImages/react_badge.svg)][React-url] | UI library. |
-| [![Vite](GithubImages/vite_badge.svg)][Vite-url] | dev server + bundler. |
+| [![Vite](GithubImages/vite_badge.svg)][Vite-url] | Dev server + bundler. |
 | [![Supabase](GithubImages/supabase_badge.svg)][Supabase-url] | Authentication, database (Postgres), and realtime features. |
-| [![cdd-backend](GithubImages/cdd_backend_badge.svg)][cdd-backend-url] | server layer which handles IGDB integration, additional API logic, and server-only secrets. |
+| [![cdd-backend](GithubImages/cdd_backend_badge.svg)][cdd-backend-url] | Server layer which handles IGDB integration, additional API logic, and server-only secrets. |
 | ![Plain CSS](GithubImages/css_badge.svg) | General styling solution |
 
 
@@ -114,39 +114,34 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To start, you have two options of using this software.
-1) Run the .exe file
-2) Run the python code script manually
-
 ### Installation
 
-1. Clone the repo
-   ```sh
+1. Clone the repo:
+```sh
    git clone https://github.com/Nelson25805/cdd-frontend.git
    ```
-   
-2. If using option 1, skip to step 5.
-   If using option 2, continue reading.
-   
-3. You must have python downloaded on your machine, or in your IDE of choice.
-   [Python Download](https://www.python.org/downloads/)
-
-4. Install the required packages:
-   ```sh
-   pip install -r requirements.txt
+```sh
+   cd cdd-frontend
    ```
-   
-5. Create account for IGDB Api requests following their steps:
-   [IGDB Api Getting Started](https://api-docs.igdb.com/#getting-started)
 
-7. Create a .env file with your unique CLIENT_ID, and CLIENT_SECRET as shown in this fake test example here:
-   ![Project Name Screen Shot][project-screenshot5]
+2. Install dependencies:
+```sh
+   npm install
+   ```
+or
+```sh
+   yarn install
+   ```
 
-8. Depending on where you run the application, place .env file into same folder as .exe, and or the main project folder. 
+3. Go to my cdd-backend project, and begin installation there for backend installation/setup: <a href="https://github.com/Nelson25805/cdd-backend">cdd-backend</a>
 
-9. Either run the application from the .exe in the dlist folder, or by executing:
-    ```sh
-   python main.py
+5. Once completed, run frontend:
+```sh
+   npm run dev
+   ```
+or
+```sh
+   yarn run dev
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -154,25 +149,23 @@ To start, you have two options of using this software.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-This README documents general flows and UI expectations — the app is interactive and the best way to explore is to run it locally.
+This README documents general flows and UI expectations — the app is interactive and the best way to explore is to run it locally, or go to the website to access all the features mentioned below.
 
 Example user flows:
 
-- Sign up / Log in (Supabase auth)
+- Sign up / Log in (Supabase auth).
 
-- Search for a game (results include IGDB-sourced entries and any user-submitted games)
+- Search for a game: results include IGDB-sourced entries and any user-submitted games.
 
-- Open a game detail page, add to collection: set value, status (e.g., Loose / Sealed), completion, console, notes
+- Open a game detail page, add to collection: set value, status (e.g., Loose / Sealed), completion, console, notes and more.
 
-- Add a game to wishlist and select which consoles you want it for
+- Add a game to wishlist and select which consoles you want it for.
 
-- View other user profiles and add them as friends
+- View other user profiles (collections, and wishlists), and add them as friends.
 
-- Open or participate in message threads to discuss collections, trades, or sales
+- Open or participate in message threads to discuss collections, trades, or sales.
 
-- Admin users: access dashboard pages showing site stats (total users, top wished games, report queue)
-
-- Screenshots / GIFs are stored in GithubImages/ — replace or update them with current UI captures.
+- Admin users: access dashboard pages showing site stats (total users, top wished games, report queue).
 
 ### Filtered Game Search:
 ![Project Name Screen Shot][project-screenshot2]
@@ -276,11 +269,6 @@ Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/N
 [Vite-url]: https://vite.dev/
 [Supabase-url]: https://supabase.com/
 [cdd-backend-url]: https://github.com/Nelson25805/cdd-backend
-
-[Python]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
-[Python-url]: https://www.python.org/downloads/
-[Tkinter]: https://img.shields.io/badge/Tkinter-8.6-green
-[Tkinter-url]: https://docs.python.org/3/library/tkinter.html
 
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
 [JQuery-url]: https://jquery.com 
