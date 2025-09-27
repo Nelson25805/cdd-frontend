@@ -25,8 +25,6 @@
 
 <h3 align="center">CDD Frontend</h3>
 
-
-
   <p align="center">
     An application to search for games using the IGDB API.
     <br />
@@ -65,8 +63,6 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
@@ -96,7 +92,6 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
   ### Built With
 
 | Badge | Description |
@@ -107,9 +102,7 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 | [![cdd-backend](GithubImages/cdd_backend_badge.svg)][cdd-backend-url] | Server layer which handles IGDB integration, additional API logic, and server-only secrets. |
 | ![Plain CSS](GithubImages/css_badge.svg) | General styling solution |
 
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -180,8 +173,6 @@ This page allows you to search for a random game in the IGDB database, giving yo
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- ROADMAP -->
 <!--
 ## Roadmap
@@ -195,8 +186,6 @@ See the [open issues](https://github.com/Nelson25805/cdd-frontend/issues) for a 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 -->
-
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
