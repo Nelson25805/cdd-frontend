@@ -160,16 +160,16 @@ Example user flows:
 
 - Admin users: access dashboard pages showing site stats (total users, top wished games, report queue).
 
-### Filtered Game Search:
+### Game Search:
 ![Project Name Screen Shot][project-screenshot2]
 
-This page allows you to search for games with the selected filters, and afterwards save results to a coresponding excel file.
+This page allows you to search for games with the selected filters, and afterwards save the game to your collection, or wishlist.
 
 
-### Random Game Search:
+### Communicate With Friends:
 ![Project Name Screen Shot][project-screenshot3]
 
-This page allows you to search for a random game in the IGDB database, giving you related information about said game if it's available.
+This page allows you to talk with friends you add on IGDB. Talk about game trading, games you completed, or anything you wish.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
