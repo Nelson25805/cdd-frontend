@@ -209,16 +209,12 @@ Don't forget to give the project a star! Thanks again!
   <img src="https://contrib.rocks/image?repo=Nelson25805/cdd-frontend" alt="contrib.rocks image" />
 </a>
 
-
-
 <!-- LICENSE -->
 ## License
 
 Distributed under the project_license. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- CONTACT -->
 ## Contact
@@ -228,7 +224,6 @@ Nelson McFadyen <!-- - [@twitter_handle](https://twitter.com/twitter_handle) -->
 Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/Nelson25805/cdd-frontend)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
@@ -261,4 +256,3 @@ Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/N
 
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
 [JQuery-url]: https://jquery.com 
-
