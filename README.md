@@ -165,7 +165,6 @@ Example user flows:
 
 This page allows you to search for games with the selected filters, and afterwards save the game to your collection, or wishlist.
 
-
 ### Communicate With Friends:
 ![Project Name Screen Shot][project-screenshot3]
 
