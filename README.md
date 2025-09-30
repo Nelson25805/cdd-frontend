@@ -25,8 +25,6 @@
 
 <h3 align="center">CDD Frontend</h3>
 
-
-
   <p align="center">
     An application to search for games using the IGDB API.
     <br />
@@ -65,8 +63,6 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
@@ -96,7 +92,6 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
   ### Built With
 
 | Badge | Description |
@@ -107,9 +102,7 @@ This README covers **frontend** setup and usage. Backend (API, database, auth, I
 | [![cdd-backend](GithubImages/cdd_backend_badge.svg)][cdd-backend-url] | Server layer which handles IGDB integration, additional API logic, and server-only secrets. |
 | ![Plain CSS](GithubImages/css_badge.svg) | General styling solution |
 
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -167,20 +160,17 @@ Example user flows:
 
 - Admin users: access dashboard pages showing site stats (total users, top wished games, report queue).
 
-### Filtered Game Search:
+### Game Search:
 ![Project Name Screen Shot][project-screenshot2]
 
-This page allows you to search for games with the selected filters, and afterwards save results to a coresponding excel file.
+This page allows you to search for games with the selected filters, and afterwards save the game to your collection, or wishlist.
 
-
-### Random Game Search:
+### Communicate With Friends:
 ![Project Name Screen Shot][project-screenshot3]
 
-This page allows you to search for a random game in the IGDB database, giving you related information about said game if it's available.
+This page allows you to talk with friends you add on IGDB. Talk about game trading, games you completed, or anything you wish.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- ROADMAP -->
 <!--
@@ -195,8 +185,6 @@ See the [open issues](https://github.com/Nelson25805/cdd-frontend/issues) for a 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 -->
-
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
@@ -220,16 +208,12 @@ Don't forget to give the project a star! Thanks again!
   <img src="https://contrib.rocks/image?repo=Nelson25805/cdd-frontend" alt="contrib.rocks image" />
 </a>
 
-
-
 <!-- LICENSE -->
 ## License
 
 Distributed under the project_license. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 <!-- CONTACT -->
 ## Contact
@@ -239,7 +223,6 @@ Nelson McFadyen <!-- - [@twitter_handle](https://twitter.com/twitter_handle) -->
 Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/Nelson25805/cdd-frontend)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
@@ -272,4 +255,3 @@ Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/N
 
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
 [JQuery-url]: https://jquery.com 
-
