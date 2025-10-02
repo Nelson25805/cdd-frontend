@@ -242,7 +242,7 @@ Project Link: [https://github.com/Nelson25805/cdd-frontend](https://github.com/N
 [project-Image]: GithubImages/projectImage.png
 
 [project-screenshot]: GithubImages/mainScreen.png
-[project-screenshot2]: GithubImages/filteredGameSearch.gif
+[project-screenshot2]: GithubImages/gameSearchScreen3.png
 [project-screenshot3]: GithubImages/randomGameSearch.gif
 
 [project-screenshot4]: GithubImages/excelExample.png
